@@ -1,0 +1,13 @@
+#content ul li::before,
+footer ul li::before {
+  background-image: url(../images/ul-bullet.png);
+}
+.page-header h1 {
+  background-image: url(../images/lang-uk-logo.png);
+}
+#socials a.fb-icon {
+  background-image: url(../images/icons/fb.png);
+}
+#socials a.git-icon {
+  background-image: url(../images/icons/git.png);
+}

@@ -581,18 +581,18 @@ footer a:hover:before {
 #content ol > li::before {
   content: counters(listitem, ".") ".";
 }
-#content ol.global {
+#content .global ol {
   counter-reset: listitem;
 }
-#content ol.global > li {
+#content .global ol > li {
   counter-increment: listitem;
   margin-left: 40px;
   position: relative;
 }
-#content ol.global > li::before {
+#content .global ol > li::before {
   content: none;
 }
-#content ol.global > li > *:first-child::before {
+#content .global ol > li > *:first-child::before {
   content: counter(listitem);
   position: absolute;
   left: -40px;
@@ -604,27 +604,27 @@ footer a:hover:before {
   transition: color 0.5s;
 }
 @media only screen and (min-width: 961px) {
-  #content ol.global > li > *:first-child::before {
+  #content .global ol > li > *:first-child::before {
     left: -60px;
     font-size: 97.2px;
   }
 }
-#content ol.global > li > h3:first-child,
-#content ol.global > li > h4:first-child,
-#content ol.global > li > h5:first-child,
-#content ol.global > li > h6:first-child {
+#content .global ol > li > h3:first-child,
+#content .global ol > li > h4:first-child,
+#content .global ol > li > h5:first-child,
+#content .global ol > li > h6:first-child {
   margin-left: -40px;
 }
-#content ol.global > li > h3:first-child::before,
-#content ol.global > li > h4:first-child::before,
-#content ol.global > li > h5:first-child::before,
-#content ol.global > li > h6:first-child::before {
+#content .global ol > li > h3:first-child::before,
+#content .global ol > li > h4:first-child::before,
+#content .global ol > li > h5:first-child::before,
+#content .global ol > li > h6:first-child::before {
   content: none;
 }
-#content ol.global > li > h3:first-child + *::before,
-#content ol.global > li > h4:first-child + *::before,
-#content ol.global > li > h5:first-child + *::before,
-#content ol.global > li > h6:first-child + *::before {
+#content .global ol > li > h3:first-child + *::before,
+#content .global ol > li > h4:first-child + *::before,
+#content .global ol > li > h5:first-child + *::before,
+#content .global ol > li > h6:first-child + *::before {
   content: counter(listitem);
   position: absolute;
   left: -40px;
@@ -636,31 +636,31 @@ footer a:hover:before {
   transition: color 0.5s;
 }
 @media only screen and (min-width: 961px) {
-  #content ol.global > li > h3:first-child + *::before,
-  #content ol.global > li > h4:first-child + *::before,
-  #content ol.global > li > h5:first-child + *::before,
-  #content ol.global > li > h6:first-child + *::before {
+  #content .global ol > li > h3:first-child + *::before,
+  #content .global ol > li > h4:first-child + *::before,
+  #content .global ol > li > h5:first-child + *::before,
+  #content .global ol > li > h6:first-child + *::before {
     left: -60px;
     font-size: 97.2px;
   }
 }
-#content ol.global > li:hover > *:first-child::before {
+#content .global ol > li:hover > *:first-child::before {
   color: #dddddd;
 }
-#content ol.global > li:hover > h3:first-child + *::before,
-#content ol.global > li:hover > h4:first-child + *::before,
-#content ol.global > li:hover > h5:first-child + *::before,
-#content ol.global > li:hover > h6:first-child + *::before {
+#content .global ol > li:hover > h3:first-child + *::before,
+#content .global ol > li:hover > h4:first-child + *::before,
+#content .global ol > li:hover > h5:first-child + *::before,
+#content .global ol > li:hover > h6:first-child + *::before {
   color: #dddddd;
 }
 @media only screen and (min-width: 961px) {
-  #content ol.global > li {
+  #content .global ol > li {
     margin-left: 60px;
   }
-  #content ol.global > li > h3:first-child,
-  #content ol.global > li > h4:first-child,
-  #content ol.global > li > h5:first-child,
-  #content ol.global > li > h6:first-child {
+  #content .global ol > li > h3:first-child,
+  #content .global ol > li > h4:first-child,
+  #content .global ol > li > h5:first-child,
+  #content .global ol > li > h6:first-child {
     margin-left: -60px;
   }
 }
@@ -998,6 +998,9 @@ footer .nav {
 }
 #socials a.fb {
   background-image: url(../images/converted/icons/fb.svg);
+}
+#socials a.twitter {
+  background-image: url(../images/converted/icons/twitter.svg);
 }
 #socials a.git {
   background-image: url(../images/converted/icons/git.svg);

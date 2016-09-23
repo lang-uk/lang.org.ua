@@ -1,10 +1,10 @@
-{% load static wagtailuserbar wagtailcore_tags %}<!DOCTYPE html>
+{% load static wagtailuserbar wagtailcore_tags i18n %}<!DOCTYPE html>
 <html lang="uk">
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
-        <title>{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
+        <title>{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.translated_title }}{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}</title>
         <meta name="description" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -27,9 +27,7 @@
                 <h1>
                     <span>Lang-uk</span>
                 </h1>
-                <h2>
-                    Маніфест спільноти lang-uk
-                </h2>
+                <h2>{{ page.translated_title }}</h2>
                 <div id="blueprint">
                     <div class="wrapper-in">
                         <ul>
@@ -62,7 +60,7 @@
                                     <!--[if lt IE 9]>
                                         <img src="/images/blueprint/icon-corpus.png" alt="Іконка зі стопкою текстів" />
                                     <![endif]-->
-                                    <span class="label">Корпуси</span>
+                                    <span class="label">{{ _("Корпуси") }}</span>
                                 </a>
                             </li>
                             <li class="item dictionary">
@@ -72,7 +70,7 @@
                                     <!--[if lt IE 9]>
                                         <img src="/images/blueprint/icon-dictionary.png" alt="Іконка із ієрархією літер" />
                                     <![endif]-->
-                                    <span class="label">Словники</span>
+                                    <span class="label">{{ _("Словники") }}</span>
                                 </a>
                             </li>
                             <li class="item gazetteer">
@@ -82,7 +80,7 @@
                                     <!--[if lt IE 9]>
                                         <img src="/images/blueprint/icon-gazetteer.png" alt="Іконка із різними написаннями літери" />
                                     <![endif]-->
-                                    <span class="label">Ґазетіри</span>
+                                    <span class="label">{{ _("Ґазетіри") }}</span>
                                 </a>
                             </li>
                             <li class="item service">
@@ -92,7 +90,7 @@
                                     <!--[if lt IE 9]>
                                         <img src="/images/blueprint/icon-service.png" alt="Іконка із Зіркою Смерті" />
                                     <![endif]-->
-                                    <span class="label">Сервіси</span>
+                                    <span class="label">{{ _("Сервіси") }}</span>
                                 </a>
                             </li>
                             <li class="item library">
@@ -102,7 +100,7 @@
                                     <!--[if lt IE 9]>
                                         <img src="/images/blueprint/icon-library.png" alt="Іконка з роботом R2-D2" />
                                     <![endif]-->
-                                    <span class="label">Бібліотеки</span>
+                                    <span class="label">{{ _("Бібліотеки") }}</span>
 
                                     <span class="connector library">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="145.002" height="112" viewBox="57.499 44 145.002 112"><path fill="none" stroke="#FFF" stroke-miterlimit="10" d="M92.532 103.095h16.725v16.725H92.532z"/><circle fill="none" stroke="#FFF" stroke-miterlimit="10" cx="100.895" cy="111.457" r="7.526"/><g fill="none" stroke="#FFF" stroke-miterlimit="10"><path stroke-width="4" d="M102.567 111.458h3.346"/><path stroke-width="2" stroke-dasharray="13,13" d="M113.16 111.458h83.068"/><path stroke-width="2" d="M199.572 111.458h3.346"/></g><circle cx="100.895" cy="111.458" r="2.788"/><g fill="none" stroke="#FFF" stroke-miterlimit="10"><path stroke-width="4" d="M59.083 44v3.345"/><path stroke-width="2" stroke-dasharray="12,12" d="M59.083 54.035v79.722"/><path stroke-width="2" d="M59.083 137.103v3.345h3.344M66.33 140.448h3.345v-3.345"/><path stroke-width="2" stroke-dasharray="11,11" d="M69.675 130.97V98.635"/><path stroke-width="2" d="M69.675 95.848v-3.346h3.345M76.365 92.502h3.345v3.346"/><path stroke-width="2" stroke-dasharray="7,7" d="M79.71 99.75v6.132"/><path stroke-width="2" d="M79.71 108.112v3.346h3.345M89.188 111.458h3.344"/></g></svg>
@@ -119,7 +117,7 @@
                                     <!--[if lt IE 9]>
                                         <img src="/images/blueprint/icon-model.png" alt="Іконка з 3D-моделлю літери" />
                                     <![endif]-->
-                                    <span class="label">Моделі</span>
+                                    <span class="label">{{ _("Моделі") }}</span>
 
                                     <span class="connector model">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="200" height="20" viewBox="150 15 200 20"><path fill="none" stroke="#FFF" stroke-width="2" stroke-miterlimit="10" stroke-dasharray="12" d="M152.131 25h182.801"/><path fill="none" stroke="#FFF" stroke-width="2" stroke-miterlimit="10" d="M334.932 17l13.374 7.976L334.932 33z"/></svg>
@@ -144,29 +142,17 @@
 
                 <nav id="mainnav">
                     <ul>
-                        <li>
-                            <a href="#manifest" class="active">Маніфест</a>
-                        </li>
-                        <li>
-                            <a href="#announce">Анонси</a>
-                        </li>
-                        <li>
-                            <a href="#team">Команда</a>
-                        </li>
-                        <li>
-                            <a href="#cooperation">Співпраця</a>
-                        </li>
-                        <li>
-                            <a href="#contact">Зв'язок</a>
-                        </li>
+                        {% for menuitem in page.top_menu_links.all %}
+                        <li><a href="{{ menuitem.link }}" {# class="active" #}>{{ menuitem.caption }}</a></li>
+                        {% endfor %}
                     </ul>
                 </nav>
 
                 <div id="socials">
                     <ul class="wrapper-in">
                         <li>
-                            <a href="#facebook" class="fb">
-                                <span>Facebook</span>
+                            <a href="https://twitter.com/lang_uk_org" class="twitter" target="_blank">
+                                <span>Twitter</span>
                             </a>
                         </li>
                         <li>
@@ -181,44 +167,17 @@
 
 
             <section id="content">
-                <div class="wrapper-in rte">
+                <div class="wrapper-in rte {{ page.global_class }}">
                     <section>
                         {{ page.translated_body|richtext }}
-                    </section>
-                    <section>
-                        <p><strong>lang-uk</strong> — це неформальна група ентузиастів, які ставлять на меті покращення комп'ютерної обробки україномовних текстів. Цей текст описує принципи, на яких будується робота групи.</p>
-                    </section>
-                    <section>
-                        <ol class="global">
-                            <li>
-                                <h3>Волонтерство</h3>
-                                <p><a href="team">Учасники групи</a> працюють на волонтерських засадах, не розраховуючи на отримання за цю роботу винагороди. Хоча для деяких проектів такий варіант не виключено, але це має обговорюватись окремо для кожного проекту.</p>
-                            </li>
-                            <li>
-                                <h3>Відкриті і загальнодоступні результати</h3>
-                                <p>Результати роботи групи — це:</p>
-                                <ul>
-                                    <li>відкриті дані, </li>
-                                    <li>програмний код інструментів роботи з ними, </li>
-                                    <li>машинно-навчені моделі, </li>
-                                    <li>публікації </li>
-                                    <li>та ін. </li>
-                                </ul>
-                                <p>Всі ці артефакти мають публікуватись в <a href="#github">центральному репозиторії групи</a>, мати дозволяючу ліцензію на роботу з ними (наприклад, MIT, BSD, Creative Commons, Apache). Ми намагатимемость забезпечити максимальну інтероперабельність рішень, побудованих на цих артефактах, на основі використовувати відкритих специфікацій, стандартних або загальноприйнятих форматів кодування даних і моделей.</p>
-                            </li>
-                            <li>
-                                <h3>Меритократія і демократичність</h3>
-                                <p>В рамках окремих проектів рішення приймаються тими, хто бере на себе відповідальність за їх реалізацію. В той же час група є майданчиком для обговорень, які відбуваються прозоро, та прийняття спільних рішень щодо принципових напрямків роботи і підходів до реалізації конкретних проектів.</p>
-                            </li>
-                        </ol>
                     </section>
                 </div>
             </section>
 
             <footer>
                 <div class="wrapper-in">
-                    <a href="#page-top" class="nav">вгору</a>
-                    &copy;2016, спільнота <a href="#manifest">lang-uk</a>
+                    <a href="#page-top" class="nav">{{ _("вгору") }}</a>
+                    &copy;2016, {{ _("спільнота") }} <a href="#manifest">lang-uk</a>
                 </div>
             </footer>
 

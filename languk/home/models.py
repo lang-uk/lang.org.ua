@@ -68,6 +68,10 @@ class HomePage(Page):
         default="", max_length=255,
         verbose_name="[EN] Назва сторінки")
 
+    global_class = models.CharField(
+        default="", max_length=255, blank=True,
+        verbose_name="CSS-Клас сторінки")
+
     body = RichTextField(
         default="",
         verbose_name="[UA] Загальний текст сторінки")
@@ -92,6 +96,8 @@ class HomePage(Page):
 
         FieldPanel('body', classname="full"),
         FieldPanel('body_en', classname="full"),
+
+        FieldPanel('global_class', classname="full"),
 
         InlinePanel('top_menu_links', label="Меню зверху"),
     ]

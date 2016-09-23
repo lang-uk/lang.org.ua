@@ -142,7 +142,7 @@
 
                 <nav id="mainnav">
                     <ul>
-                        {% for menuitem in page.top_menu_links.all %}
+                        {% for menuitem in top_menu %}
                         <li><a href="{{ menuitem.link }}" {# class="active" #}>{{ menuitem.caption }}</a></li>
                         {% endfor %}
                     </ul>

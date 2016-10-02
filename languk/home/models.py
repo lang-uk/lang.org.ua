@@ -63,7 +63,7 @@ class HomePageTopMenuLink(Orderable, LinkFields):
     page = ParentalKey('home.HomePage', related_name='top_menu_links')
 
 
-class HomePage(Page):
+class AbstractPage(Page):
     title_en = models.CharField(
         default="", max_length=255,
         verbose_name="[EN] Назва сторінки")
@@ -90,6 +90,25 @@ class HomePage(Page):
         'body_en',
     )
 
+    content_panels = [
+        FieldPanel('title', classname="full title"),
+        FieldPanel('title_en', classname="full title"),
+
+        FieldPanel('body', classname="full"),
+        FieldPanel('body_en', classname="full"),
+
+        FieldPanel('global_class', classname="full"),
+    ]
+
+    class Meta:
+        abstract = True
+
+
+class StaticPage(AbstractPage):
+    template = "home/home_page.html"
+
+
+class HomePage(AbstractPage):
     content_panels = [
         FieldPanel('title', classname="full title"),
         FieldPanel('title_en', classname="full title"),

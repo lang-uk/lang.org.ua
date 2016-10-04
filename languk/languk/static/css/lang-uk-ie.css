@@ -5,9 +5,12 @@ footer ul li::before {
 .page-header h1 {
   background-image: url(../images/lang-uk-logo.png);
 }
-#socials a.fb-icon {
+#socials a.fb {
   background-image: url(../images/icons/fb.png);
 }
-#socials a.git-icon {
+#socials a.git {
   background-image: url(../images/icons/git.png);
+}
+#socials a.twitter {
+  background-image: url(../images/icons/twitter.png);
 }

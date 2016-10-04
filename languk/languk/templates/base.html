@@ -143,7 +143,7 @@
                 <nav id="mainnav">
                     <ul>
                         {% for menuitem in top_menu %}
-                        <li><a href="{{ menuitem.link }}" {# class="active" #}>{{ menuitem.caption }}</a></li>
+                        <li><a href="{{ menuitem.link }}" {# class="active" #}>{{ menuitem.translated_caption }}</a></li>
                         {% endfor %}
                     </ul>
                 </nav>
@@ -177,7 +177,7 @@
             <footer>
                 <div class="wrapper-in">
                     <a href="#page-top" class="nav">{{ _("вгору") }}</a>
-                    &copy;2016, {{ _("спільнота") }} <a href="#manifest">lang-uk</a>
+                    &copy;2016, {{ _("спільнота") }} <a href="{% url "wagtail_serve" "about/" %}">lang-uk</a>
                 </div>
             </footer>
 

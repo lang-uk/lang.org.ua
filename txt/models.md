@@ -7,7 +7,7 @@
 Ми також побудували модель для пошуку іменованих сутностей російською мовою, використовуючи [анотований корпус](https://github.com/dialogue-evaluation/factRuEval-2016) підготовлений організаторами конференції [Dialogue 2016](http://www.dialog-21.ru/evaluation/2016/ner/). Для обчислення CCA embeddings ми використовували корпус статей російської вікіпедії.
 
 
-## Word embeddings (Word2Vec, GloVe, LexVec)
+### Word embeddings (Word2Vec, GloVe, LexVec)
 
 На базі зібраних нами корпусів новин, статей, художньої літератури, законів та юридичних текстів ми обчислили найпоширеніши word embeddings: [Word2Vec](https://radimrehurek.com/gensim/models/word2vec.html) (та його покращену версію [LexVec](https://github.com/alexandres/lexvec/)) й [GloVe](http://www-nlp.stanford.edu/projects/glove/). Ми вирішили опублікувати ці моделі, тому що їх обчислення займає доволі багато часу та серверних ресурсів.
 

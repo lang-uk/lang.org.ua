@@ -1,11 +1,30 @@
 from django.db import models
 from django.utils import translation
 
+from wagtail.wagtailcore import hooks
 from wagtail.wagtailcore.models import Page, Orderable
 from modelcluster.fields import ParentalKey
 from wagtail.wagtailcore.fields import RichTextField
+from wagtail.wagtailcore.whitelist import (
+    attribute_rule, allow_without_attributes)
 from wagtail.wagtailadmin.edit_handlers import (
     InlinePanel, FieldPanel, PageChooserPanel)
+
+
+@hooks.register('construct_whitelister_element_rules')
+def whitelister_element_rules():
+    return {
+        'u': allow_without_attributes,
+        'table': attribute_rule({'cellspacing': True, 'cellpadding': True,
+                                 'border': True}),
+        'td': attribute_rule({'valign': True, 'style': True}),
+        'tr': allow_without_attributes,
+        'th': allow_without_attributes,
+        'tbody': allow_without_attributes,
+        'tfoot': allow_without_attributes,
+        'thead': allow_without_attributes,
+        'p': attribute_rule({'align': True}),
+    }
 
 
 class TranslatedField(object):

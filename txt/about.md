@@ -31,4 +31,4 @@
 ## Медіа про нас
 
 - [Анонс проекту](https://dou.ua/lenta/columns/lang-uk/)
-- [Дмитро Чаплинський. Проект «lang-uk» — прорив у обробці україномовних текстів.](http://www.idealist.media/index.php/video/dmitro-chaplinskiy-proekt-lang-uk-proriv-u-obrobtsi-ukrayinomovnih-tekstiv/)
+- [Дмитро Чаплинський. Проект «lang-uk» — прорив у обробці україномовних текстів](http://www.idealist.media/index.php/video/dmitro-chaplinskiy-proekt-lang-uk-proriv-u-obrobtsi-ukrayinomovnih-tekstiv/)

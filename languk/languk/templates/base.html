@@ -1,5 +1,5 @@
 {% load static wagtailuserbar wagtailcore_tags i18n %}<!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" prefix="og: http://ogp.me/ns#">
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -7,6 +7,7 @@
         <title>{% block title %}{% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.translated_title }}{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}: lang-uk</title>
         <meta name="description" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:image" content="{% static 'images/converted/lang-uk-logo.png' %}" />
 
         {# Global stylesheets #}
         <link rel="stylesheet" type="text/css" href="{% static 'css/lang-uk.css' %}">

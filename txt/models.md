@@ -12,3 +12,18 @@
 На базі зібраних нами корпусів новин, статей, художньої літератури, законів та юридичних текстів ми обчислили найпоширеніши word embeddings: [Word2Vec](https://radimrehurek.com/gensim/models/word2vec.html) (та його покращену версію [LexVec](https://github.com/alexandres/lexvec/)) й [GloVe](http://www-nlp.stanford.edu/projects/glove/). Ми вирішили опублікувати ці моделі, тому що їх обчислення займає доволі багато часу та серверних ресурсів.
 
 Ми створили окремі моделі для кожної категорії текстів з 300d векторами. Ми також обчислили їх для лематизованих версій тих самих корпусів. Якщо вам потрібні інші налаштування моделей — скористайтеся корпусами, що ми підготували, та обчисліть моделі згідно ваших потреб.
+
+Для оцінки якості побудованих векторів були перекладені та доповнені [тестові набори](https://github.com/lang-uk/vecs/blob/master/test/test_vocabulary.txt), які існували для англійської мови.
+
+Результат оцінки якості можна подивтись [тут](https://github.com/lang-uk/vecs/blob/master/results/Models_scores.csv).
+
+
+### Модель розширення тонального словнику
+
+Для розширення [тонального словнику](https://github.com/lang-uk/tone-dict-uk) була побудована [нейромережева модель](https://github.com/lang-uk/tonal-model), яка дозволяє шукати подібні до існуючих слів з використанням векторів word2vec та lexvec.
+
+
+Приклади роботи з моделлю і її даними:
+
+- [Пошук подібних слів](https://github.com/lang-uk/tonal-model/blob/master/examples/word2vec%20usage%20examples.ipynb)
+- [Оцінка тональності слова](https://github.com/lang-uk/tonal-model/blob/master/examples/keras%20classifier%20usage%20examples.ipynb)

@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'wagtail.contrib.wagtailsitemaps',
-    'wagtailtinymce'
+    'wagtailtinymce',
+    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE = [

@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import translation
+from django.conf import settings
 
 from wagtail.wagtailcore import hooks
 from wagtail.wagtailcore.models import Page, Orderable
@@ -119,15 +120,28 @@ class AbstractPage(Page):
         FieldPanel('global_class', classname="full"),
     ]
 
+    def get_sitemap_urls(self):
+        for code, _ in settings.LANGUAGES:
+            translation.activate(code)
+
+            yield {
+                'location': self.full_url,
+                'lastmod': self.latest_revision_created_at
+            }
+
+            translation.deactivate()
+
     class Meta:
         abstract = True
 
 
 class StaticPage(AbstractPage):
-    template = "home/home_page.html"
+    template = "home/static_page.html"
 
 
 class HomePage(AbstractPage):
+    template = "home/home_page.html"
+
     content_panels = [
         FieldPanel('title', classname="full title"),
         FieldPanel('title_en', classname="full title"),

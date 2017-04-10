@@ -13,6 +13,16 @@
         {# Global stylesheets #}
         <link rel="stylesheet" type="text/css" href="{% static 'css/lang-uk.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
+
+        {% get_available_languages as languages %}
+        {% for lang_code, lang_name in languages %}
+            {% if lang_code != LANGUAGE_CODE %}
+                {% language lang_code %}
+                <link rel="alternate" href="{% pageurl page %}" hreflang="{{ lang_code }}" />
+                {% endlanguage %}
+            {% endif %}
+        {% endfor %}
+
         <!--[if lt IE 9]>
             <link rel="stylesheet" type="text/css" href="../css/lang-uk-ie.css" />
         <![endif]-->
@@ -149,7 +159,7 @@
                         {% for menuitem in top_menu %}
                         <li><a href="{{ menuitem.link }}" {% if menuitem.link_page and menuitem.link_page.slug == page.slug %} class="active" {% endif %}>{{ menuitem.translated_caption }}</a></li>
                         {% endfor %}
-                        {% get_available_languages as languages %}
+
                         {% for lang_code, lang_name in languages %}
                             {% language lang_code %}
                             
@@ -181,7 +191,8 @@
 
             <section id="content">
                 <div class="wrapper-in rte {{ page.global_class }}">
-                    <div id="contentsList"></div>
+                    {% block toc %}
+                    {% endblock %}
                     <section>
                         {{ page.translated_body|richtext }}
                     </section>

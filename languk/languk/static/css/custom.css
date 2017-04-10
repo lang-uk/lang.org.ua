@@ -8,6 +8,10 @@
         line-height: 40px;
         display: block;
     }
+
+    #content h2 {
+        margin-top: 10px;
+    }
 }
 
 #mainnav li.lang-switcher a img {

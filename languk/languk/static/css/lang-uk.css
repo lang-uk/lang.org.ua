@@ -351,23 +351,23 @@ th {
 body {
   color: #333333;
   font-family: 'Source Sans Pro', 'Helvetica', Arial, sans-serif;
-  font-size: 17.01px;
+  font-size: 15.75px;
   line-height: 1.5em;
   letter-spacing: -0.01em;
 }
 @media only screen and (min-width: 961px) {
   body {
-    font-size: 19.44px;
+    font-size: 18px;
     line-height: 1.5em;
   }
 }
 #content a,
 footer a {
-  display: inline-block;
   text-decoration: none;
   border-bottom: 1px dotted #034f84;
   line-height: 1.25em;
   position: relative;
+  transition: color 1s ease-out;
 }
 #content a,
 footer a,
@@ -377,31 +377,10 @@ footer a:active,
 footer a:visited {
   color: #034f84;
 }
-#content a:before,
-footer a:before {
-  content: '';
-  position: absolute;
-  left: 0;
-  width: 0;
-  bottom: -1px;
-  height: 2px;
-  background: #79c753;
-  transition: width 1s;
-}
-#content a:hover:before,
-footer a:hover:before {
-  width: 100%;
-}
-#content {
-  /*
-     * Tables
-     */
-  /*
-     * Lists
-     */
-  /*
-     * Global list to be used for numbered page sections: action steps, structures etc
-     */
+#content a:hover,
+footer a:hover {
+  color: #79c753;
+  animation: linkdance 0.5s ease-out;
 }
 #content strong {
   font-weight: bold;
@@ -422,42 +401,73 @@ footer a:hover:before {
   line-height: 1.125em;
 }
 #content h2 {
-  font-size: 29.16px;
-  margin: -20px -20px 40px;
-  padding: 20px;
-  opacity: 0.75;
+  text-align: center;
+  font-size: 27px;
+  margin: -20px 0 45px;
+  color: #72b850;
+  padding: 40px 0;
+  line-height: 0.95em;
+  position: relative;
+  text-shadow: 0 -4px rgba(0, 0, 0, 0.05);
+  transition: all 1s ease-out;
+}
+@media only screen and (min-width: 641px) {
+  #content h2 {
+    font-size: 31.5px;
+  }
 }
 @media only screen and (min-width: 961px) {
   #content h2 {
-    margin: 30px 0 20px;
+    margin-top: -40px;
+    font-size: 36px;
   }
 }
-#content h3 {
-  font-size: 29.16px;
-  margin-bottom: 14.58px;
-  padding-top: 20px;
+#content h2:after {
+  content: '';
+  position: absolute;
+  background: #e7e7e7;
+  top: 100%;
+  height: 5px;
+  left: 25%;
+  right: 25%;
+  transition: all 2s ease-out;
 }
-@media only screen and (min-width: 641px) and (max-width: 960px) {
+#content h2:hover {
+  transform: scale(1.01);
+  text-shadow: 0 -5px rgba(0, 0, 0, 0.025);
+}
+#content h2:hover:after {
+  left: 24%;
+  right: 24%;
+}
+#content h3 {
+  font-size: 27px;
+  margin-bottom: 13.5px;
+  padding-top: 20px;
+  text-shadow: 0 -3px rgba(0, 0, 0, 0.025);
+}
+@media only screen and (min-width: 641px) {
   #content h3 {
-    font-size: 34.02px;
+    font-size: 31.5px;
   }
 }
 @media only screen and (min-width: 961px) {
   #content h3 {
-    font-size: 38.88px;
+    font-size: 36px;
   }
 }
 #content h4 {
-  font-size: 21.87px;
+  font-size: 20.25px;
+  text-shadow: 0 -1px rgba(0, 0, 0, 0.025);
 }
-@media only screen and (min-width: 641px) and (max-width: 960px) {
+@media only screen and (min-width: 641px) {
   #content h4 {
-    font-size: 25.515px;
+    font-size: 23.625px;
   }
 }
 @media only screen and (min-width: 961px) {
   #content h4 {
-    font-size: 29.16px;
+    font-size: 27px;
   }
 }
 #content img {
@@ -469,13 +479,13 @@ footer a:hover:before {
 #content p,
 #content ul,
 #content ol {
-  margin-bottom: 14.58px;
+  margin-bottom: 13.5px;
 }
 #content img,
 #content blockquote,
 #content table {
-  margin-top: 29.16px;
-  margin-bottom: 29.16px;
+  margin-top: 27px;
+  margin-bottom: 27px;
 }
 #content q,
 #content cite {
@@ -491,7 +501,7 @@ footer a:hover:before {
 }
 #content blockquote {
   color: #777777;
-  font-size: 29.16px;
+  font-size: 27px;
   line-height: 1.25em;
   position: relative;
 }
@@ -596,7 +606,7 @@ footer a:hover:before {
   left: -40px;
   color: #e7e7e7;
   font-family: 'Open Sans Condensed', 'Arial Black', Gadget, sans-serif;
-  font-size: 48.6px;
+  font-size: 45px;
   line-height: 0.85em;
   z-index: -1;
   transition: color 0.5s;
@@ -604,7 +614,7 @@ footer a:hover:before {
 @media only screen and (min-width: 961px) {
   #content .global ol > li > *:first-child::before {
     left: -60px;
-    font-size: 97.2px;
+    font-size: 90px;
   }
 }
 #content .global ol > li > h3:first-child,
@@ -628,7 +638,7 @@ footer a:hover:before {
   left: -40px;
   color: #e7e7e7;
   font-family: 'Open Sans Condensed', 'Arial Black', Gadget, sans-serif;
-  font-size: 48.6px;
+  font-size: 45px;
   line-height: 0.85em;
   z-index: -1;
   transition: color 0.5s;
@@ -639,7 +649,7 @@ footer a:hover:before {
   #content .global ol > li > h5:first-child + *::before,
   #content .global ol > li > h6:first-child + *::before {
     left: -60px;
-    font-size: 97.2px;
+    font-size: 90px;
   }
 }
 #content .global ol > li:hover > *:first-child::before {
@@ -660,6 +670,23 @@ footer a:hover:before {
   #content .global ol > li > h5:first-child,
   #content .global ol > li > h6:first-child {
     margin-left: -60px;
+  }
+}
+@keyframes linkdance {
+  20% {
+    padding-bottom: 3px;
+  }
+  40% {
+    padding-bottom: 0;
+  }
+  60% {
+    padding-bottom: 2px;
+  }
+  80% {
+    padding-bottom: 0;
+  }
+  100% {
+    padding-bottom: 1px;
   }
 }
 *,
@@ -720,8 +747,8 @@ body {
   z-index: -2;
 }
 .page-header h1 {
-  height: 200px;
-  width: 140px;
+  height: 150px;
+  width: 98px;
   margin: 0 auto;
   text-align: center;
   background: url(../images/converted/lang-uk-logo.svg) no-repeat center center;
@@ -730,8 +757,15 @@ body {
   text-indent: -999em;
 }
 .page-header h1 span {
-  line-height: 200px;
+  line-height: 150px;
   color: #034f84;
+}
+.home .page-header h1 {
+  height: 200px;
+  width: 140px;
+}
+.home .page-header h1 span {
+  line-height: 200px;
 }
 .page-header h2 {
   display: none;
@@ -872,10 +906,13 @@ footer .nav {
   #mainnav {
     position: absolute;
     top: 0;
-    height: 60px;
+    height: 40px;
     margin: 0;
     left: -4000px;
     right: -4000px;
+  }
+  .home #mainnav {
+    height: 60px;
   }
   #mainnav:before,
   #mainnav:after {
@@ -890,7 +927,7 @@ footer .nav {
 }
 #mainnav li {
   display: block;
-  font-size: 19.44px;
+  font-size: 18px;
   line-height: 20px;
   margin: 0;
 }
@@ -926,9 +963,9 @@ footer .nav {
 #mainnav a.active:before {
   background: #79c753;
 }
-@media only screen and (min-width: 641px) and (max-width: 960px) {
+@media only screen and (min-width: 641px) {
   #mainnav li {
-    font-size: 24.3px;
+    font-size: 22.5px;
   }
   #mainnav a {
     padding-left: 40px;
@@ -943,26 +980,32 @@ footer .nav {
   }
   #mainnav li {
     display: inline-block;
-    font-size: 26.73px;
   }
-  #mainnav a {
-    padding: 20px;
+  .home #mainnav li {
+    font-size: 24.75px;
   }
-  #mainnav a:before {
+  body #mainnav a:before {
     top: auto;
     bottom: 0;
     left: 20px;
     right: 20px;
+    width: auto;
     height: 0;
   }
-  #mainnav a:hover:before,
-  #mainnav a.active:before {
+  body #mainnav a:hover:before,
+  body #mainnav a.active:before {
     width: auto;
     height: 5px;
+  }
+  .home #mainnav a {
+    padding: 20px;
   }
 }
 @media only screen and (min-width: 961px) {
   .page-header {
+    padding-top: 40px;
+  }
+  .home .page-header {
     padding-top: 60px;
   }
 }
@@ -1021,8 +1064,11 @@ footer .nav {
     position: absolute;
     right: 0;
     margin-top: 0;
-    top: 170px;
+    top: 100px;
     box-shadow: none;
+  }
+  .home #socials {
+    top: 170px;
   }
   #socials ul {
     padding: 0 20px 10px;
@@ -1077,13 +1123,13 @@ footer .nav {
   position: relative;
   height: 280px;
 }
-@media only screen and (min-width: 641px) and (max-width: 960px) {
+@media only screen and (min-width: 641px) {
   #blueprint ul {
     height: 320px;
   }
 }
 @media only screen and (min-width: 961px) {
-  #blueprint ul {
+  .home #blueprint ul {
     height: 400px;
   }
 }
@@ -1096,7 +1142,7 @@ footer .nav {
 }
 #blueprint .item .label {
   font-family: 'Jura', 'Arial Black', Gadget, sans-serif;
-  font-size: 19.44px;
+  font-size: 18px;
   line-height: 16px;
   height: 20px;
   text-transform: lowercase;
@@ -1356,8 +1402,17 @@ footer .nav {
   height: 40%;
   transform: rotate(10deg);
 }
-@media only screen and (max-width: 449.6px), only screen and (min-width: 961px) {
+@media only screen and (max-width: 449.6px) {
   #blueprint .connector.service {
+    left: 80%;
+    bottom: 70%;
+    width: 50%;
+    height: 50%;
+    transform: none;
+  }
+}
+@media only screen and (min-width: 961px) {
+  .home #blueprint .connector.service {
     left: 80%;
     bottom: 70%;
     width: 50%;
@@ -1380,8 +1435,8 @@ footer .nav {
   transform-origin: 100% 100%;
 }
 @media only screen and (min-width: 961px) {
-  #blueprint .connector.dictionary,
-  #blueprint .connector.library-fallback {
+  .home #blueprint .connector.dictionary,
+  .home #blueprint .connector.library-fallback {
     transform: rotate(-10deg);
   }
 }
@@ -1392,7 +1447,7 @@ footer .nav {
   transform-origin: 100% 0;
 }
 @media only screen and (min-width: 961px) {
-  #blueprint .connector.gazetteer {
+  .home #blueprint .connector.gazetteer {
     transform: rotate(10deg);
   }
 }
@@ -1431,19 +1486,19 @@ footer .nav {
     display: block;
   }
 }
-@media only screen and (min-width: 641px) and (max-width: 960px) {
+@media only screen and (min-width: 641px) {
   #blueprint .item .label {
-    font-size: 24.3px;
+    font-size: 22.5px;
   }
   #blueprint .item .icon {
     border-width: 4px;
   }
 }
 @media only screen and (min-width: 961px) {
-  #blueprint .item .label {
-    font-size: 29.16px;
+  .home #blueprint .item .label {
+    font-size: 27px;
   }
-  #blueprint .item .icon {
+  .home #blueprint .item .icon {
     border-width: 5px;
   }
 }
@@ -1470,4 +1525,15 @@ footer .nav {
   87.5% {
     transform: rotate(-1.25deg);
   }
+}
+#contentsList {
+  margin-bottom: 40px;
+  position: relative;
+}
+#contentsList ul {
+  margin-bottom: 0;
+}
+#contentsList ul > li:before {
+  content: '\2192';
+  background: transparent;
 }

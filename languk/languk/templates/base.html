@@ -1,5 +1,6 @@
 {% load static wagtailuserbar wagtailcore_tags i18n %}<!DOCTYPE html>
-<html lang="uk" prefix="og: http://ogp.me/ns#">
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" prefix="og: http://ogp.me/ns#">
     <head>
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -11,6 +12,7 @@
 
         {# Global stylesheets #}
         <link rel="stylesheet" type="text/css" href="{% static 'css/lang-uk.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
         <!--[if lt IE 9]>
             <link rel="stylesheet" type="text/css" href="../css/lang-uk-ie.css" />
         <![endif]-->
@@ -29,6 +31,7 @@
                     <span>Lang-uk</span>
                 </h1>
                 <h2>{{ page.translated_title }}</h2>
+
                 <div id="blueprint">
                     <div class="wrapper-in">
                         <ul>
@@ -144,7 +147,16 @@
                 <nav id="mainnav">
                     <ul>
                         {% for menuitem in top_menu %}
-                        <li><a href="{{ menuitem.link }}" {# class="active" #}>{{ menuitem.translated_caption }}</a></li>
+                        <li><a href="{{ menuitem.link }}" {% if menuitem.link_page and menuitem.link_page.slug == page.slug %} class="active" {% endif %}>{{ menuitem.translated_caption }}</a></li>
+                        {% endfor %}
+                        {% get_available_languages as languages %}
+                        {% for lang_code, lang_name in languages %}
+                            {% language lang_code %}
+                            
+                            {% with 'images/converted/'|add:lang_code|add:'.png' as image_static %}
+                                <li class="lang-switcher"><a href="{% pageurl page %}" title="{{ lang_name }}"><img alt="{{ lang_name }}" src="{% static image_static %}" /></a></li>
+                            {% endwith %}
+                            {% endlanguage %}
                         {% endfor %}
                     </ul>
                 </nav>
@@ -169,6 +181,7 @@
 
             <section id="content">
                 <div class="wrapper-in rte {{ page.global_class }}">
+                    <div id="contentsList"></div>
                     <section>
                         {{ page.translated_body|richtext }}
                     </section>
@@ -178,7 +191,7 @@
             <footer>
                 <div class="wrapper-in">
                     <a href="#" class="nav">{{ _("вгору") }}</a>
-                    &copy;2016, {{ _("спільнота") }} <a href="{% url "wagtail_serve" "about/" %}">lang-uk</a>
+                    &copy;2016–2017, {{ _("спільнота") }} <a href="{% url "wagtail_serve" "about/" %}">lang-uk</a>
                 </div>
             </footer>
 
@@ -187,6 +200,7 @@
 
         {# Global javascript #}
         <script type="text/javascript" src="{% static 'js/main.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/contents-list.js' %}"></script>
 
         {% block extra_js %}
         {% endblock %}

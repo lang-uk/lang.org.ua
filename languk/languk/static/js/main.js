@@ -1,3 +1,4 @@
 window.onload = function() {
-    document.body.setAttribute('class', 'loaded');
+    var basicClass = document.body.getAttribute('class');
+    document.body.setAttribute('class', 'loaded ' + basicClass);
 };

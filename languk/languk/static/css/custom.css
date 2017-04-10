@@ -1,0 +1,25 @@
+#mainnav li.lang-switcher {
+    max-height: 40px;
+}
+
+@media only screen and (min-width: 641px) {
+    #mainnav li.lang-switcher a {
+        padding: 0 10px;
+        line-height: 40px;
+        display: block;
+    }
+}
+
+#mainnav li.lang-switcher a img {
+    max-width: 22px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#mainnav li.lang-switcher a:before {
+    display: none;
+}
+
+#mainnav a {
+    padding-left: 20px;
+}

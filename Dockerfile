@@ -41,7 +41,7 @@ RUN python -m compileall ${root} \
 
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 
-VOLUME [ "/static", "/media" ]
+VOLUME [ "${STATIC_ROOT}", "${MEDIA_ROOT}" ]
 
 EXPOSE 8000
 

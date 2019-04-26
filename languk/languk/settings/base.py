@@ -188,6 +188,6 @@ except raven.exceptions.InvalidGitRepository:
     pass
 
 RAVEN_CONFIG = {
-    'dsn': get_env_str('RAVEN_DSN', None),
+    'dsn': get_env_str('SENTRY_DSN', None),
     'release': get_env_str('VERSION', GIT_VERSION),
 }

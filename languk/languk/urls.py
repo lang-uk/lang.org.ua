@@ -1,27 +1,26 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.conf import settings
-from django.conf.urls import include, url
+from django.urls import include, path
 from django.contrib import admin
 
 from django.conf.urls.i18n import i18n_patterns
-from wagtail.wagtailadmin import urls as wagtailadmin_urls
-from wagtail.wagtailcore import urls as wagtail_urls
-from wagtail.wagtaildocs import urls as wagtaildocs_urls
-from wagtail.contrib.wagtailsitemaps.views import sitemap
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.core import urls as wagtail_urls
+from wagtail.documents import urls as wagtaildocs_urls
+from wagtail.contrib.sitemaps.views import sitemap
 
 urlpatterns = [
-    url(r'^django-admin/', include(admin.site.urls)),
-
-    url(r'^admin/', include(wagtailadmin_urls)),
-    url(r'^documents/', include(wagtaildocs_urls)),
-    url('^sitemap\.xml$', sitemap),
+    path("django-admin/", admin.site.urls),
+    path("admin/", include(wagtailadmin_urls)),
+    path("documents/", include(wagtaildocs_urls)),
+    path("sitemap.xml", sitemap),
 ]
 
 
 urlpatterns += i18n_patterns(
-    # url(r'^search/$', search_views.search, name='search'),
-    url(r'', include(wagtail_urls)),
+    # path('search/', search_views.search, name='search'),
+    path("", include(wagtail_urls)),
 )
 
 

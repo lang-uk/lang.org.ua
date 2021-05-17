@@ -1,5 +1,7 @@
+from wagtail.core.models import Site
+
 def get_site_root(request):
-    return request.site.root_page
+    return Site.find_for_request(request).root_page
 
 
 def menu_processor(request):

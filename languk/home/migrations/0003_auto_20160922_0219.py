@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 import django.db.models.deletion
 import modelcluster.fields
-import wagtail.wagtailcore.fields
+import wagtail.core.fields
 
 
 class Migration(migrations.Migration):
@@ -34,12 +34,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='homepage',
             name='body',
-            field=wagtail.wagtailcore.fields.RichTextField(default='', verbose_name='[UA] Загальний текст сторінки'),
+            field=wagtail.core.fields.RichTextField(default='', verbose_name='[UA] Загальний текст сторінки'),
         ),
         migrations.AddField(
             model_name='homepage',
             name='body_en',
-            field=wagtail.wagtailcore.fields.RichTextField(default='', verbose_name='[EN] Загальний текст сторінки'),
+            field=wagtail.core.fields.RichTextField(default='', verbose_name='[EN] Загальний текст сторінки'),
         ),
         migrations.AddField(
             model_name='homepage',

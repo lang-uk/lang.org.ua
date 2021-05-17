@@ -2,13 +2,13 @@ from django.db import models
 from django.utils import translation
 from django.conf import settings
 
-from wagtail.wagtailcore import hooks
-from wagtail.wagtailcore.models import Page, Orderable
+from wagtail.core import hooks
+from wagtail.core.models import Page, Orderable
 from modelcluster.fields import ParentalKey
-from wagtail.wagtailcore.fields import RichTextField
-from wagtail.wagtailcore.whitelist import (
+from wagtail.core.fields import RichTextField
+from wagtail.core.whitelist import (
     attribute_rule, allow_without_attributes)
-from wagtail.wagtailadmin.edit_handlers import (
+from wagtail.admin.edit_handlers import (
     InlinePanel, FieldPanel, PageChooserPanel)
 
 
@@ -58,6 +58,7 @@ class LinkFields(models.Model):
         null=True,
         blank=True,
         related_name='+',
+        on_delete=models.CASCADE,
         verbose_name="Або посилання на існуючу сторінку"
     )
 

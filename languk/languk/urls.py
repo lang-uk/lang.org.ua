@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.conf import settings
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.contrib import admin
 
 from django.conf.urls.i18n import i18n_patterns
@@ -20,7 +20,7 @@ urlpatterns = [
 
 urlpatterns += i18n_patterns(
     # path('search/', search_views.search, name='search'),
-    path("", include(wagtail_urls)),
+    re_path(r"", include(wagtail_urls))
 )
 
 

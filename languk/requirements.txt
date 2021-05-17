@@ -4,3 +4,4 @@ Django==3.2.3
 git+https://github.com/TwilioDevEd/wagtailtinymce.git
 gunicorn==20.1.0
 raven==6.10.0
+pymongo==3.11.4

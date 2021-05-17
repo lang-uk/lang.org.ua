@@ -121,12 +121,12 @@ class AbstractPage(Page):
         FieldPanel('global_class', classname="full"),
     ]
 
-    def get_sitemap_urls(self):
+    def get_sitemap_urls(self, request=None):
         for code, _ in settings.LANGUAGES:
             translation.activate(code)
 
             yield {
-                'location': self.full_url,
+                'location': self.get_full_url(request),
                 'lastmod': self.latest_revision_created_at
             }
 

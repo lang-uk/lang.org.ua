@@ -91,7 +91,49 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "languk.urls"
 
+# TEMPLATES = [
+#     {
+#         "BACKEND": "django.template.backends.django.DjangoTemplates",
+#         "DIRS": [
+#             os.path.join(PROJECT_DIR, "templates"),
+#         ],
+#         "APP_DIRS": True,
+#         "OPTIONS": {
+#             "context_processors": [
+#                 "django.template.context_processors.debug",
+#                 "django.template.context_processors.request",
+#                 "django.contrib.auth.context_processors.auth",
+#                 "django.contrib.messages.context_processors.messages",
+#                 "home.context_processors.menu_processor",
+#             ],
+#         },
+#     },
+# ]
+
 TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.jinja2.Jinja2",
+        "DIRS": [os.path.join(PROJECT_DIR, "jinja2")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "environment": "jinja2_env.environment",
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.i18n",
+                "django.contrib.messages.context_processors.messages",
+                "home.context_processors.menu_processor",
+            ],
+            "extensions": [
+                "jinja2.ext.i18n",
+                "jinja2.ext.with_",
+                "wagtail.core.jinja2tags.core",
+                "wagtail.admin.jinja2tags.userbar",
+                "wagtail.images.jinja2tags.images",
+            ],
+        },
+    },
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from 'corpus/_macro.html' import article_excerpt %}
+
+{% block page_header %}
+{% endblock %}
+
+{% block title %}
+	{{ _("Джерело") }} «{{ source.title }}» | {{ _("UberText") }}
+{% endblock %}
+
+
+{% block page_content %}
+<div class="wrapper-in rte full_page">
+	<section>
+		<h3>
+			{{ _("Джерело") }} «{{ source.title }}»
+		</h3>
+		<h4>
+			{{ _("Вибірка") }} «<strong>{{ sample.title }}</strong>»
+		</h4>
+
+		{% for doc in sample.documents %}
+			{{ article_excerpt(doc) }}
+		{% endfor %}
+	</section>
+</div>
+{% endblock %}

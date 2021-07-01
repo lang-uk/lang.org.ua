@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block page_header %}
+{% endblock %}
+
+{% block title %}
+{% endblock %}
+
+{% block page_content %}
+<div class="wrapper-in rte full_page">
+	<section>
+		{% for collection, sources in corpus_sources.items() %}
+		{% set ns = namespace(corpus_docs = 0, corpus_total_words = 0, corpus_total_len = 0) %}
+		<h3>
+			{{ _("Корпус") }} {{ collection }}
+		</h3>
+		<table class="source-stats">
+			<thead>
+				<tr>
+					<th>{{ _("Джерело") }}</th>
+					<th>{{ _("Статей") }}</th>
+					<th>{{ _("Токенів") }}</th>
+					<th>{{ _("Байтів") }}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for source in sources %}
+				<tr>
+					<td><a href="{{ url('corpus>corpus_source', args=[source.collection, source._id]) }}">{{ source.title }}</a><br/><small><a href="{{ source.url }}">{{ source.copyright }}</a></small></td>
+					<td class="number_format">
+						{% if source.stats %}
+							{{ source.stats.docs|number_format }}{% set ns.corpus_docs = ns.corpus_docs + source.stats.docs %}
+						{% else %}
+						—
+						{% endif %}
+					</td>
+					<td class="number_format">
+						{% if source.stats %}
+							{{ source.stats.total_words|number_format }}
+							{% set ns.corpus_total_words = ns.corpus_total_words + source.stats.total_words %}
+						{% else %}
+						—
+						{% endif %}
+					</td>
+					<td class="number_format">
+						{% if source.stats %}
+							{{ source.stats.total_len|number_format }}
+							{% set ns.corpus_total_len = ns.corpus_total_len + source.stats.total_len %}
+						{% else %}
+						—
+						{% endif %}
+					</td>
+				</tr>
+				{% endfor %}
+				<tr>
+					<td><strong>{{ _("Загалом") }}</strong></td>
+					<td class="number_format">{{ ns.corpus_docs|number_format }}</td>
+					<td class="number_format">{{ ns.corpus_total_words|number_format }}</td>
+					<td class="number_format">{{ ns.corpus_total_len|number_format }}</td>
+				</tr>
+			</tbody>
+		</table>
+		{% endfor %}
+	</section>
+</div>
+{% endblock %}

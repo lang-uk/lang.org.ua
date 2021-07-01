@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block page_header %}
+{% endblock %}
+
+{% block title %}
+	{{ _("Джерело") }} «{{ source.title }}» | {{ _("UberText") }}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.4/chartist.min.css" integrity="sha512-V0+DPzYyLzIiMiWCg3nNdY+NyIiK9bED/T1xNBj08CaIUyK3sXRpB26OUCIzujMevxY9TRJFHQIxTwgzb0jVLg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block page_content %}
+<div class="wrapper-in rte full_page">
+	<section>
+		<h3>
+			{{ _("Джерело") }} «{{ source.title }}»
+		</h3>
+
+		<table class="source-details">
+			<tbody>
+				<tr>
+					<th>
+						{{ _("Ідентифікатор") }}
+					</th>
+					<td>
+						{{ source._id }}
+					</td>
+				</tr>
+				<tr>
+					<th>
+						{{ _("Сайт") }}
+					</th>
+					<td>
+						<a href="{{ source.website }}">{{ source.website }}</a>
+					</td>
+				</tr>
+				<tr>
+					<th>
+						{{ _("Авторські права") }}
+					</th>
+					<td>
+						{{ source.copyright }}
+					</td>
+				</tr>
+				{% if source.stats %}
+					<tr>
+						<th>
+							{{ _("Статей") }}
+						</th>
+						<td>
+							{{ source.stats.docs|number_format }}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							{{ _("Слів") }}
+						</th>
+						<td>
+							{{ source.stats.total_words|number_format }}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							{{ _("Байтів") }}
+						</th>
+						<td>
+							{{ source.stats.total_len|number_format }}
+						</td>
+					</tr>
+
+					{% if source.stats.docs %}
+						<tr>
+							<th>
+								{{ _("Слів на статтю") }}
+							</th>
+							<td>
+								{{ (source.stats.total_words / source.stats.docs)|number_format }}
+							</td>
+						</tr>
+						<tr>
+							<th>
+								{{ _("Довжина статті") }}
+							</th>
+							<td>
+								{{ (source.stats.total_len / source.stats.docs)|number_format }}
+							</td>
+						</tr>
+					{% endif %}
+					{% if source.stats.min_date %}
+						<tr>
+							<th>
+								{{ _("Найстаріша стаття") }}
+							</th>
+							<td>
+								{{ source.stats.min_date|datetime }}
+							</td>
+						</tr>
+					{% endif %}
+					{% if source.stats.max_date %}
+						<tr>
+							<th>
+								{{ _("Найновіша стаття") }}
+							</th>
+							<td>
+								{{ source.stats.max_date|datetime }}
+							</td>
+						</tr>
+					{% endif %}
+					{% if source.timeline %}
+						<tr>
+							<th colspan="2">
+								{{ _("Таймлайн") }}
+								<div id="source_timeline" data-timeline="{{ source.timeline|tojson|forceescape }}">
+								</div>
+							</th>
+						</tr>
+					{% endif %}
+					{% if source.sampling_results %}
+						<tr>
+							<th>
+								{{ _("Тестові вибірки") }}
+							</th>
+							<td>
+								<ul>
+								{% for sample_slug, sample in source.sampling_results.items() %}
+								<li><a href="{{ url('corpus>corpus_sample', args=[source.collection, source._id, sample_slug]) }}">{{ sample.title }}</a></li>
+								{% endfor %}
+								</ul>
+							</td>
+						</tr>   
+					{% endif %}
+				{% endif %}
+			</tbody>
+		</table>
+	</section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.4/chartist.min.js" integrity="sha512-9rxMbTkN9JcgG5euudGbdIbhFZ7KGyAuVomdQDI9qXfPply9BJh0iqA7E/moLCatH2JD4xBGHwV6ezBkCpnjRQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script type="text/javascript" src="{{ static('js/chartist-plugin-tooltip.min.js') }}"></script>
+
+
+	<script type="text/javascript">
+		$(function() {
+			var timeline = $("#source_timeline").data("timeline"),
+				timeline_series = [];
+
+			for (var i = 0; i < timeline.length; i++) {
+				if (!timeline[i]["date"]) {
+					continue;
+				}
+				timeline_series.push({
+					"x": moment.utc(timeline[i]["date"])._d,
+					"y": timeline[i]["count"]
+				});
+			}
+			var chart = new Chartist.Line('#source_timeline', {
+				series: [{
+					name: 'Publications',
+					data: timeline_series
+				}]
+			}, {
+				showPoint: true,
+				showLine: true,
+				lineSmooth: Chartist.Interpolation.simple({
+					divisor: 2
+				}),
+				plugins: [
+					Chartist.plugins.tooltip({
+						appendToBody: true,
+						anchorToPoint: false, //accepts true or false
+						transformTooltipTextFnc: function(value) {
+							// console.log(value, typeof(value));
+							if (value) {
+								return value.split(",")[1];
+							}
+							return value;
+						}
+    				})
+				],
+				axisX: {
+					type: Chartist.FixedScaleAxis,
+					divisor: 12,
+					labelInterpolationFnc: function(value) {
+						return moment(value).format('MMM Y');
+					}
+				}
+			});
+		});
+	</script>
+{% endblock %}

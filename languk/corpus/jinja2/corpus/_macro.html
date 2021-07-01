@@ -1,0 +1,26 @@
+{% macro article_excerpt(article) %}
+<article class="excerpt">
+	<h2>
+		<a href="{{ article.url }}" target="_blank">
+		{% if article.title %}
+			{{ article.title }}
+		{% else %}
+			<strong>[{{ _("Заголовка немає взагалі") }}]</strong>
+		{% endif %}
+		</a>
+	</h2>
+	{% if article.date_of_publish %}
+	<time>
+		{{ article.date_of_publish }}
+	</time>
+	{% endif %}
+	<pre>{% if article.text -%}
+			{{ article.text|excerpt_markdown }}
+		{%- else -%}
+			<strong>[{{ _("Тексту немає взагалі") }}]</strong>
+	{%- endif %}</pre>
+	{% if article.author %}
+		<address>{{ _("Автор:") }} {{ article.author }}</address>
+	{% endif %}
+</article>
+{% endmacro %}

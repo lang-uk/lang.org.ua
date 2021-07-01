@@ -100,6 +100,13 @@ class DatabaseWrapper(object):
 
         return old
 
+    def __getitem__(self, func):
+        old = getattr(self._database, func)
+        if isinstance(old, Collection):
+            return CollectionWrapper(old)
+
+        return old
+
     def __repr__(self):
         return "<DatabaseWrapper %s>" % self._database.__repr__()
 

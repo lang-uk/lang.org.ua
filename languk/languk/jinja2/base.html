@@ -12,12 +12,15 @@
         {# Global stylesheets #}
         <link rel="stylesheet" type="text/css" href="{{ static('css/lang-uk.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ static('css/custom.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ static('css/chartist-plugin-tooltip.css') }}">
 
         {% for lang_code, lang_name in LANGUAGES %}
             {% if lang_code != LANGUAGE_CODE %}
-                {% language lang_code %}
-                <link rel="alternate" href="{{ pageurl(page) }}" hreflang="{{ lang_code }}" />
-                {% endlanguage %}
+                {% if page %}
+                    {% language lang_code %}
+                    <link rel="alternate" href="{{ pageurl(page) }}" hreflang="{{ lang_code }}" />
+                    {% endlanguage %}
+                {% endif %}
             {% endif %}
         {% endfor %}
 
@@ -189,19 +192,21 @@
             {% endblock %}
 
             <section id="content">
-                <div class="wrapper-in rte {{ page.global_class }}">
+                {% block page_content %}
+                <div class="wrapper-in rte {% if page %}{{ page.global_class }}{% endif %}">
                     {% block toc %}
                     {% endblock %}
                     <section>
                         {{ page.translated_body|richtext }}
-                    </section>
+                    </section>    
                 </div>
+                {% endblock %}
             </section>
 
             <footer>
                 <div class="wrapper-in">
                     <a href="#" class="nav">{{ _("вгору") }}</a>
-                    &copy;2016–2017, {{ _("спільнота") }} <a href="{{ url('wagtail_serve', args=['about/']) }}">lang-uk</a>
+                    &copy;2016-{{ curr_year }}, {{ _("спільнота") }} <a href="{{ url('wagtail_serve', args=['about/']) }}">lang-uk</a>
                 </div>
             </footer>
 
@@ -209,6 +214,7 @@
         <noscript></div></noscript>
 
         {# Global javascript #}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script type="text/javascript" src="{{ static('js/main.js') }}"></script>
         <script type="text/javascript" src="{{ static('js/contents-list.js') }}"></script>
 

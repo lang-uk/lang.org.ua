@@ -1,13 +1,56 @@
+from django.utils.translation import gettext as _
+from django.http import Http404
 from django.views.generic.base import TemplateView
 
 from .models import Corpus
 
 
 class CorpusHomeView(TemplateView):
-
-    template_name = "corpus.html"
+    template_name = "corpus/corpus_home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['latest_articles'] = Article.objects.all()[:5]
+        context["corpus_sources"] = Corpus.get_sources()
+        return context
+
+
+class CorpusSourceView(TemplateView):
+    template_name = "corpus/corpus_source.html"
+
+    def get_context_data(self, collection, source, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        source = Corpus.get_source(collection, source)
+        if source is None:
+            raise Http404(_("Джерела не існує"))
+
+        context["source"] = source
+        return context
+
+
+class CorpusSampleView(TemplateView):
+    template_name = "corpus/corpus_sample.html"
+
+    def get_context_data(self, collection, source, slug, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        source = Corpus.get_source(collection, source)
+        if source is None:
+            raise Http404(_("Джерела не існує"))
+
+        sample = Corpus.get_sample(source, slug)
+        if sample is None:
+            raise Http404(_("Вибірки не існує"))
+
+        context["source"] = source
+        context["sample"] = sample
+        return context
+
+
+class CorpusSourceDetailsView(TemplateView):
+    template_name = "corpus/corpus_details.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
         return context

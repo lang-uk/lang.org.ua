@@ -7,3 +7,4 @@ raven==6.10.0
 pymongo==3.11.4
 Jinja2==3.0.1
 python-dateutil==2.8.1
+Markdown==3.3.4

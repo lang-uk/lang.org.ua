@@ -36,3 +36,9 @@ class Corpus:
         sample["documents"] = documents
 
         return sample
+
+    @staticmethod
+    def get_article(source, article_id):
+        article = db[source["collection"]].find_one({"_id": article_id})
+
+        return article

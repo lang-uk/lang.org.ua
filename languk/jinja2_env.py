@@ -82,6 +82,10 @@ def excerpt_markdown(text, lines=10):
     return Markup("\n".join(excerpt).replace("#", "").strip() + reminder)
 
 
+def markdown_filter(text):
+    return Markup(markdown.markdown(text))
+
+
 def environment(**options):
     env = Environment(**options)
     env.globals.update(
@@ -102,6 +106,7 @@ def environment(**options):
             "date": date_filter,
             "number_format": number_format,
             "excerpt_markdown": excerpt_markdown,
+            "markdown": markdown_filter,
         }
     )
 

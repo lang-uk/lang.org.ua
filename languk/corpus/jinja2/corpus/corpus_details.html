@@ -1,0 +1,56 @@
+{% extends "bare_base.html" %}
+
+{% block title %}
+	«{{ article.title }}» | {{ _("UberText") }}
+{% endblock %}
+
+{% block extra_css %}
+	<style type="text/css">
+		a[target="_blank"]::after {
+		  content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+		  margin: 0 3px 0 5px;
+		}
+	</style>
+{% endblock %}
+
+
+{% block page_content %}
+	<h1>
+		<a href="{{ article.url }}" target="_blank">
+			{% if article.title %}
+				{{ article.title }}
+			{% else %}
+				[{{ _("Заголовка немає взагалі") }}]
+			{% endif %}
+		</a>
+	</h1>
+
+	{% if article.date_of_publish %}
+		<time>{{ article.date_of_publish }}</time>
+	{% endif %}
+
+	{% if article.author %}
+		<address>{{ _("Автор або джерело:") }} {{ article.author }}</address>
+	{% endif %}
+
+	{% if article.tags %}
+		{% set comma_joiner = joiner(", ") %}
+
+		<div>
+		{% for tag in article.tags %}
+			<span>{{ tag }}</span>{{ comma_joiner() }}
+		{% endfor %}
+		</div>
+	{% endif %}
+
+	{% if article.date_of_publish %}
+	<article>
+		{% if article.img %}
+		<img src="{{ article.img }}" />
+		{% endif %}
+		{% if article.text %}
+			{{ article.text|markdown }}
+		{% endif %}
+	</article>
+	{% endif %}
+{% endblock %}

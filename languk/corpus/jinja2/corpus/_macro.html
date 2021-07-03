@@ -8,6 +8,8 @@
 			<strong>[{{ _("Заголовка немає взагалі") }}]</strong>
 		{% endif %}
 		</a>
+		<br/>
+		<a href="{{ url('corpus>corpus_details', args=[source.collection, source._id, article._id]) }}">[{{ _("Повна версія") }}]</a>
 	</h2>
 	{% if article.date_of_publish %}
 	<time>
@@ -20,7 +22,7 @@
 			<strong>[{{ _("Тексту немає взагалі") }}]</strong>
 	{%- endif %}</pre>
 	{% if article.author %}
-		<address>{{ _("Автор:") }} {{ article.author }}</address>
+		<address>{{ _("Автор або джерело:") }} {{ article.author }}</address>
 	{% endif %}
 </article>
 {% endmacro %}

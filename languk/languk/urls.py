@@ -17,6 +17,8 @@ urlpatterns = [
     path("documents/", include(wagtaildocs_urls)),
     path("sitemap.xml", sitemap),
     path("corpus/", include("corpus.urls")),
+    path('django_task/', include('django_task.urls', namespace='django_task')),
+    path('django-rq/', include('django_rq.urls')),
 ]
 
 

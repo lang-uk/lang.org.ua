@@ -50,6 +50,8 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # Application definition
 
 INSTALLED_APPS = [
+    "django_rq",
+    "django_task",
     "home",
     "corpus",
     "search",
@@ -221,6 +223,29 @@ MONGODB = {
         "authSource": get_env_str("MONGODB_AUTH_DB", "admin"),
     }
 }
+
+REDIS_HOST = get_env_str('REDIS_HOST', 'localhost')
+REDIS_PORT = 6379
+REDIS_URL = 'redis://%s:%d/0' % (REDIS_HOST, REDIS_PORT)
+
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': REDIS_URL
+    },
+}
+
+RQ_PREFIX = "languk_"
+QUEUE_DEFAULT = RQ_PREFIX + 'default'
+
+RQ_QUEUES = {
+    QUEUE_DEFAULT: {
+        'URL': REDIS_URL,
+        'DEFAULT_TIMEOUT': 360,
+    }
+}
+
+RQ_SHOW_ADMIN_LINK = True
 
 try:
     GIT_VERSION = raven.fetch_git_sha(os.path.abspath(os.path.join(BASE_DIR, "..")))

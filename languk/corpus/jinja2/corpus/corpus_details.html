@@ -25,6 +25,46 @@
 		</a>
 	</h1>
 
+	<p>
+	{% if article.nlp %}
+		{% if variant == "default" %}
+			[{{ _("Повна версія") }}]
+		{% else %}
+			<a href="{{ url('corpus>corpus_details', args=[source.collection, source._id, article._id]) }}">[{{ _("Повна версія") }}]</a>
+		{% endif %}
+		{% if article.nlp.tokens %}
+			{% if variant == "tokens" %}
+				[{{ _("Токенізована версія") }}]
+			{% else %}
+				<a href="{{ url('corpus>corpus_details', args=[source.collection, source._id, article._id, 'tokens']) }}">[{{ _("Токенізована версія") }}]</a>
+			{% endif %}
+		{% endif %}
+
+		{% if article.nlp.lemmas %}
+			{% if variant == "lemmas"%}
+				[{{ _("Лематизована версія") }}]
+			{% else %}
+				<a href="{{ url('corpus>corpus_details', args=[source.collection, source._id, article._id, 'lemmas']) }}">[{{ _("Лематизована версія") }}]</a>
+			{% endif %}
+		{% endif %}
+	{% endif %}
+
+	{% if article.clean %}
+		{% if article.clean.uk_rate %}
+			<br />
+			{% if article.clean.uk_rate >= 0.75 %}
+				<strong style="color: darkgreen">
+			{% elif article.clean.uk_rate >= 0.5 %}
+				<strong style="color: darkorange">
+			{% else %}
+				<strong style="color: red">
+			{% endif %}
+				{{ _( "Обсяг українського тексту: ")}} {{ (article.clean.uk_rate * 100)|number_format }}%
+				</strong>
+		{% endif %}
+	{% endif %}
+	</p>
+
 	{% if article.date_of_publish %}
 		<time>{{ article.date_of_publish }}</time>
 	{% endif %}
@@ -33,6 +73,9 @@
 		<address>{{ _("Автор або джерело:") }} {{ article.author }}</address>
 	{% endif %}
 
+	<p>
+		<a href="{{ url('corpus>corpus_source', args=[source.collection, source._id]) }}">{{ _("Першоджерело") }}</a>
+	</p>
 	{% if article.tags %}
 		{% set comma_joiner = joiner(", ") %}
 
@@ -43,14 +86,26 @@
 		</div>
 	{% endif %}
 
-	{% if article.date_of_publish %}
 	<article>
-		{% if article.img %}
-		<img src="{{ article.img }}" />
+		{% if variant == "default" %}
+			<h2>{{ _("Повна версія") }}</h2>
+			{% if article.text %}
+				{{ article.text|markdown }}
+			{% endif %}
+		{% elif variant == "tokens" %}
+			<h2>{{ _("Токенізована версія") }}</h2>
+			{% if article.nlp and article.nlp.tokens %}
+				<pre>{{ article.nlp.tokens|trim }}</pre>
+			{% endif %}
+		{% elif variant == "lemmas" %}
+			<h2>{{ _("Лематизована версія") }}</h2>
+			{% if article.nlp and article.nlp.lemmas %}
+				<pre>{{ article.nlp.lemmas|trim }}</pre>
+			{% endif %}
 		{% endif %}
-		{% if article.text %}
-			{{ article.text|markdown }}
+
+		{% if article.img %}
+			<img src="{{ article.img }}" />
 		{% endif %}
 	</article>
-	{% endif %}
 {% endblock %}

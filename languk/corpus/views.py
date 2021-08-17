@@ -50,7 +50,7 @@ class CorpusSampleView(TemplateView):
 class CorpusSourceDetailsView(TemplateView):
     template_name = "corpus/corpus_details.html"
 
-    def get_context_data(self, collection, source_id, pk, **kwargs):
+    def get_context_data(self, collection, source_id, pk, variant="default", **kwargs):
         context = super().get_context_data(**kwargs)
 
         source = Corpus.get_source(collection, source_id)
@@ -61,7 +61,12 @@ class CorpusSourceDetailsView(TemplateView):
         if article is None:
             raise Http404(_("Документу не існує"))
 
+        if variant != "default":
+            if "nlp" not in article or variant not in article["nlp"]:
+                raise Http404(_("Документ ще не оброблений"))
+
         context["source"] = source
         context["article"] = article
+        context["variant"] = variant
 
         return context

@@ -42,7 +42,7 @@ class ExportCorpusJob(Job):
         from .mongodb import db
 
         for corpus in task.corpora:
-            for article in db[corpus].find():
+            for article in db[corpus].find()[:10]:
                 yield article
 
     @staticmethod
@@ -83,10 +83,10 @@ class ExportCorpusJob(Job):
     def write_article(job, task, fp, article):
         if task.processing == "orig":
             fp.write(f"{article['title']}\n\n{article['text']}\n\n\n")
-        elif task.processing == "tokens" and "nlp" in article and "tokens" in article["nlp"]:
-            fp.write(f"{article['title']}\n\n{article['nlp']['tokens']}\n\n\n")
-        elif task.processing == "lemmas" and "nlp" in article and "lemmas" in article["nlp"]:
-            fp.write(f"{article['title']}\n\n{article['nlp']['lemmas']}\n\n\n")
+        elif task.processing == "tokens" and "nlp" in article:
+            fp.write(f"{article['nlp'].get('title', {}).get('tokens', '')}\n\n{article['nlp'].get('text', {}).get('tokens', '')}\n\n\n")
+        elif task.processing == "lemmas" and "nlp" in article:
+            fp.write(f"{article['nlp'].get('title', {}).get('lemmas', '')}\n\n{article['nlp'].get('text', {}).get('lemmas', '')}\n\n\n")
 
     @staticmethod
     def execute(job, task):

@@ -42,7 +42,7 @@ class ExportCorpusJob(Job):
         from .mongodb import db
 
         for corpus in task.corpora:
-            for article in db[corpus].find()[:10]:
+            for article in db[corpus].find():
                 yield article
 
     @staticmethod

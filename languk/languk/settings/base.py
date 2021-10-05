@@ -192,6 +192,8 @@ MEDIA_URL = "/media/"
 
 LOCALE_PATHS = (os.path.join(BASE_DIR, "languk/locale"),)
 
+CORPORA_EXPORT_PATH = os.path.join(STATIC_ROOT, "data")
+
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "languk"
@@ -237,11 +239,12 @@ CACHES = {
 
 RQ_PREFIX = "languk_"
 QUEUE_DEFAULT = RQ_PREFIX + 'default'
+CORPUS_EXPORT_PATH = "/tmp"
 
 RQ_QUEUES = {
     QUEUE_DEFAULT: {
         'URL': REDIS_URL,
-        'DEFAULT_TIMEOUT': 360,
+        'DEFAULT_TIMEOUT': 360000,
     }
 }
 

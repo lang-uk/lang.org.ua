@@ -82,7 +82,7 @@ class ExportCorpusJob(Job):
     @staticmethod
     def write_article(job, task, fp, article):
         if task.processing == "orig":
-            fp.write(f"{article['title']}\n\n{article['text']}\n\n\n")
+            fp.write(f"{article.get('title', '')}\n\n{article.get('text', '')}\n\n\n")
         elif task.processing == "tokens" and "nlp" in article:
             fp.write(f"{article['nlp'].get('title', {}).get('tokens', '')}\n\n{article['nlp'].get('text', {}).get('tokens', '')}\n\n\n")
         elif task.processing == "lemmas" and "nlp" in article:

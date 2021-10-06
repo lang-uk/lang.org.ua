@@ -94,7 +94,7 @@ class Corpus:
 class ExportCorpusTask(TaskRQ):
     CORPORA_CHOICES = (
         ("news", "News and magazines"),
-        ("wiki", "Ukrainian Wikipedia"),
+        ("wikipedia", "Ukrainian Wikipedia"),
         ("fiction", "Fiction"),
         ("court", "Sampled court decisions"),
         ("laws", "Laws and bylaws"),

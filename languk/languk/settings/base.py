@@ -248,6 +248,8 @@ RQ_QUEUES = {
     }
 }
 
+UDPIPE_MODEL_FILE = ""
+
 RQ_SHOW_ADMIN_LINK = True
 
 try:

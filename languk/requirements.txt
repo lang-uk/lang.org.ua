@@ -11,3 +11,4 @@ Markdown==3.3.4
 django-task==2.0.0
 django-rq==2.4.1
 django-redis-cache==3.0.0
+dependencies/ufal.udpipe-1.2.0.1.tar.gz

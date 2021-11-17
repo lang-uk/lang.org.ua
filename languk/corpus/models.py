@@ -8,6 +8,14 @@ from django_task.models import TaskRQ
 
 from .mongodb import db
 
+_CORPORA_CHOICES = (
+    ("news", "News and magazines"),
+    ("wikipedia", "Ukrainian Wikipedia"),
+    ("fiction", "Fiction"),
+    ("court", "Sampled court decisions"),
+    ("laws", "Laws and bylaws"),
+)
+
 
 class ChoiceArrayField(ArrayField):
     """
@@ -92,14 +100,6 @@ class Corpus:
 
 
 class ExportCorpusTask(TaskRQ):
-    CORPORA_CHOICES = (
-        ("news", "News and magazines"),
-        ("wikipedia", "Ukrainian Wikipedia"),
-        ("fiction", "Fiction"),
-        ("court", "Sampled court decisions"),
-        ("laws", "Laws and bylaws"),
-    )
-
     FILTERING_CHOICE = (
         ("rus", "Filter out texts with a lot of russian words"),
         ("short", "Filter out texts, where title and body combined are too short"),
@@ -125,7 +125,7 @@ class ExportCorpusTask(TaskRQ):
             max_length=10,
             null=False,
             blank=False,
-            choices=CORPORA_CHOICES,
+            choices=_CORPORA_CHOICES,
         ),
         blank=False,
     )
@@ -163,3 +163,28 @@ class ExportCorpusTask(TaskRQ):
         from .jobs import ExportCorpusJob
 
         return ExportCorpusJob
+
+
+class TagWithUDPipeTask(TaskRQ):
+    corpora = ChoiceArrayField(
+        models.CharField(
+            max_length=10,
+            null=False,
+            blank=False,
+            choices=_CORPORA_CHOICES,
+        ),
+        blank=False,
+    )
+
+    TASK_QUEUE = settings.QUEUE_DEFAULT
+
+    DEFAULT_VERBOSITY = 2
+    TASK_TIMEOUT = 0
+    LOG_TO_FIELD = True
+    LOG_TO_FILE = False
+
+    @staticmethod
+    def get_jobclass():
+        from .jobs import TagWithUDPipeJob
+
+        return TagWithUDPipeJob

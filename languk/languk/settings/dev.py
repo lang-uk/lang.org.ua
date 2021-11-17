@@ -17,6 +17,8 @@ DATABASES = {
     }
 }
 
+UDPIPE_MODEL_FILE = "/Users/dchaplinsky/Downloads/20180506.uk.mova-institute.udpipe"
+
 if DEBUG:
     INSTALLED_APPS += ["debug_toolbar"]
 

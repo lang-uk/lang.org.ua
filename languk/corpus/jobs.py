@@ -4,6 +4,7 @@ import lzma
 import os.path
 from collections import defaultdict, Counter
 
+import pymongo
 from django.conf import settings
 from django_task.job import Job
 
@@ -39,7 +40,9 @@ class BaseCorpusTask(Job):
     @staticmethod
     def get_iter(db, job, task):
         for corpus in task.corpora:
-            for article in db[corpus].find():
+            # TODO: move to separate function or get_iter implementation of TagWithUDPipeJob
+            # for article in db[corpus].find({"processing_status": {"$nin": ["updipe_tagged"]}}):
+            for article in db[corpus].find({"_id": "a7aaa513f8f7d43ce334e8ff71d60afc5b5fc17d"}):
                 yield corpus, article
 
     @staticmethod
@@ -147,60 +150,64 @@ class TagWithUDPipeJob(BaseCorpusTask):
                         continue
 
                     for s in article["nlp"][f]["tokens"].split("\n"):
-                            tokenized = model.tokenize(s)
-                            for tok_sent in tokenized:
-                                sent_lemmas = []
-                                sent_postags = []
-                                sent_features = []
+                        tokenized = model.tokenize(s)
+                        for tok_sent in tokenized:
+                            sent_lemmas = []
+                            sent_postags = []
+                            sent_features = []
 
-                                model.tag(tok_sent)
+                            model.tag(tok_sent)
 
-                                for w in tok_sent.words[1:]:
-                                    poses.update([w.upostag])
-                                    sent_lemmas.append(w.lemma)
-                                    # Again, not moving that to a separate function to 
-                                    # reduce number of unnecessary calls
-                                    try:
-                                        sent_postags.append(COMPRESS_UPOS_MAPPING[w.upostag])
-                                    except KeyError:
-                                        logger.warning(f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now")
-                                        sent_postags.append("Z")
+                            for w in tok_sent.words[1:]:
+                                poses.update([w.upostag])
+                                sent_lemmas.append(w.lemma)
+                                # Again, not moving that to a separate function to 
+                                # reduce number of unnecessary calls
+                                try:
+                                    sent_postags.append(COMPRESS_UPOS_MAPPING[w.upostag])
+                                except KeyError:
+                                    logger.warning(f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now")
+                                    sent_postags.append("Z")
 
-                                    sent_features.append(compress_features(w.feats))
+                                sent_features.append(compress_features(w.feats))
 
-                                    for pair in w.feats.split("|"):
-                                        if not pair:
-                                            continue
-                                        cat, val = pair.split("=")
-                                        feat_categories.update([cat])
-                                        feat_values[cat].update([val])
+                                for pair in w.feats.split("|"):
+                                    if not pair:
+                                        continue
+                                    cat, val = pair.split("=")
+                                    feat_categories.update([cat])
+                                    feat_values[cat].update([val])
 
-                                update_clause[f"nlp.{f}.ud_lemmas"].append(" ".join(sent_lemmas))
-                                # We don't need to have a separator for the postags as there is always one
-                                # pos tag (which is character) per word
-                                update_clause[f"nlp.{f}.ud_postags"].append("".join(sent_postags))
-                                update_clause[f"nlp.{f}.ud_features"].append(" ".join(sent_features))
+                            update_clause[f"nlp.{f}.ud_lemmas"].append(" ".join(sent_lemmas))
+                            # We don't need to have a separator for the postags as there is always one
+                            # pos tag (which is character) per word
+                            update_clause[f"nlp.{f}.ud_postags"].append("".join(sent_postags))
+                            update_clause[f"nlp.{f}.ud_features"].append(" ".join(sent_features))
 
                 for k, v in update_clause.items():
                     update_clause[k] = "\n".join(v)
 
                 if update_clause:
-                    db[corpus].update_one(
-                        {"_id": article["_id"]},
-                        {
-                            "$set": update_clause,
-                            "$addToSet": {"processing_status": "updipe_tagged"},
-                        },
-                    )
+                    try:
+                        db[corpus].update_one(
+                            {"_id": article["_id"]},
+                            {
+                                "$set": update_clause,
+                                "$addToSet": {"processing_status": "updipe_tagged"},
+                            },
+                        )
+                    except pymongo.errors.WriteError:
+                        logger.warning(f"Cannot store results back to the document {article['_id']}")
+                        continue
                 else:
                     logger.warning(f"Cannot find any text in the document {article['_id']}")
 
-            if i and i % 1000 == 0:
-                print(poses.most_common())
-                print("\n\n")
-                print(feat_categories.most_common())
-                print("\n\n")
-                for k, v in feat_values.items():
-                    print(k, v.most_common())
+            # if i and i % 1000 == 0:
+            #     print(poses.most_common())
+            #     print("\n\n")
+            #     print(feat_categories.most_common())
+            #     print("\n\n")
+            #     for k, v in feat_values.items():
+            #         print(k, v.most_common())
 
             task.set_progress((i + 1) * 100 // total_docs, step=1)

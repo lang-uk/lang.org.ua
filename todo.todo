@@ -1,0 +1,4 @@
+ ✔ Add uncommitted changes to the repo @done (21-12-14 17:58)
+ ✔ Try whitespace tokenizer @done (22-01-25 21:18)
+ ✘ Wrap the current tagging (together with tokenized text) to the message pack @cancelled (22-01-25 21:18)
+ ✘ Evaluate the size of compressed document and try to bzip it or stuff into the separate collection @cancelled (22-01-25 21:18)

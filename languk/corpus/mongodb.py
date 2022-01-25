@@ -8,7 +8,7 @@ from types import FunctionType
 import functools
 import time
 
-__all__ = ("connection", "connections", "db")
+__all__ = ("connection", "connections", "db", "get_db")
 
 """
 Goals:
@@ -161,7 +161,10 @@ class MongoHandler(object):
         return self._connections[alias]
 
 
-connections = MongoHandler(settings.MONGODB)
-connection = connections["default"]
+def get_db():
+    connections = MongoHandler(settings.MONGODB)
+    connection = connections["default"]
 
-db = connection.default
+    return connection.default
+
+db = get_db()

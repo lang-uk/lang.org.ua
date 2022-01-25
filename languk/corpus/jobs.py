@@ -4,6 +4,7 @@ import lzma
 import os.path
 from collections import defaultdict, Counter
 
+import pymongo
 from django.conf import settings
 from django_task.job import Job
 
@@ -102,7 +103,8 @@ class ExportCorpusJob(BaseCorpusTask):
 
     @staticmethod
     def execute(job, task):
-        from .mongodb import db
+        from .mongodb import get_db
+        db = get_db()
 
         total_docs = ExportCorpusJob.get_total_count(db, job, task)
 
@@ -118,11 +120,35 @@ class ExportCorpusJob(BaseCorpusTask):
 
 class TagWithUDPipeJob(BaseCorpusTask):
     @staticmethod
+    def _get_mongo_filter(task):
+        if task.force:
+            return {}
+        else:
+            return {"processing_status": {"$nin": ["updipe_tagged"]}}
+
+    @staticmethod
+    def get_total_count(db, job, task):
+        total = 0
+        for corpus in task.corpora:
+            total += db[corpus].find(TagWithUDPipeJob._get_mongo_filter(task)).count()
+
+        return total
+
+    @staticmethod
+    def get_iter(db, job, task):
+        for corpus in task.corpora:
+            for article in db[corpus].find(TagWithUDPipeJob._get_mongo_filter(task)):
+                yield corpus, article
+
+    @staticmethod
     def execute(job, task):
         assert settings.UDPIPE_MODEL_FILE, "You must set UDPIPE_MODEL_FILE setting to begin"
 
-        from .mongodb import db
+        from .mongodb import get_db
         from .udpipe_model import Model as UDPipeModel
+        from ufal.udpipe import Sentence
+
+        db = get_db()
 
         model = UDPipeModel(settings.UDPIPE_MODEL_FILE)
         total_docs = TagWithUDPipeJob.get_total_count(db, job, task)
@@ -147,60 +173,63 @@ class TagWithUDPipeJob(BaseCorpusTask):
                         continue
 
                     for s in article["nlp"][f]["tokens"].split("\n"):
-                            tokenized = model.tokenize(s)
-                            for tok_sent in tokenized:
-                                sent_lemmas = []
-                                sent_postags = []
-                                sent_features = []
+                        # ignoring default model tokenizer in order to use whitespace tokenizer
 
-                                model.tag(tok_sent)
+                        tok_sent = Sentence()
+                        for w in s.split(" "):
+                            tok_sent.addWord(w)
 
-                                for w in tok_sent.words[1:]:
-                                    poses.update([w.upostag])
-                                    sent_lemmas.append(w.lemma)
-                                    # Again, not moving that to a separate function to 
-                                    # reduce number of unnecessary calls
-                                    try:
-                                        sent_postags.append(COMPRESS_UPOS_MAPPING[w.upostag])
-                                    except KeyError:
-                                        logger.warning(f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now")
-                                        sent_postags.append("Z")
+                        sent_lemmas = []
+                        sent_postags = []
+                        sent_features = []
 
-                                    sent_features.append(compress_features(w.feats))
+                        model.tag(tok_sent)
 
-                                    for pair in w.feats.split("|"):
-                                        if not pair:
-                                            continue
-                                        cat, val = pair.split("=")
-                                        feat_categories.update([cat])
-                                        feat_values[cat].update([val])
+                        for w in tok_sent.words[1:]:
+                            poses.update([w.upostag])
+                            sent_lemmas.append(w.lemma)
+                            # Again, not moving that to a separate function to
+                            # reduce number of unnecessary calls
+                            try:
+                                sent_postags.append(COMPRESS_UPOS_MAPPING[w.upostag])
+                            except KeyError:
+                                logger.warning(
+                                    f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now"
+                                )
+                                sent_postags.append("Z")
 
-                                update_clause[f"nlp.{f}.ud_lemmas"].append(" ".join(sent_lemmas))
-                                # We don't need to have a separator for the postags as there is always one
-                                # pos tag (which is character) per word
-                                update_clause[f"nlp.{f}.ud_postags"].append("".join(sent_postags))
-                                update_clause[f"nlp.{f}.ud_features"].append(" ".join(sent_features))
+                            sent_features.append(compress_features(w.feats))
+
+                            for pair in w.feats.split("|"):
+                                if not pair:
+                                    continue
+                                cat, val = pair.split("=")
+                                feat_categories.update([cat])
+                                feat_values[cat].update([val])
+
+                        update_clause[f"nlp.{f}.ud_lemmas"].append(" ".join(sent_lemmas))
+
+                        # We don't need to have a separator for the postags as there is always one
+                        # pos tag (which is character) per word
+                        update_clause[f"nlp.{f}.ud_postags"].append("".join(sent_postags))
+                        update_clause[f"nlp.{f}.ud_features"].append(" ".join(sent_features))
 
                 for k, v in update_clause.items():
                     update_clause[k] = "\n".join(v)
 
                 if update_clause:
-                    db[corpus].update_one(
-                        {"_id": article["_id"]},
-                        {
-                            "$set": update_clause,
-                            "$addToSet": {"processing_status": "updipe_tagged"},
-                        },
-                    )
+                    try:
+                        db[corpus].update_one(
+                            {"_id": article["_id"]},
+                            {
+                                "$set": update_clause,
+                                "$addToSet": {"processing_status": "updipe_tagged"},
+                            },
+                        )
+                    except pymongo.errors.WriteError:
+                        logger.warning(f"Cannot store results back to the document {article['_id']}")
+                        continue
                 else:
                     logger.warning(f"Cannot find any text in the document {article['_id']}")
-
-            if i and i % 1000 == 0:
-                print(poses.most_common())
-                print("\n\n")
-                print(feat_categories.most_common())
-                print("\n\n")
-                for k, v in feat_values.items():
-                    print(k, v.most_common())
 
             task.set_progress((i + 1) * 100 // total_docs, step=1)

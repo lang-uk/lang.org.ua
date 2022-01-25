@@ -52,7 +52,7 @@ _FEATURES_MAPPING = [
     ("Abbr", "B"),  # 59132
     ("Variant", "r"),  # 22024
     ("Hyph", "H"),  # 13212
-    ("Animacy[gram])", "g"),  # 11597
+    ("Animacy[gram]", "g"),  # 11597
     ("PartType", "Y"),  # 5582
     ("Orth", "h"),  # 3516
 ]

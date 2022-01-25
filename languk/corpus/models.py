@@ -176,6 +176,11 @@ class TagWithUDPipeTask(TaskRQ):
         blank=False,
     )
 
+    force = models.BooleanField(
+        "Tag all texts, including already tagged",
+        default=False,
+    )
+
     TASK_QUEUE = settings.QUEUE_DEFAULT
 
     DEFAULT_VERBOSITY = 2

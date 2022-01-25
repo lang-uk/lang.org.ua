@@ -232,12 +232,4 @@ class TagWithUDPipeJob(BaseCorpusTask):
                 else:
                     logger.warning(f"Cannot find any text in the document {article['_id']}")
 
-            # if i and i % 1000 == 0:
-            #     print(poses.most_common())
-            #     print("\n\n")
-            #     print(feat_categories.most_common())
-            #     print("\n\n")
-            #     for k, v in feat_values.items():
-            #         print(k, v.most_common())
-
             task.set_progress((i + 1) * 100 // total_docs, step=1)

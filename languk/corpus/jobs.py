@@ -9,7 +9,7 @@ from django.conf import settings
 from django_task.job import Job
 
 from .ud_converter import COMPRESS_UPOS_MAPPING, compress_features
-from .models import ExportCorpusTask
+from .models import ExportCorpusTask, _CORPORA_CHOICES
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -67,7 +67,7 @@ class ExportCorpusJob(BaseCorpusTask):
         corpora = sorted(task.corpora)
         filtering = sorted(task.filtering)
 
-        if len(ExportCorpusTask.CORPORA_CHOICES) == len(corpora):
+        if len(_CORPORA_CHOICES) == len(corpora):
             sources = "all"
         else:
             sources = "_".join(corpora)

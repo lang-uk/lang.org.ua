@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 
 def _filter_rus(task):
-    return task.get("clean", {}).get("uk_rate", 1) >= 0.75
+    return task.get("clean", {}).get("uk_rate", 1) > task.get("clean", {}).get("ru_rate", 0)
 
 
 def _filter_short(task):

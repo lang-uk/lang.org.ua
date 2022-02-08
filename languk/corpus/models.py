@@ -1,4 +1,6 @@
 from collections import defaultdict
+from typing import Tuple
+
 from django import forms
 from django.core import exceptions
 from django.db import models
@@ -8,13 +10,19 @@ from django_task.models import TaskRQ
 
 from .mongodb import db
 
-_CORPORA_CHOICES = (
+_CORPORA_CHOICES: Tuple[Tuple[str, str]] = (
     ("news", "News and magazines"),
     ("wikipedia", "Ukrainian Wikipedia"),
     ("fiction", "Fiction"),
     ("court", "Sampled court decisions"),
     ("laws", "Laws and bylaws"),
 )
+
+_FILTERING_CHOICES: Tuple[Tuple[str, str]]  = (
+    ("rus", "Filter out texts with a lot of russian words"),
+    ("short", "Filter out texts, where title and body combined are too short"),
+)
+
 
 
 class ChoiceArrayField(ArrayField):
@@ -100,11 +108,6 @@ class Corpus:
 
 
 class ExportCorpusTask(TaskRQ):
-    FILTERING_CHOICE = (
-        ("rus", "Filter out texts with a lot of russian words"),
-        ("short", "Filter out texts, where title and body combined are too short"),
-    )
-
     file_format = models.CharField(
         max_length=5, null=False, blank=False, default="txt", choices=(("txt", "Text File"),)
     )
@@ -135,7 +138,7 @@ class ExportCorpusTask(TaskRQ):
             max_length=10,
             null=False,
             blank=False,
-            choices=FILTERING_CHOICE,
+            choices=_FILTERING_CHOICES,
         ),
         blank=True,
     )
@@ -193,3 +196,53 @@ class TagWithUDPipeTask(TaskRQ):
         from .jobs import TagWithUDPipeJob
 
         return TagWithUDPipeJob
+
+
+class BuildFreqVocabTask(TaskRQ):
+    corpora = ChoiceArrayField(
+        models.CharField(
+            max_length=10,
+            null=False,
+            blank=False,
+            choices=_CORPORA_CHOICES,
+        ),
+        blank=False,
+    )
+
+    filtering = ChoiceArrayField(
+        models.CharField(
+            max_length=10,
+            null=False,
+            blank=False,
+            choices=_FILTERING_CHOICES,
+        ),
+        blank=True,
+        default=list
+    )
+
+    file_format = models.CharField(
+        max_length=5, null=False, blank=False, default="csv", choices=(("csv", "CSV file"),)
+    )
+    file_compression = models.CharField(
+        max_length=5,
+        null=False,
+        blank=False,
+        default="none",
+        choices=(
+            ("none", "No compression"),
+            ("bz2", "Bzip2"),
+            ("lzma", "LZMA"),
+        ),
+    )
+    TASK_QUEUE = settings.QUEUE_DEFAULT
+
+    DEFAULT_VERBOSITY = 2
+    TASK_TIMEOUT = 0
+    LOG_TO_FIELD = True
+    LOG_TO_FILE = False
+
+    @staticmethod
+    def get_jobclass():
+        from .jobs import BuildFreqVocabJob
+
+        return BuildFreqVocabJob

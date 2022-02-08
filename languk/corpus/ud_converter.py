@@ -1,6 +1,8 @@
 import logging
-from collections import deque
+from collections import deque, OrderedDict
+from typing import Union, List
 from itertools import zip_longest
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -150,3 +152,84 @@ def decompress_features(compressed):
         res += cat + "=" + val + "|"
 
     return res.strip("|")
+
+
+
+def unpack_values(param_name: str, s: str) -> List[List[Union[str, OrderedDict]]]:
+    def _unpack_value(v: str) -> Union[str, OrderedDict]:
+        if param_name == "ud_postags":
+            try:
+                return DECOMPRESS_UPOS_MAPPING[v]
+            except KeyError:
+                logger.warning(
+                    f"Cannot find the upos '{v}' in the mapping, skipping it for now"
+                )
+                return "UNK"
+
+        elif param_name == "ud_features":
+            res = []
+
+            for c_cat, c_val in grouper(v, 2):
+                try:
+                    cat = DECOMPRESS_FEATURES_MAPPING[c_cat]
+                except KeyError:
+                    logger.warning(
+                        f"Cannot find the feature '{c_cat}' in the mapping, skipping it for now"
+                    )
+                    cat = "UNK"
+
+                try:
+                    val = DECOMPRESS_FEATURE_VALUES_MAPPING[cat][c_val]
+                except KeyError:
+                    logger.warning(
+                        f"Cannot find the value '{c_val}' for the feature '{cat}' in the mapping, skipping it for now"
+                    )
+                    
+                    val = "UNK"
+
+                res.append((cat, val))
+            return OrderedDict(res)
+        else:
+            return v
+
+    if param_name == "ud_postags":
+        return [[_unpack_value(w) for w in l] for l in s.split("\n")]
+    else:
+        return [[_unpack_value(w) for w in l.split(" ")] for l in s.split("\n")]
+
+
+def decompress(tokens: str=None, ud_lemmas: str=None, ud_features: str=None, ud_postags: str=None) -> List[OrderedDict]:
+    params = locals()
+
+    assert any(
+        map(lambda x: x is not None, params.values())
+    ), "at least one param should be not None"
+
+    zipped: dict = {}
+
+    for param_name, param_value in params.items():
+        if param_value is not None:
+#             if param_name == "tokens":
+#                 # TODO: validate if this workaround can be properly fixed
+#                 param_value = param_value.strip()
+            zipped[param_name] = unpack_values(param_name, param_value)
+    
+
+    sentences_length: set = set(map(len, zipped.values()))
+    assert len(sentences_length) == 1, f"Text contains different number of sentences: {sentences_length}"
+
+    res: list = []
+    param_names: list[str] = list(zipped.keys())
+    param_values: list[str] = list(zipped.values())
+
+    for sent in zip(*param_values): 
+        word_length:set = set(map(len, sent))
+
+        assert len(sentences_length) == 1, f"Text contains different number of words in sentence: {sent}"
+
+        res.append(
+            [OrderedDict(zip(param_names, word_info)) for word_info in zip(*sent)]
+        )
+
+
+    return res

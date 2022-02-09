@@ -308,10 +308,12 @@ class BuildFreqVocabJob(BaseCorpusTask):
         processed_articles: int = 0
 
         count_by_pos = defaultdict(Counter)
+        document_frequency = defaultdict(Counter)
 
         for i, (corpus, article) in enumerate(BuildFreqVocabJob.get_iter(db, job, task)):
             if BuildFreqVocabJob.apply_filter(job, task, article):
                 processed_articles += 1
+                lemmas_in_doc: set = set()
 
                 for f in ["title", "text"]:
                     if "nlp" not in article:
@@ -342,7 +344,11 @@ class BuildFreqVocabJob(BaseCorpusTask):
                     for s in decompressed_result:
                         for w in s:
                             if w["ud_lemmas"]:
+                                lemmas_in_doc.add((w["ud_postags"], w["ud_lemmas"]))
                                 count_by_pos[w["ud_postags"]].update([w["ud_lemmas"]])
+
+            for pos, lemma in lemmas_in_doc:
+                document_frequency[pos].update([lemma])
 
             task.set_progress((i + 1) * 100 // total_docs, step=1)
 
@@ -356,7 +362,7 @@ class BuildFreqVocabJob(BaseCorpusTask):
         filename: pathlib.Path = BuildFreqVocabJob.generate_filename(job, task)
         fp: TextIO = BuildFreqVocabJob.any_open(filename)
 
-        w = csv.DictWriter(fp, fieldnames=["lemma", "pos", "count", "freq_by_pos", "freq_in_corpus"])
+        w = csv.DictWriter(fp, fieldnames=["lemma", "pos", "count", "doc_count", "freq_by_pos", "freq_in_corpus", "doc_frequency"])
         w.writeheader()
 
         for pos, counts in count_by_pos.items():
@@ -366,8 +372,10 @@ class BuildFreqVocabJob(BaseCorpusTask):
                         "lemma": lemma,
                         "pos": pos,
                         "count": count,
+                        "doc_count": document_frequency[pos][lemma],
                         "freq_by_pos": count / total_lemmas_by_pos[pos],
                         "freq_in_corpus": count / total_lemmas,
+                        "doc_frequency": document_frequency[pos][lemma] / processed_articles
                     }
                 )
 

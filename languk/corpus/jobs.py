@@ -347,8 +347,8 @@ class BuildFreqVocabJob(BaseCorpusTask):
                                 lemmas_in_doc.add((w["ud_postags"], w["ud_lemmas"]))
                                 count_by_pos[w["ud_postags"]].update([w["ud_lemmas"]])
 
-            for pos, lemma in lemmas_in_doc:
-                document_frequency[pos].update([lemma])
+                for pos, lemma in lemmas_in_doc:
+                    document_frequency[pos].update([lemma])
 
             task.set_progress((i + 1) * 100 // total_docs, step=1)
 

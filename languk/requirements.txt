@@ -1,6 +1,6 @@
 psycopg2-binary
 wagtail==2.15.2
-Django==3.2.12
+Django==3.2.13
 git+https://github.com/TwilioDevEd/wagtailtinymce.git
 gunicorn==20.1.0
 raven==6.10.0

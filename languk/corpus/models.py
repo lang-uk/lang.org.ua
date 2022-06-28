@@ -144,11 +144,12 @@ class ExportCorpusTask(TaskRQ):
     )
 
     processing = models.CharField(
-        max_length=10,
+        max_length=15,
         null=False,
         blank=False,
         choices=(
             ("orig", "Original texts in markdown format"),
+            ("orig_titles", "Original titles"),
             ("tokens", "Tokenized by NLP-UK lib"),
             ("lemmas", "Lemmatized by NLP-UK lib"),
         ),

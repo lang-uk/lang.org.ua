@@ -113,6 +113,8 @@ class ExportCorpusJob(BaseCorpusTask):
     def write_article(job, task, fp: TextIO, article: dict) -> None:
         if task.processing == "orig":
             fp.write(f"{article.get('title', '')}\n\n{article.get('text', '')}\n\n\n")
+        if task.processing == "orig_titles":
+            fp.write(f"{article.get('title', '')}\n\n")
         elif task.processing == "tokens" and "nlp" in article:
             fp.write(
                 f"{article['nlp'].get('title', {}).get('tokens', '')}\n\n{article['nlp'].get('text', {}).get('tokens', '')}\n\n\n"

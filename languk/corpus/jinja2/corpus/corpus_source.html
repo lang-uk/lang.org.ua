@@ -167,12 +167,12 @@
 				showPoint: true,
 				showLine: true,
 				lineSmooth: Chartist.Interpolation.simple({
-					divisor: 2
+					divisor: 1
 				}),
 				plugins: [
 					Chartist.plugins.tooltip({
 						appendToBody: true,
-						anchorToPoint: true, //accepts true or false
+						anchorToPoint: false, //accepts true or false
 						transformTooltipTextFnc: function(value) {
 							if (value) {
 								var dt = new Date(parseInt(value.split(",")[0]));

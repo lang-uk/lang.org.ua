@@ -172,11 +172,13 @@
 				plugins: [
 					Chartist.plugins.tooltip({
 						appendToBody: true,
-						anchorToPoint: false, //accepts true or false
+						anchorToPoint: true, //accepts true or false
 						transformTooltipTextFnc: function(value) {
-							// console.log(value, typeof(value));
 							if (value) {
-								return value.split(",")[1];
+								var dt = new Date(parseInt(value.split(",")[0]));
+								var cnt = value.split(",")[1];
+
+								return dt.toDateString() + "<br/>\n" + cnt;
 							}
 							return value;
 						}

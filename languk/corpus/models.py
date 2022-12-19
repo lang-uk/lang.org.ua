@@ -18,11 +18,11 @@ _CORPORA_CHOICES: Tuple[Tuple[str, str]] = (
     ("laws", "Laws and bylaws"),
 )
 
-_FILTERING_CHOICES: Tuple[Tuple[str, str]]  = (
-    ("rus", "Filter out texts with a lot of russian words"),
+_FILTERING_CHOICES: Tuple[Tuple[str, str]] = (
+    ("rus", "Filter out texts where russian word > ukrainian"),
+    ("rus_gcld", "Filter out texts where gcld says it's ukrainian"),
     ("short", "Filter out texts, where title and body combined are too short"),
 )
-
 
 
 class ChoiceArrayField(ArrayField):
@@ -150,6 +150,7 @@ class ExportCorpusTask(TaskRQ):
         choices=(
             ("orig", "Original texts in markdown format"),
             ("orig_titles", "Original titles"),
+            ("text_only", "Titles & texts with markdown stripped"),
             ("tokens", "Tokenized by NLP-UK lib"),
             ("lemmas", "Lemmatized by NLP-UK lib"),
         ),
@@ -218,12 +219,10 @@ class BuildFreqVocabTask(TaskRQ):
             choices=_FILTERING_CHOICES,
         ),
         blank=True,
-        default=list
+        default=list,
     )
 
-    file_format = models.CharField(
-        max_length=5, null=False, blank=False, default="csv", choices=(("csv", "CSV file"),)
-    )
+    file_format = models.CharField(max_length=5, null=False, blank=False, default="csv", choices=(("csv", "CSV file"),))
     file_compression = models.CharField(
         max_length=5,
         null=False,

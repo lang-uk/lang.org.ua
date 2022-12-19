@@ -1,22 +1,32 @@
 import logging
 import bz2
 import lzma
-import os.path
 import pathlib
 import csv
+import gcld3
 from collections import defaultdict, Counter
 from typing import TextIO
 
 import pymongo
 from django.conf import settings
 from django_task.job import Job
+from corpus.utils import md_to_text2
 
 from .ud_converter import COMPRESS_UPOS_MAPPING, compress_features, decompress
-from .models import ExportCorpusTask, _CORPORA_CHOICES
+from .models import _CORPORA_CHOICES
+
+
+detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)
 
 
 def _filter_rus(task: dict) -> bool:
     return task.get("clean", {}).get("uk_rate", 1) > task.get("clean", {}).get("ru_rate", 0)
+
+
+def _filter_rus_gcld(task: dict) -> bool:
+    result = detector.FindLanguage(text=task.get("text", "") + " " + task.get("title", ""))
+
+    return result.language == "uk" and result.is_reliable
 
 
 def _filter_short(task: dict) -> bool:
@@ -99,6 +109,7 @@ class ExportCorpusJob(BaseCorpusTask):
     _filters = {
         "rus": _filter_rus,
         "short": _filter_short,
+        "rus_gcld": _filter_rus_gcld,
     }
 
     @staticmethod
@@ -113,6 +124,10 @@ class ExportCorpusJob(BaseCorpusTask):
     def write_article(job, task, fp: TextIO, article: dict) -> None:
         if task.processing == "orig":
             fp.write(f"{article.get('title', '')}\n\n{article.get('text', '')}\n\n\n")
+
+        if task.processing == "text_only":
+            fp.write(f"{md_to_text2(article.get('title', ''))}\n\n{md_to_text2(article.get('text', ''))}\n\n\n")
+
         if task.processing == "orig_titles":
             fp.write(f"{article.get('title', '')}\n\n")
         elif task.processing == "tokens" and "nlp" in article:
@@ -271,6 +286,7 @@ class BuildFreqVocabJob(BaseCorpusTask):
     _filters = {
         "rus": _filter_rus,
         "short": _filter_short,
+        "rus_gcld": _filter_rus_gcld,
     }
 
     @staticmethod

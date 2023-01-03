@@ -20,7 +20,7 @@ _CORPORA_CHOICES: Tuple[Tuple[str, str]] = (
 
 _FILTERING_CHOICES: Tuple[Tuple[str, str]] = (
     ("rus", "Filter out texts where russian word > ukrainian"),
-    ("rus_gcld", "Filter out texts where gcld says it's ukrainian"),
+    ("rus_gcld", "Filter out texts where gcld says it's NOT ukrainian"),
     ("short", "Filter out texts, where title and body combined are too short"),
 )
 
@@ -109,8 +109,16 @@ class Corpus:
 
 class ExportCorpusTask(TaskRQ):
     file_format = models.CharField(
-        max_length=5, null=False, blank=False, default="txt", choices=(("txt", "Text File"),)
+        max_length=5,
+        null=False,
+        blank=False,
+        default="txt",
+        choices=(
+            ("txt", "Text File"),
+            ("jsonl", "JSONLines File"),
+        ),
     )
+
     file_compression = models.CharField(
         max_length=5,
         null=False,

@@ -1,0 +1,7 @@
+<div class="spacer">
+{% for item in menu_items %}
+  {% if not item.sub_menu %}
+    <div class="spacer__item"><a class="footer-nav__link underline-animation" href="{{ item.href }}">{{ item.text }}</a></div>
+  {% endif %}
+{% endfor %}
+</div>

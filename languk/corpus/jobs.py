@@ -1,17 +1,20 @@
+import json
 import logging
 import bz2
 import lzma
 import pathlib
 import csv
-import gcld3
 from collections import defaultdict, Counter
-from typing import TextIO
+from typing import TextIO, Optional, Dict
 
 import pymongo
-from django.conf import settings
-from django_task.job import Job
-from corpus.utils import md_to_text2
+import gcld3
 
+from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
+from django_task.job import Job
+
+from corpus.utils import md_to_text2
 from .ud_converter import COMPRESS_UPOS_MAPPING, compress_features, decompress
 from .models import _CORPORA_CHOICES
 
@@ -19,17 +22,17 @@ from .models import _CORPORA_CHOICES
 detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)
 
 
-def _filter_rus(task: dict) -> bool:
+def _filter_rus(task: Dict) -> bool:
     return task.get("clean", {}).get("uk_rate", 1) > task.get("clean", {}).get("ru_rate", 0)
 
 
-def _filter_rus_gcld(task: dict) -> bool:
+def _filter_rus_gcld(task: Dict) -> bool:
     result = detector.FindLanguage(text=task.get("text", "") + " " + task.get("title", ""))
 
     return result.language == "uk" and result.is_reliable
 
 
-def _filter_short(task: dict) -> bool:
+def _filter_short(task: Dict) -> bool:
     if "nlp" in task:
         return (
             len(task["nlp"].get("text", {}).get("tokens", "") + task["nlp"].get("title", {}).get("tokens", "")) >= 100
@@ -113,7 +116,7 @@ class ExportCorpusJob(BaseCorpusTask):
     }
 
     @staticmethod
-    def apply_filter(job, task, article: dict) -> bool:
+    def apply_filter(job, task, article: Dict) -> bool:
         for filt in task.filtering:
             if not ExportCorpusJob._filters[filt](article):
                 return False
@@ -121,23 +124,43 @@ class ExportCorpusJob(BaseCorpusTask):
         return True
 
     @staticmethod
-    def write_article(job, task, fp: TextIO, article: dict) -> None:
+    def write_article(job, task, fp: TextIO, article: Dict) -> None:
+        title: Optional[str] = ""
+        text: Optional[str] = ""
+
         if task.processing == "orig":
-            fp.write(f"{article.get('title', '')}\n\n{article.get('text', '')}\n\n\n")
+            title = article.get("title", "")
+            text = article.get("text", "")
 
         if task.processing == "text_only":
-            fp.write(f"{md_to_text2(article.get('title', ''))}\n\n{md_to_text2(article.get('text', ''))}\n\n\n")
+            title = md_to_text2(article.get("title", ""))
+            text = md_to_text2(article.get("text", ""))
 
         if task.processing == "orig_titles":
-            fp.write(f"{article.get('title', '')}\n\n")
+            title = article.get("title", "")
+            text = None
+
         elif task.processing == "tokens" and "nlp" in article:
-            fp.write(
-                f"{article['nlp'].get('title', {}).get('tokens', '')}\n\n{article['nlp'].get('text', {}).get('tokens', '')}\n\n\n"
-            )
+            title = article["nlp"].get("title", {}).get("tokens", "")
+            text = article["nlp"].get("text", {}).get("tokens", "")
         elif task.processing == "lemmas" and "nlp" in article:
-            fp.write(
-                f"{article['nlp'].get('title', {}).get('lemmas', '')}\n\n{article['nlp'].get('text', {}).get('lemmas', '')}\n\n\n"
-            )
+            title = article["nlp"].get("title", {}).get("lemmas", "")
+            text = article["nlp"].get("text", {}).get("lemmas", "")
+
+        if task.file_format == "txt":
+            if task.processing == "orig_titles":
+                fp.write(f"{title}\n\n")
+            else:
+                fp.write(f"{title}\n\n{text}\n\n\n")
+        elif task.file_format == "jsonl":
+            if task.processing == "orig_titles":
+                fp.write(f"{json.dumps({'title': title}, ensure_ascii=False, cls=DjangoJSONEncoder)}\n")
+            else:
+                doc: Dict = {k: v for k, v in article.items() if k not in ["nlp", "clean", "title", "text"]}
+                doc["title"] = title
+                doc["text"] = text
+
+                fp.write(f"{json.dumps(doc, ensure_ascii=False, sort_keys=True, cls=DjangoJSONEncoder)}\n")
 
     @staticmethod
     def execute(job, task):
@@ -290,7 +313,7 @@ class BuildFreqVocabJob(BaseCorpusTask):
     }
 
     @staticmethod
-    def apply_filter(job, task, article: dict) -> bool:
+    def apply_filter(job, task, article: Dict) -> bool:
         # Separate implementation as different tasks might have different filters
         for filt in task.filtering:
             if not BuildFreqVocabJob._filters[filt](article):
@@ -380,7 +403,9 @@ class BuildFreqVocabJob(BaseCorpusTask):
         filename: pathlib.Path = BuildFreqVocabJob.generate_filename(job, task)
         fp: TextIO = BuildFreqVocabJob.any_open(filename)
 
-        w = csv.DictWriter(fp, fieldnames=["lemma", "pos", "count", "doc_count", "freq_by_pos", "freq_in_corpus", "doc_frequency"])
+        w = csv.DictWriter(
+            fp, fieldnames=["lemma", "pos", "count", "doc_count", "freq_by_pos", "freq_in_corpus", "doc_frequency"]
+        )
         w.writeheader()
 
         for pos, counts in count_by_pos.items():
@@ -393,7 +418,7 @@ class BuildFreqVocabJob(BaseCorpusTask):
                         "doc_count": document_frequency[pos][lemma],
                         "freq_by_pos": count / total_lemmas_by_pos[pos],
                         "freq_in_corpus": count / total_lemmas,
-                        "doc_frequency": document_frequency[pos][lemma] / processed_articles
+                        "doc_frequency": document_frequency[pos][lemma] / processed_articles,
                     }
                 )
 

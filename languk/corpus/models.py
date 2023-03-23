@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Tuple
+from typing import Tuple, Dict, List, Optional
 
 from django import forms
 from django.core import exceptions
@@ -9,16 +9,19 @@ from django.conf import settings
 from django_task.models import TaskRQ
 
 from .mongodb import db
+from pymongo.cursor import Cursor as MongoCursor
 
-_CORPORA_CHOICES: Tuple[Tuple[str, str]] = (
+_CORPORA_CHOICES: Tuple[Tuple[str, str], ...] = (
     ("news", "News and magazines"),
     ("wikipedia", "Ukrainian Wikipedia"),
     ("fiction", "Fiction"),
     ("court", "Sampled court decisions"),
     ("laws", "Laws and bylaws"),
+    ("forum", "Forums"),
+    ("social", "Social media and telegram"),
 )
 
-_FILTERING_CHOICES: Tuple[Tuple[str, str]] = (
+_FILTERING_CHOICES: Tuple[Tuple[str, str], ...] = (
     ("rus", "Filter out texts where russian word > ukrainian"),
     ("rus_gcld", "Filter out texts where gcld says it's NOT ukrainian"),
     ("short", "Filter out texts, where title and body combined are too short"),
@@ -69,7 +72,7 @@ class ChoiceArrayField(ArrayField):
 
 class Corpus:
     @staticmethod
-    def get_sources():
+    def get_sources() -> Dict[str, List]:
         grouped = defaultdict(list)
 
         for source in db.corpus__sources.find():
@@ -81,12 +84,11 @@ class Corpus:
         return grouped
 
     @staticmethod
-    def get_source(collection, _id):
-
+    def get_source(collection: str, _id: str) -> Dict:
         return db.corpus__sources.find_one({"collection": collection, "_id": _id})
 
     @staticmethod
-    def get_sample(source, slug):
+    def get_sample(source: Dict, slug: str) -> Optional[Dict]:
         if slug not in source["sampling_results"]:
             return None
 
@@ -101,10 +103,55 @@ class Corpus:
         return sample
 
     @staticmethod
-    def get_article(source, article_id):
+    def get_article(source: Dict, article_id: str) -> Dict:
         article = db[source["collection"]].find_one({"_id": article_id})
 
         return article
+
+    @staticmethod
+    def get_articles_with_layers(
+        collection: str,
+        layer_names: List[str],
+        match_clause: Optional[Dict] = None,
+        project_clause: Optional[Dict] = None,
+    ) -> MongoCursor:
+        coll = db[collection]
+
+        pipeline: List[Dict] = []
+        if match_clause is not None:
+            pipeline.append(
+                {
+                    "$match": match_clause,
+                }
+            )
+
+        for layer_name in layer_names:
+            pipeline.append(
+                {
+                    "$lookup": {
+                        "from": "layers",
+                        "localField": "layers.{}".format(layer_name),
+                        "foreignField": "_id",
+                        "as": layer_name,
+                    },
+                },
+            )
+
+            pipeline.append({"$addFields": {"{}".format(layer_name): {"$arrayElemAt": ["${}".format(layer_name), 0]}}})
+
+        if project_clause is not None:
+            pipeline.append({"$project": project_clause})
+
+        cursor: MongoCursor = coll.aggregate(pipeline)
+        # cursor.no_cursor_timeout = True
+        # command = {
+        #     'aggregate': collection,
+        #     'pipeline': pipeline,
+        #     'cursor': {'batchSize': 1000, 'noCursorTimeout': True}
+        # }
+
+        # return coll.database.command(command)['cursor']
+        return cursor
 
 
 class ExportCorpusTask(TaskRQ):
@@ -254,3 +301,33 @@ class BuildFreqVocabTask(TaskRQ):
         from .jobs import BuildFreqVocabJob
 
         return BuildFreqVocabJob
+
+
+class ProcessWithNlpUKTask(TaskRQ):
+    corpora = ChoiceArrayField(
+        models.CharField(
+            max_length=10,
+            null=False,
+            blank=False,
+            choices=_CORPORA_CHOICES,
+        ),
+        blank=False,
+    )
+
+    force = models.BooleanField(
+        "Process all texts, including already processed",
+        default=False,
+    )
+
+    TASK_QUEUE = settings.QUEUE_DEFAULT
+
+    DEFAULT_VERBOSITY = 2
+    TASK_TIMEOUT = 0
+    LOG_TO_FIELD = True
+    LOG_TO_FILE = False
+
+    @staticmethod
+    def get_jobclass():
+        from .jobs import ProcessWithNlpUKJob
+
+        return ProcessWithNlpUKJob

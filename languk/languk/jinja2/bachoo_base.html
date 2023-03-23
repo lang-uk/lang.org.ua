@@ -4,16 +4,11 @@
   <body data-barba="wrapper">
     <div class="loader"></div>
     <div class="layout">
-    	{% include "_includes/header.html" %}
+      {% include "_includes/header.html" %}
       <main class="main" data-barba="container">
         {% include "_includes/cookies.html" %}
         <div class="main__container">
         {% block page_content %}
-            {% block toc %}
-            {% endblock %}
-            <section>
-                
-            </section>
         {% endblock %}
         </div>
       </main>

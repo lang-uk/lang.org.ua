@@ -4,8 +4,9 @@ import bz2
 import lzma
 import pathlib
 import csv
+from hashlib import sha1
 from collections import defaultdict, Counter
-from typing import TextIO, Optional, Dict
+from typing import TextIO, Optional, Dict, List, Tuple
 
 import pymongo
 import gcld3
@@ -14,9 +15,10 @@ from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django_task.job import Job
 
-from corpus.utils import md_to_text2
+from corpus.utils import md_to_text2, batch_iterator
 from .ud_converter import COMPRESS_UPOS_MAPPING, compress_features, decompress
-from .models import _CORPORA_CHOICES
+from .models import _CORPORA_CHOICES, Corpus
+from .nlp_uk_client import NlpUkClient, NlpUkApiException
 
 
 detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)
@@ -46,7 +48,7 @@ class BaseCorpusTask(Job):
     def get_total_count(db, job, task) -> int:
         total = 0
         for corpus in task.corpora:
-            total += db[corpus].count()
+            total += db[corpus].count_documents({})
 
         return total
 
@@ -61,13 +63,17 @@ class BaseCorpusTask(Job):
         raise NotImplementedError()
 
     @staticmethod
+    def get_layer_id(corpus: str, id_: str, layer_name: str) -> str:
+        return sha1(f"{corpus}/{id_}/{layer_name}".encode()).hexdigest()
+
+    @staticmethod
     def generate_filename(
         job, task, basedir: str = settings.CORPUS_EXPORT_PATH, file_prefix: str = "ubertext"
     ) -> pathlib.Path:
-        suffixes: list[tuple[str, str]] = []
+        suffixes: List[Tuple[str, str]] = []
 
         if hasattr(task, "corpora"):
-            corpora: list[str] = sorted(task.corpora)
+            corpora: List[str] = sorted(task.corpora)
 
             if len(_CORPORA_CHOICES) == len(corpora):
                 suffixes.append(("sources", "all"))
@@ -75,7 +81,7 @@ class BaseCorpusTask(Job):
                 suffixes.append(("sources", "_".join(corpora)))
 
         if hasattr(task, "filtering"):
-            filtering: list[str] = sorted(task.filtering)
+            filtering: List[str] = sorted(task.filtering)
 
             if not filtering:
                 suffixes.append(("filtering", "nofilter"))
@@ -187,28 +193,40 @@ class ExportCorpusJob(BaseCorpusTask):
 class TagWithUDPipeJob(BaseCorpusTask):
     @staticmethod
     def _get_mongo_filter(task) -> dict:
-        if task.force:
-            return {}
-        else:
-            return {"processing_status": {"$nin": ["udpipe_tagged"]}}
+        clause: Dict = {"processing_status": {"$in": ["nlp_uk"]}}
+
+        if not task.force:
+            clause["processing_status"]["$nin"] = ["udpiped"]
+
+        return clause
 
     @staticmethod
     def get_total_count(db, job, task) -> int:
         total = 0
         for corpus in task.corpora:
-            total += db[corpus].find(TagWithUDPipeJob._get_mongo_filter(task)).count()
+            total += db[corpus].count_documents(TagWithUDPipeJob._get_mongo_filter(task))
 
         return total
 
     @staticmethod
     def get_iter(db, job, task):
         for corpus in task.corpora:
-            for article in db[corpus].find(TagWithUDPipeJob._get_mongo_filter(task)):
+            cursor = Corpus.get_articles_with_layers(
+                collection=corpus,
+                layer_names=["tokenized"],
+                match_clause=TagWithUDPipeJob._get_mongo_filter(task),
+                project_clause={"title": 0, "text": 0, "clean": 0, "nlp": 0},
+            )
+
+            for article in cursor:
                 yield corpus, article
+
+            cursor.close()
 
     @staticmethod
     def execute(job, task):
         assert settings.UDPIPE_MODEL_FILE, "You must set UDPIPE_MODEL_FILE setting to begin"
+        BULK_UPDATE_SIZE = 100  # how many articles and layers to insert/update at once
 
         from .mongodb import get_db
         from .udpipe_model import Model as UDPipeModel
@@ -216,93 +234,128 @@ class TagWithUDPipeJob(BaseCorpusTask):
 
         db = get_db()
 
+        layer_name = "udpiped"
+        # This is our bulky udpipe model which consumes a lot of time to load and RAM
         model = UDPipeModel(settings.UDPIPE_MODEL_FILE)
         total_docs = TagWithUDPipeJob.get_total_count(db, job, task)
 
+        # Stats collector to review later
         feat_categories = Counter()
         poses = Counter()
         feat_values = defaultdict(Counter)
 
+        def bulk_update(layers: List[pymongo.ReplaceOne], layer_refs: Dict[str, List[pymongo.UpdateOne]]) -> None:
+            # Bulk upsert!
+            try:
+                if layers:
+                    db.layers.bulk_write(layers)
+            except pymongo.errors.WriteError:
+                task.log(logging.WARNING, "Cannot add layers")
+
+            for corpus, updates in layer_refs.items():
+                try:
+                    if updates:
+                        db[corpus].bulk_write(updates)
+                except pymongo.errors.WriteError:
+                    task.log(logging.WARNING, "Cannot reference layers from the corpus document")
+                    continue
+
+        # Here we will collect the list of layers to upsert into the layers collection
+        layers: List[pymongo.ReplaceOne] = []
+
+        # This is the list of update operations, to connect original documents,
+        # identified by corpus/id pair to the respective layers in bulk
+        layer_refs: Dict[str, List[pymongo.UpdateOne]] = defaultdict(list)
+
+        # One by one, let's iterate over the corpora pulling articles with tokenized layer
         for i, (corpus, article) in enumerate(TagWithUDPipeJob.get_iter(db, job, task)):
-            update_clause = defaultdict(list)
-            article_lemmas = []
-            article_postags = []
-            article_features = []
-            if "nlp" in article:
-                for f in ["title", "text"]:
-                    if f not in article["nlp"]:
-                        task.log(logging.WARNING, f"Cannot find field {f} in the document {article['_id']}")
-                        continue
+            id_: str = article["_id"]
+            layer_data = {
+                "corpus": corpus,
+                "parent_id": id_,
+                "layer_type": layer_name,
+                "text": defaultdict(list),
+                "title": defaultdict(list),
+            } 
 
-                    if "tokens" not in article["nlp"][f]:
-                        task.log(
-                            logging.WARNING,
-                            f"Cannot find tokenized version of field {f} in the document {article['_id']}",
-                        )
-                        continue
+            # This is the layer we are about to create
+            layer_id: str = TagWithUDPipeJob.get_layer_id(corpus=corpus, id_=id_, layer_name=layer_name)
 
-                    for s in article["nlp"][f]["tokens"].split("\n"):
-                        # ignoring default model tokenizer in order to use whitespace tokenizer
+            # udpipe is applied to both, title and text
+            for f in ["title", "text"]:
+                # sentence by sentence
+                for s in article["tokenized"].get(f, []):
+                    # ignoring default udpipe tokenizer as we already have our text tokenized
+                    tok_sent = Sentence()
+                    for w in s:
+                        tok_sent.addWord(w)
 
-                        tok_sent = Sentence()
-                        for w in s.split(" "):
-                            tok_sent.addWord(w)
+                    sent_lemmas = []
+                    sent_postags = []
+                    sent_features = []
 
-                        sent_lemmas = []
-                        sent_postags = []
-                        sent_features = []
+                    model.tag(tok_sent)
 
-                        model.tag(tok_sent)
+                    for w in tok_sent.words[1:]:
+                        poses.update([w.upostag])
+                        sent_lemmas.append(w.lemma)
 
-                        for w in tok_sent.words[1:]:
-                            poses.update([w.upostag])
-                            sent_lemmas.append(w.lemma)
-                            # Again, not moving that to a separate function to
-                            # reduce number of unnecessary calls
-                            try:
-                                sent_postags.append(COMPRESS_UPOS_MAPPING[w.upostag])
-                            except KeyError:
-                                task.log(
-                                    logging.WARNING,
-                                    f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now",
-                                )
-                                sent_postags.append("Z")
+                        # Again, not moving that to a separate function to
+                        # reduce number of unnecessary calls
+                        try:
+                            sent_postags.append(COMPRESS_UPOS_MAPPING[w.upostag])
+                        except KeyError:
+                            task.log(
+                                logging.WARNING,
+                                f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now",
+                            )
+                            sent_postags.append("Z")
 
-                            sent_features.append(compress_features(w.feats))
+                        sent_features.append(compress_features(w.feats))
 
-                            for pair in w.feats.split("|"):
-                                if not pair:
-                                    continue
-                                cat, val = pair.split("=")
-                                feat_categories.update([cat])
-                                feat_values[cat].update([val])
+                        for pair in w.feats.split("|"):
+                            if not pair:
+                                continue
+                            cat, val = pair.split("=")
+                            feat_categories.update([cat])
+                            feat_values[cat].update([val])
 
-                        update_clause[f"nlp.{f}.ud_lemmas"].append(" ".join(sent_lemmas))
+                    layer_data[f]["ud_lemmas"].append(" ".join(sent_lemmas))
 
-                        # We don't need to have a separator for the postags as there is always one
-                        # pos tag (which is character) per word
-                        update_clause[f"nlp.{f}.ud_postags"].append("".join(sent_postags))
-                        update_clause[f"nlp.{f}.ud_features"].append(" ".join(sent_features))
+                    # We don't need to have a separator for the postags as there is always one
+                    # pos tag (which is character) per word
+                    layer_data[f]["ud_postags"].append("".join(sent_postags))
+                    layer_data[f]["ud_features"].append(" ".join(sent_features))
 
-                for k, v in update_clause.items():
-                    update_clause[k] = "\n".join(v)
+            layers.append(
+                # layer will have a processed version of both fields, title and text
+                pymongo.ReplaceOne(
+                    {"_id": layer_id},
+                    layer_data,
+                    upsert=True,
+                )
+            )
 
-                if update_clause:
-                    try:
-                        db[corpus].update_one(
-                            {"_id": article["_id"]},
-                            {
-                                "$set": update_clause,
-                                "$addToSet": {"processing_status": "udpipe_tagged"},
-                            },
-                        )
-                    except pymongo.errors.WriteError:
-                        task.log(logging.WARNING, f"Cannot store results back to the document {article['_id']}")
-                        continue
-                else:
-                    task.log(logging.WARNING, f"Cannot find any text in the document {article['_id']}")
+            # Collecting the update operations for the corpora collections
+            layer_refs[corpus].append(
+                pymongo.UpdateOne(
+                    {"_id": id_},
+                    {"$set": {f"layers.{layer_name}": layer_id}, "$addToSet": {"processing_status": layer_name}},
+                    upsert=True,
+                )
+            )
+
+            if len(layers) == BULK_UPDATE_SIZE:
+                # Time to flush it to the db
+                bulk_update(layers, layer_refs)
+
+                layers = []
+                layer_refs = defaultdict(list)
 
             task.set_progress((i + 1) * 100 // total_docs, step=1)
+
+        # Leftovers
+        bulk_update(layers, layer_refs)
 
 
 class BuildFreqVocabJob(BaseCorpusTask):
@@ -329,7 +382,7 @@ class BuildFreqVocabJob(BaseCorpusTask):
     def get_total_count(db, job, task) -> int:
         total = 0
         for corpus in task.corpora:
-            total += db[corpus].find(BuildFreqVocabJob._get_mongo_filter(task)).count()
+            total += db[corpus].count_documents(BuildFreqVocabJob._get_mongo_filter(task))
 
         return total
 
@@ -428,3 +481,132 @@ class BuildFreqVocabJob(BaseCorpusTask):
             logging.INFO,
             f"Saved information on {total_lemmas} occurences from {processed_articles} filtered out of {total_docs} into the {filename}",
         )
+
+
+class ProcessWithNlpUKJob(BaseCorpusTask):
+    @staticmethod
+    def _get_mongo_filter(task) -> dict:
+        if task.force:
+            return {}  # {"_id": "44ca9029164a35c86a70469082770d9e8aa065b0"}
+        else:
+            # return {"processing_status": {"$nin": ["nlp_uk"]}, "_id": "44ca9029164a35c86a70469082770d9e8aa065b0"}
+            return {"processing_status": {"$nin": ["nlp_uk"]}}
+
+    @staticmethod
+    def get_total_count(db, job, task) -> int:
+        total = 0
+        for corpus in task.corpora:
+            total += db[corpus].count_documents(ProcessWithNlpUKJob._get_mongo_filter(task))
+
+        return total
+
+    @staticmethod
+    def get_iter(db, job, task):
+        for corpus in task.corpora:
+            cursor = db[corpus].find(ProcessWithNlpUKJob._get_mongo_filter(task), no_cursor_timeout=True)
+            for article in cursor:
+                yield corpus, article
+            cursor.close()
+
+    @staticmethod
+    def remove_spaces(tokenized: List[List[str]]) -> List[List[str]]:
+        # Temproray solution until char modifiers tokenization will be fixed in LT
+        return [[w for w in s if w.strip().strip(chr(65039) + "\u200b")] for s in tokenized]
+
+    @staticmethod
+    def execute(job, task):
+        assert settings.NLP_UK_BASE_URL, "You must set NLP_UK_BASE_URL setting to begin"
+
+        client: NlpUkClient = NlpUkClient(base_url=settings.NLP_UK_BASE_URL)
+        from .mongodb import get_db
+
+        db = get_db()
+
+        total_docs = ProcessWithNlpUKJob.get_total_count(db, job, task)
+        # TODO: this probably needs to be corrected according to the size of the texts
+        MAX_BATCH_SIZE = 50
+
+        # First we iterate over the batches of the documents found.
+        # Batches has size of 500 documents, and each document has title and text fields that
+        # has to be processed, which makes 1000 texts to be sent to the nlp_uk_api
+        for i, chunk_of_docs in enumerate(batch_iterator(ProcessWithNlpUKJob.get_iter(db, job, task), MAX_BATCH_SIZE)):
+            texts: List[str] = []
+            ids: List[Tuple[str, str]] = []
+
+            for corpus, doc in chunk_of_docs:
+                # Stacking up all the titles and texts of the documents
+                texts += [md_to_text2(doc.get("title", "")), md_to_text2(doc.get("text", ""))]
+                # and preserving their corpus/id identifiers to use later
+                ids.append((corpus, doc["_id"]))
+
+            # Sending texts for the processing
+            try:
+                batch = client.batch(texts)
+            except NlpUkApiException as e:
+                task.log(logging.ERROR, f"Cannot process some of texts below: {ids}, exiting")
+                break
+
+            # Here we will collect the list of layers to upsert into the layers collection
+            layers: List[pymongo.ReplaceOne] = []
+
+            # This is the list of update operations, to connect original documents,
+            # identified by corpus/id pair to the respective layers in bulk
+            layer_refs: Dict[str, List[pymongo.UpdateOne]] = defaultdict(list)
+
+            # Batch 2 here means, that we are grouping back the results of processing
+            # of title and texts, as they'll live in the same layer document
+            for (corpus, id_), (title, text) in zip(ids, batch_iterator(batch, 2)):
+                update_clause: Dict = {}
+
+                # Remapping the fieldnames in the API response to something more suitable
+                for field_name, layer_name in {
+                    "cleanText": "cleansed",
+                    "tokens": "tokenized",
+                    "lemmas": "lemmatized",
+                    "sentences": "sentenced",
+                }.items():
+                    # ids for the layers are being made from hashing of the corpus/document id and
+                    # the layer name
+                    layer_id: str = ProcessWithNlpUKJob.get_layer_id(corpus, id_, layer_name)
+                    update_clause[f"layers.{layer_name}"] = layer_id
+
+                    if field_name == "tokens":
+                        title[field_name] = ProcessWithNlpUKJob.remove_spaces(title[field_name])
+                        text[field_name] = ProcessWithNlpUKJob.remove_spaces(text[field_name])
+
+                    layers.append(
+                        # layer will have a processed version of both fields, title and text
+                        pymongo.ReplaceOne(
+                            {"_id": layer_id},
+                            {
+                                "corpus": corpus,
+                                "parent_id": id_,
+                                "layer_type": layer_name,
+                                "title": title[field_name],
+                                "text": text[field_name],
+                            },
+                            upsert=True,
+                        )
+                    )
+
+                # Collecting the update operations
+                layer_refs[corpus].append(
+                    pymongo.UpdateOne(
+                        {"_id": id_}, {"$set": update_clause, "$addToSet": {"processing_status": "nlp_uk"}}, upsert=True
+                    )
+                )
+
+            # Bulk upsert!
+            try:
+                db.layers.bulk_write(layers)
+            except pymongo.errors.WriteError:
+                task.log(logging.WARNING, "Cannot add layers")
+
+            for corpus, updates in layer_refs.items():
+                try:
+                    db[corpus].bulk_write(updates)
+                except pymongo.errors.WriteError:
+                    task.log(logging.WARNING, "Cannot reference layers from the corpus document")
+                    continue
+
+            task.set_progress((i * MAX_BATCH_SIZE + 1) * 100 // total_docs, step=1)

@@ -9,6 +9,8 @@ from wagtail.core.fields import RichTextField
 from wagtail.core.whitelist import attribute_rule, allow_without_attributes
 from wagtail.admin.edit_handlers import InlinePanel, FieldPanel, PageChooserPanel
 
+from wagtailmenus.models import AbstractMainMenuItem
+
 from wagtail.contrib.settings.models import (
     BaseGenericSetting,
     register_setting,
@@ -89,10 +91,6 @@ class LinkFields(models.Model):
         abstract = True
 
 
-class HomePageTopMenuLink(Orderable, LinkFields):
-    page = ParentalKey("home.HomePage", related_name="top_menu_links")
-
-
 class AbstractPage(Page):
     title_en = models.CharField(default="", max_length=255, verbose_name="[EN] Назва сторінки")
 
@@ -101,6 +99,13 @@ class AbstractPage(Page):
     body = RichTextField(default="", verbose_name="[UA] Загальний текст сторінки")
 
     body_en = RichTextField(default="", verbose_name="[EN] Загальний текст сторінки")
+
+    svg_image = models.TextField(
+        verbose_name="SVG image icon (raw text) to display next to menu item",
+        default="",
+        blank=True,
+        help_text="Content of the SVG tag, ignored if empty",
+    )
 
     translated_title = TranslatedField(
         "title",
@@ -117,6 +122,7 @@ class AbstractPage(Page):
         FieldPanel("title_en", classname="full title"),
         FieldPanel("body", classname="full"),
         FieldPanel("body_en", classname="full"),
+        FieldPanel("svg_image", classname="full"),
         FieldPanel("global_class", classname="full"),
     ]
 
@@ -139,11 +145,93 @@ class StaticPage(AbstractPage):
 class HomePage(AbstractPage):
     template = "home/home_page.html"
 
+    slogan_title = models.TextField(default="", verbose_name="[UA] Слоган (заголовок)")
+    slogan_title_en = models.TextField(default="", verbose_name="[EN] Слоган (заголовок)")
+    translated_slogan_title = TranslatedField(
+        "slogan_title",
+        "slogan_title_en",
+    )
+
+    slogan_text = RichTextField(default="", verbose_name="[UA] Слоган (текст)")
+    slogan_text_en = RichTextField(default="", verbose_name="[EN] Слоган (текст)")
+    translated_slogan_text = TranslatedField(
+        "slogan_text",
+        "slogan_text_en",
+    )
+
+    aboutus_title = models.TextField(default="", verbose_name="[UA] Про нас (заголовок)")
+    aboutus_title_en = models.TextField(default="", verbose_name="[EN] Про нас (заголовок)")
+    translated_aboutus_title = TranslatedField(
+        "aboutus_title",
+        "aboutus_title_en",
+    )
+
+    aboutus_text = RichTextField(default="", verbose_name="[UA] Про нас (текст)")
+    aboutus_text_en = RichTextField(default="", verbose_name="[EN] Про нас (текст)")
+    translated_aboutus_text = TranslatedField(
+        "aboutus_text",
+        "aboutus_text_en",
+    )
+
+    content_panels = [
+        FieldPanel("title", classname="full title"),
+        FieldPanel("title_en", classname="full title"),
+
+        FieldPanel("slogan_title"),
+        FieldPanel("slogan_title_en"),
+        FieldPanel("slogan_text", classname="full"),
+        FieldPanel("slogan_text_en", classname="full"),
+
+        FieldPanel("aboutus_title"),
+        FieldPanel("aboutus_title_en"),
+        FieldPanel("aboutus_text", classname="full"),
+        FieldPanel("aboutus_text_en", classname="full"),
+
+        FieldPanel("body", classname="full"),
+        FieldPanel("body_en", classname="full"),
+        FieldPanel("global_class", classname="full"),
+    ]
+
+
+class ProductsPage(AbstractPage):
+    template = "home/products_page.html"
+
     content_panels = [
         FieldPanel("title", classname="full title"),
         FieldPanel("title_en", classname="full title"),
         FieldPanel("body", classname="full"),
         FieldPanel("body_en", classname="full"),
+        FieldPanel("svg_image", classname="full"),
         FieldPanel("global_class", classname="full"),
-        InlinePanel("top_menu_links", label="Меню зверху"),
     ]
+
+
+class ProductPage(AbstractPage):
+    template = "home/product_page.html"
+
+
+class LangUkMainMenuItem(AbstractMainMenuItem):
+    """A custom menu item model to be used by ``wagtailmenus.MainMenu``"""
+
+    menu = ParentalKey(
+        "wagtailmenus.MainMenu",
+        on_delete=models.CASCADE,
+        related_name="lang_uk_menu_items",  # See the base.py's WAGTAILMENUS_MAIN_MENU_ITEMS_RELATED_NAME
+    )
+
+    show_in_footer = models.BooleanField(
+        verbose_name="Show menu item in the footer menu",
+        default=True,
+        help_text="Display this item in the site footer",
+    )
+
+    # Also override the panels attribute, so that the new fields appear
+    # in the admin interface
+    panels = (
+        PageChooserPanel("link_page"),
+        FieldPanel("link_url"),
+        FieldPanel("url_append"),
+        FieldPanel("link_text"),
+        FieldPanel("show_in_footer"),
+        FieldPanel("allow_subnav"),
+    )

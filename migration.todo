@@ -1,0 +1,17 @@
+Re-design:
+  ☐ Add CMS controls for the home page
+
+UberText support:
+ ✔ Deploy https://github.com/arysin/nlp_uk_api locally and test @done (23-03-06 19:41)
+ ✔ Amend batch api in the nlp_uk_api @done (23-03-06 19:41)
+ ✔ Add a simple client for nlp_uk_api @done (23-03-16 19:22)
+ ✔ Prepare a data model for the layers @done (23-03-21 18:18)
+ ☐ UserWarning: use an explicit session with no_cursor_timeout=True otherwise the cursor may still timeout after 30 minutes, for more info see https://mongodb.com/docs/v4.4/reference/method/cursor.noCursorTimeout/#session-idle-timeout-overrides-nocursortimeout
+ ✔ Add jobs to populate layers with data after nlp_uk_api @done (23-03-21 18:18)
+ ✔ Remove spaces from the nlp-uk output @done (23-03-22 13:54)
+ ✔ Rewrite udpipe task to use layers @done (23-03-23 20:55)
+ ✔ Add a helper to extract required layers alongside with the texts in bulk @done (23-03-23 18:10)
+ ☐ Rewrite export
+ ☐ Rewrite frequency dict calculation and export
+ ☐ Add some kind of DSL to the export to support filtering
+

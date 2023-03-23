@@ -1,21 +1,12 @@
   <header class="header">
     <div class="header__container">
-      <div class="header-logo"><a href="index.html"><img class="header-logo__logo" src="{{ static('img/logo.svg') }}" alt="lang uk"/></a></div>
+      <div class="header-logo"><a href="{{ pageurl(root_page) }}"><img class="header-logo__logo" src="{{ static('img/logo.svg') }}" alt="lang uk"/></a></div>
       <div class="header__navigation">
-        {{ main_menu(template="_includes/main_menu.html")|safe }}
+        {{ lang_uk_menu(template="_includes/main_menu.html")|safe }}
         <div class="navigation-action">
           <div class="navigation-action__item lang">
-            <a class="lang__item" href="#">{{ LANGUAGE_CODE|upper }}
-              <span class="lang-arrow">
-                <svg width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 1L5 5L1 0.999999" stroke="black" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-              </span>
-            </a>
-            {% for lang_code, lang_name in LANGUAGES -%}
-              {% if lang_code != LANGUAGE_CODE -%}
-              {% language lang_code %}
-                <a class="lang__item lang-{{ lang_code }}" href="{{ pageurl(page) }}">{{ lang_name }}</a>
+            <a class="lang__item" href="#">{{ LANGUAGES_DICT[LANGUAGE_CODE] }}<span class="lang-arrow"><svg width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 1L5 5L1 0.999999" stroke="black" stroke-width="2" stroke-linecap="round"/></svg></span></a>{% for lang_code, lang_name in LANGUAGES -%}
+              {% if lang_code != LANGUAGE_CODE -%}{% language lang_code %}<a class="lang__item lang-en" href="{{ pageurl(page) }}">{{ lang_name }}</a>
                 {% endlanguage %}
               {%- endif %}
             {%- endfor %}

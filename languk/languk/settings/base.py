@@ -81,7 +81,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    # "wagtailtinymce",
     "raven.contrib.django.raven_compat",
 ]
 
@@ -113,7 +112,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.i18n",
                 "django.contrib.messages.context_processors.messages",
-                "home.context_processors.menu_processor",
+                "home.context_processors.pages_processor",
                 "wagtail.contrib.settings.context_processors.settings",
                 "wagtailmenus.context_processors.wagtailmenus",
             ],
@@ -138,7 +137,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "home.context_processors.menu_processor",
+                "home.context_processors.pages_processor",
             ],
         },
     },
@@ -207,7 +206,6 @@ CORPORA_EXPORT_PATH = os.path.join(STATIC_ROOT, "data")
 WAGTAIL_SITE_NAME = "languk"
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
     "hallo": {"WIDGET": "wagtail.wagtailadmin.rich_text.HalloRichTextArea"},
-    # "default": {"WIDGET": "wagtailtinymce.rich_text.TinyMCERichTextArea"},
 }
 
 # WAGTAILSIMPLETRANSLATION_SYNC_PAGE_TREE = True
@@ -259,6 +257,9 @@ UDPIPE_MODEL_FILE = ""
 
 RQ_SHOW_ADMIN_LINK = True
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+WAGTAILMENUS_MAIN_MENU_ITEMS_RELATED_NAME = "lang_uk_menu_items"
+NLP_UK_BASE_URL = "http://127.0.0.1:8080/"
+WAGTAILADMIN_BASE_URL = "https://lang.org.ua/admin/"
 
 try:
     GIT_VERSION = raven.fetch_git_sha(os.path.abspath(os.path.join(BASE_DIR, "..")))

@@ -4,7 +4,7 @@
     <div class="footer__logo" href="index.html"><a href="index.html"><img src="{{ static('/img/logo.svg') }}" style="width: 100%"/></a></div>
     <div class="footer-nav">
       <div class="footer-nav__item">
-        {{ footer_menu(template="_includes/footer_menu.html")|safe }}
+        {{ lang_uk_menu(template="_includes/footer_menu.html")|safe }}
       </div>
       <div class="footer-nav__item">
         <div class="spacer">
@@ -37,4 +37,5 @@
     </div>
   </div>
 </div>
+{{ wagtailuserbar() }}
 </footer>

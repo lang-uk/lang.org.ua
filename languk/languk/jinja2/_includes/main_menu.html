@@ -1,7 +1,7 @@
 <nav class="navigation">
 {% for item in menu_items %}
   <span class="navigation__item">
-    <a class="navigation__link underline-animation {{ item.active_class }} {% if item.has_children_in_menu %}navigation__link--toggle{% endif %}" href="{{ item.href }}">{{ item.text }}</a>
+    <a class="navigation__link underline-animation {{ item.active_class }} {% if item.has_children_in_menu %}navigation__link--toggle{% endif %}" href="{{ item.href }}">{% if item.link_page %}{{ item.link_page.translated_title }}{% else %}{{ item.text }}{% endif %}</a>
 {#        <span class="svg">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M3.92857 10V6.82081L1.07143 8.41041L0 6.5896L2.82738 5L0 3.4104L1.07143 1.5896L3.92857 3.17919V0H6.10119V3.17919L8.92857 1.5896L10 3.4104L7.17262 5L10 6.5896L8.92857 8.41041L6.10119 6.82081V10H3.92857Z" fill="#FF3F3F"/>

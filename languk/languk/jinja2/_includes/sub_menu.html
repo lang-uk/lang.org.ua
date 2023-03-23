@@ -1,21 +1,23 @@
 <div class="navigation__sub">
-  {% for item in menu_items %}
-    <ul class="sub__navigation--list">
-      <li class="sub__navigation--item">
-      <a class="navigation__link underline-animation" href="{{ item.href }}">{{ item.text }}
-{#        <span class="svg">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3.92857 10V6.82081L1.07143 8.41041L0 6.5896L2.82738 5L0 3.4104L1.07143 1.5896L3.92857 3.17919V0H6.10119V3.17919L8.92857 1.5896L10 3.4104L7.17262 5L10 6.5896L8.92857 8.41041L6.10119 6.82081V10H3.92857Z" fill="#FF3F3F"/>
-          </svg>
-        </span>
-#}
-      </a>
-      <div class="card__icon">
-        <svg width="25" height="21" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M24.3192 19.5097L18.5313 9.99957L12.4218 19.7591L6.64232 10.249L1.00303 19.9991" stroke="black"/>
-          <path d="M24.3211 10.51L18.5317 0.999939L12.4237 10.7594L6.64278 1.24939L1.005 10.9995" stroke="black"/>
-        </svg>
-      </div>
-    </li>
-  {% endfor %}
+  <ul class="sub__navigation--list">
+    {% for item in menu_items %}
+        <li class="sub__navigation--item">
+        <a class="navigation__link underline-animation" href="{{ item.href }}">{{ item.translated_title }}
+  {#        <span class="svg">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3.92857 10V6.82081L1.07143 8.41041L0 6.5896L2.82738 5L0 3.4104L1.07143 1.5896L3.92857 3.17919V0H6.10119V3.17919L8.92857 1.5896L10 3.4104L7.17262 5L10 6.5896L8.92857 8.41041L6.10119 6.82081V10H3.92857Z" fill="#FF3F3F"/>
+            </svg>
+          </span>
+  #}
+        </a>
+        {% if item.svg_image %}
+          <div class="card__icon">
+            <svg width="25" height="21" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {{ item.svg_image|safe }}
+            </svg>
+          </div>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
 </div>

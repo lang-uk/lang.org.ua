@@ -167,4 +167,5 @@ def get_db():
 
     return connection.default
 
+
 db = get_db()

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.serializers.json import DjangoJSONEncoder
+from django.conf import settings
 from django.utils import formats, timezone
 from django.urls import reverse
 from django.utils.translation import gettext, ngettext, override
@@ -94,9 +95,9 @@ def environment(**options):
             "static": staticfiles_storage.url,
             "url": reverse,
             "curr_year": datetime.today().year,
-            "main_menu": contextfunction(main_menu),
-            "footer_menu": contextfunction(main_menu),
+            "lang_uk_menu": contextfunction(main_menu),
             "sub_menu": contextfunction(sub_menu),
+            "LANGUAGES_DICT": dict(settings.LANGUAGES),
         }
     )
     env.install_gettext_callables(gettext=gettext, ngettext=ngettext, newstyle=True)

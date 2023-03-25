@@ -3,15 +3,17 @@ from datetime import datetime
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.serializers.json import DjangoJSONEncoder
+from django.conf import settings
 from django.utils import formats, timezone
 from django.urls import reverse
-from django.conf import settings
 from django.utils.translation import gettext, ngettext, override
+from wagtailmenus.templatetags.menu_tags import main_menu, sub_menu
+
 
 from dateutil.parser import parse as parse_dt
 import markdown
 from markupsafe import Markup
-from jinja2 import Environment
+from jinja2 import Environment, contextfunction
 from jinja2.ext import Extension, nodes
 
 
@@ -93,6 +95,9 @@ def environment(**options):
             "static": staticfiles_storage.url,
             "url": reverse,
             "curr_year": datetime.today().year,
+            "lang_uk_menu": contextfunction(main_menu),
+            "sub_menu": contextfunction(sub_menu),
+            "LANGUAGES_DICT": dict(settings.LANGUAGES),
         }
     )
     env.install_gettext_callables(gettext=gettext, ngettext=ngettext, newstyle=True)

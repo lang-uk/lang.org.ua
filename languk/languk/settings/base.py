@@ -44,6 +44,7 @@ SECRET_KEY = get_env_str("SECRET_KEY", "ch&wu3*3p3xim$n75itqy#9gqsr-2^aq09vqz2wh
 DEBUG = False
 
 ALLOWED_HOSTS = get_env_str_list("ALLOWED_HOSTS", [])
+ALLOWED_HOSTS = ["*"]
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -53,10 +54,13 @@ INSTALLED_APPS = [
     "django_rq",
     "django_task",
     "home",
+    "newborn",
     "corpus",
     "search",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
+    "wagtail.contrib.settings",
+    # "wagtail.contrib.simple_translation",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
@@ -66,6 +70,8 @@ INSTALLED_APPS = [
     "wagtail.search",
     "wagtail.admin",
     "wagtail.core",
+    "wagtail.contrib.modeladmin",
+    "wagtailmenus",
     "modelcluster",
     "taggit",
     "django.contrib.admin",
@@ -75,7 +81,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    "wagtailtinymce",
     "raven.contrib.django.raven_compat",
 ]
 
@@ -107,12 +112,14 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.i18n",
                 "django.contrib.messages.context_processors.messages",
-                "home.context_processors.menu_processor",
+                "home.context_processors.pages_processor",
+                "wagtail.contrib.settings.context_processors.settings",
+                "wagtailmenus.context_processors.wagtailmenus",
             ],
             "extensions": [
                 "jinja2.ext.i18n",
                 "jinja2.ext.with_",
-                "wagtail.core.jinja2tags.core",
+                "wagtail.jinja2tags.core",
                 "wagtail.admin.jinja2tags.userbar",
                 "wagtail.images.jinja2tags.images",
             ],
@@ -130,7 +137,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "home.context_processors.menu_processor",
+                "home.context_processors.pages_processor",
             ],
         },
     },
@@ -161,8 +168,8 @@ LANGUAGE_CODE = "uk"
 
 gettext = lambda s: s
 LANGUAGES = (
-    ("uk", gettext("Ukrainian")),
-    ("en", gettext("English")),
+    ("uk", "UA"),
+    ("en", "EN"),
 )
 
 TIME_ZONE = "Europe/Kiev"
@@ -199,8 +206,9 @@ CORPORA_EXPORT_PATH = os.path.join(STATIC_ROOT, "data")
 WAGTAIL_SITE_NAME = "languk"
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
     "hallo": {"WIDGET": "wagtail.wagtailadmin.rich_text.HalloRichTextArea"},
-    "default": {"WIDGET": "wagtailtinymce.rich_text.TinyMCERichTextArea"},
 }
+
+# WAGTAILSIMPLETRANSLATION_SYNC_PAGE_TREE = True
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
@@ -226,31 +234,32 @@ MONGODB = {
     }
 }
 
-REDIS_HOST = get_env_str('REDIS_HOST', 'localhost')
+REDIS_HOST = get_env_str("REDIS_HOST", "localhost")
 REDIS_PORT = 6379
-REDIS_URL = 'redis://%s:%d/0' % (REDIS_HOST, REDIS_PORT)
+REDIS_URL = "redis://%s:%d/0" % (REDIS_HOST, REDIS_PORT)
 
 CACHES = {
-    'default': {
-        'BACKEND': 'redis_cache.RedisCache',
-        'LOCATION': REDIS_URL
-    },
+    "default": {"BACKEND": "redis_cache.RedisCache", "LOCATION": REDIS_URL},
 }
 
 RQ_PREFIX = "languk_"
-QUEUE_DEFAULT = RQ_PREFIX + 'default'
+QUEUE_DEFAULT = RQ_PREFIX + "default"
 CORPUS_EXPORT_PATH = "/tmp"
 
 RQ_QUEUES = {
     QUEUE_DEFAULT: {
-        'URL': REDIS_URL,
-        'DEFAULT_TIMEOUT': 360000,
+        "URL": REDIS_URL,
+        "DEFAULT_TIMEOUT": 360000,
     }
 }
 
 UDPIPE_MODEL_FILE = ""
 
 RQ_SHOW_ADMIN_LINK = True
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+WAGTAILMENUS_MAIN_MENU_ITEMS_RELATED_NAME = "lang_uk_menu_items"
+NLP_UK_BASE_URL = "http://127.0.0.1:8080/"
+WAGTAILADMIN_BASE_URL = "https://lang.org.ua/admin/"
 
 try:
     GIT_VERSION = raven.fetch_git_sha(os.path.abspath(os.path.join(BASE_DIR, "..")))

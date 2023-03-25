@@ -1,7 +1,12 @@
 from io import StringIO
+from itertools import islice
+from typing import Iterator, List, TypeVar
 
 import markdown
 from bs4 import BeautifulSoup
+
+
+T = TypeVar('T')
 
 
 def md_to_text(md):
@@ -30,3 +35,12 @@ __md.stripTopLevelTags = False
 
 def md_to_text2(text):
     return __md.convert(text.replace("**", ""))
+
+
+def batch_iterator(iterator: Iterator[T], batch_size: int = 50) -> Iterator[List[T]]:
+    iterator = iter(iterator)
+    while True:
+        batch = list(islice(iterator, batch_size))
+        if not batch:
+            return
+        yield batch

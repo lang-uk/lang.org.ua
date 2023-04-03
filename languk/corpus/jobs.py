@@ -16,9 +16,9 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django_task.job import Job
 
 from corpus.utils import md_to_text2, batch_iterator
-from .ud_converter import COMPRESS_UPOS_MAPPING, compress_features, decompress
-from .models import _CORPORA_CHOICES, Corpus
-from .nlp_uk_client import NlpUkClient, NlpUkApiException
+from corpus.ud_converter import COMPRESS_UPOS_MAPPING, compress_features, decompress
+from corpus.models import _CORPORA_CHOICES, Corpus
+from corpus.nlp_uk_client import NlpUkClient, NlpUkApiException
 
 
 detector = gcld3.NNetLanguageIdentifier(min_num_bytes=0, max_num_bytes=1000)
@@ -115,6 +115,9 @@ class BaseCorpusTask(Job):
 
 
 class ExportCorpusJob(BaseCorpusTask):
+    """
+    Export corpus to file
+    """
     _filters = {
         "rus": _filter_rus,
         "short": _filter_short,
@@ -123,6 +126,9 @@ class ExportCorpusJob(BaseCorpusTask):
 
     @staticmethod
     def apply_filter(job, task, article: Dict) -> bool:
+        """
+        Apply filters to article
+        """
         for filt in task.filtering:
             if not ExportCorpusJob._filters[filt](article):
                 return False
@@ -191,6 +197,9 @@ class ExportCorpusJob(BaseCorpusTask):
 
 
 class TagWithUDPipeJob(BaseCorpusTask):
+    """
+    Tag articles with UDPipe
+    """
     @staticmethod
     def _get_mongo_filter(task) -> dict:
         clause: Dict = {"processing_status": {"$in": ["nlp_uk"]}}
@@ -503,7 +512,7 @@ class ProcessWithNlpUKJob(BaseCorpusTask):
     @staticmethod
     def get_iter(db, job, task):
         for corpus in task.corpora:
-            cursor = db[corpus].find(ProcessWithNlpUKJob._get_mongo_filter(task), no_cursor_timeout=True)
+            cursor = db[corpus].find(ProcessWithNlpUKJob._get_mongo_filter(task), {"title": 1, "text": 1}, no_cursor_timeout=True)
             for article in cursor:
                 yield corpus, article
             cursor.close()
@@ -524,7 +533,7 @@ class ProcessWithNlpUKJob(BaseCorpusTask):
 
         total_docs = ProcessWithNlpUKJob.get_total_count(db, job, task)
         # TODO: this probably needs to be corrected according to the size of the texts
-        MAX_BATCH_SIZE = 50
+        MAX_BATCH_SIZE: int = 500
 
         # First we iterate over the batches of the documents found.
         # Batches has size of 500 documents, and each document has title and text fields that
@@ -543,8 +552,8 @@ class ProcessWithNlpUKJob(BaseCorpusTask):
             try:
                 batch = client.batch(texts)
             except NlpUkApiException as e:
-                task.log(logging.ERROR, f"Cannot process some of texts below: {ids}, exiting")
-                break
+                task.log(logging.ERROR, f"Cannot process some of texts below: {ids}, error was {e}, skipping this batch")
+                continue
 
             # Here we will collect the list of layers to upsert into the layers collection
             layers: List[pymongo.ReplaceOne] = []

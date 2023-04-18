@@ -22,7 +22,6 @@ _CORPORA_CHOICES: Tuple[Tuple[str, str], ...] = (
 )
 
 _FILTERING_CHOICES: Tuple[Tuple[str, str], ...] = (
-    ("rus", "Filter out texts where russian word > ukrainian"),
     ("rus_gcld", "Filter out texts where gcld says it's NOT ukrainian"),
     ("short", "Filter out texts, where title and body combined are too short"),
 )
@@ -73,6 +72,10 @@ class ChoiceArrayField(ArrayField):
 class Corpus:
     @staticmethod
     def get_sources() -> Dict[str, List]:
+        """
+        Get all sources.
+        :return: Grouped sources.
+        """
         grouped = defaultdict(list)
 
         for source in db.corpus__sources.find():
@@ -85,10 +88,21 @@ class Corpus:
 
     @staticmethod
     def get_source(collection: str, _id: str) -> Dict:
+        """
+        Get source by ID.
+        :param collection: Collection name.
+        :param _id: Source ID.
+        """
         return db.corpus__sources.find_one({"collection": collection, "_id": _id})
 
     @staticmethod
     def get_sample(source: Dict, slug: str) -> Optional[Dict]:
+        """
+        Get sample by slug.
+        :param source: Source corpus.
+        :param slug: Sample slug.
+        :return: Sample of documents.
+        """
         if slug not in source["sampling_results"]:
             return None
 
@@ -104,6 +118,12 @@ class Corpus:
 
     @staticmethod
     def get_article(source: Dict, article_id: str) -> Dict:
+        """
+        Get article by ID.
+        :param source: Source corpus.
+        :param article_id: Article ID.
+        :return: Article.
+        """
         article = db[source["collection"]].find_one({"_id": article_id})
 
         return article
@@ -115,6 +135,14 @@ class Corpus:
         match_clause: Optional[Dict] = None,
         project_clause: Optional[Dict] = None,
     ) -> MongoCursor:
+        """
+        Get articles with layers.
+        :param collection: Collection name.
+        :layer_names: List of layer names.
+        :match_clause: Match clause.
+        :project_clause: Project clause.
+        :return: Cursor.
+        """
         coll = db[collection]
 
         pipeline: List[Dict] = []
@@ -137,7 +165,15 @@ class Corpus:
                 },
             )
 
-            pipeline.append({"$addFields": {"{}".format(layer_name): {"$arrayElemAt": ["${}".format(layer_name), 0]}}})
+            pipeline.append(
+                {
+                    "$addFields": {
+                        "{}".format(layer_name): {
+                            "$arrayElemAt": ["${}".format(layer_name), 0]
+                        }
+                    }
+                }
+            )
 
         if project_clause is not None:
             pipeline.append({"$project": project_clause})
@@ -155,6 +191,10 @@ class Corpus:
 
 
 class ExportCorpusTask(TaskRQ):
+    """
+    Task for exporting corpus in various formats.
+    """
+
     file_format = models.CharField(
         max_length=5,
         null=False,
@@ -207,6 +247,8 @@ class ExportCorpusTask(TaskRQ):
             ("orig_titles", "Original titles"),
             ("text_only", "Titles & texts with markdown stripped"),
             ("tokens", "Tokenized by NLP-UK lib"),
+            ("tokens_wo_punct", "Tokenized by NLP-UK lib without punctuation"),
+            ("sentences", "Sentence-split by NLP-UK lib"),
             ("lemmas", "Lemmatized by NLP-UK lib"),
         ),
     )
@@ -220,12 +262,19 @@ class ExportCorpusTask(TaskRQ):
 
     @staticmethod
     def get_jobclass():
+        """
+        Get job class.
+        """
         from .jobs import ExportCorpusJob
 
         return ExportCorpusJob
 
 
 class TagWithUDPipeTask(TaskRQ):
+    """
+    Task for tagging texts with UDPipe.
+    """
+
     corpora = ChoiceArrayField(
         models.CharField(
             max_length=10,
@@ -250,12 +299,19 @@ class TagWithUDPipeTask(TaskRQ):
 
     @staticmethod
     def get_jobclass():
+        """
+        Get job class.
+        """
         from .jobs import TagWithUDPipeJob
 
         return TagWithUDPipeJob
 
 
 class BuildFreqVocabTask(TaskRQ):
+    """
+    Task for building frequency vocabulary.
+    """
+
     corpora = ChoiceArrayField(
         models.CharField(
             max_length=10,
@@ -277,7 +333,13 @@ class BuildFreqVocabTask(TaskRQ):
         default=list,
     )
 
-    file_format = models.CharField(max_length=5, null=False, blank=False, default="csv", choices=(("csv", "CSV file"),))
+    file_format = models.CharField(
+        max_length=5,
+        null=False,
+        blank=False,
+        default="csv",
+        choices=(("csv", "CSV file"),),
+    )
     file_compression = models.CharField(
         max_length=5,
         null=False,
@@ -298,6 +360,9 @@ class BuildFreqVocabTask(TaskRQ):
 
     @staticmethod
     def get_jobclass():
+        """
+        Get django-tasks job class.
+        """
         from .jobs import BuildFreqVocabJob
 
         return BuildFreqVocabJob
@@ -328,6 +393,9 @@ class ProcessWithNlpUKTask(TaskRQ):
 
     @staticmethod
     def get_jobclass():
+        """
+        Get django-tasks job class.
+        """
         from .jobs import ProcessWithNlpUKJob
 
         return ProcessWithNlpUKJob

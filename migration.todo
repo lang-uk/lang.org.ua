@@ -11,7 +11,9 @@ UberText support:
  ✔ Remove spaces from the nlp-uk output @done (23-03-22 13:54)
  ✔ Rewrite udpipe task to use layers @done (23-03-23 20:55)
  ✔ Add a helper to extract required layers alongside with the texts in bulk @done (23-03-23 18:10)
- ☐ Rewrite export
+ ✔ Rewrite export
+ ☐ Investigate "too big layer" issue: pymongo.errors.OperationFailure: BSONObj size: 18697887 (0x11D4E9F) is invalid. Size must be between 0 and 16793600(16MB) First element: q: { _id: "7c0dc64d463d839c258b9cc3a749829ec921e968" }, full error: {'ok': 0.0, 'errmsg': 'BSONObj size: 18697887 (0x11D4E9F) is invalid. Size must be between 0 and 16793600(16MB) First element: q: { _id: "7c0dc64d463d839c258b9cc3a749829ec921e968" }', 'code': 10334, 'codeName': 'BSONObjectTooLarge'}
+ ☐ 2023-03-28 10:14:41,462|WARNING|Cannot find <root> in the COMPRESS_UPOS_MAPPING, skipping for now 2023-03-28 10:14:41,940|ERROR|not enough values to unpack (expected 2, got 1)
  ☐ Rewrite frequency dict calculation and export
  ☐ Add some kind of DSL to the export to support filtering
 

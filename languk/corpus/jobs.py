@@ -291,7 +291,15 @@ class ExportCorpusJob(BaseCorpusTask):
                 doc: Dict = {
                     k: v
                     for k, v in article.items()
-                    if k not in ["nlp", "clean", "title", "text", "layers", "processing_status"]
+                    if k
+                    not in [
+                        "nlp",
+                        "clean",
+                        "title",
+                        "text",
+                        "layers",
+                        "processing_status",
+                    ]
                 }
                 doc["title"] = title
                 doc["text"] = text
@@ -452,32 +460,30 @@ class TagWithUDPipeJob(BaseCorpusTask):
                     sent_features = []
 
                     model.tag(tok_sent)
+                    if len(tok_sent.words) > 1:
+                        for w in tok_sent.words[1:]:
+                            poses.update([w.upostag])
+                            sent_lemmas.append(w.lemma)
+                            # Again, not moving that to a separate function to
+                            # reduce number of unnecessary calls
+                            try:
+                                sent_postags.append(COMPRESS_UPOS_MAPPING[w.upostag])
+                            except KeyError:
+                                task.log(
+                                    logging.WARNING,
+                                    f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now, "
+                                    + f"sentence was '{s}', error happened at {corpus}.{id_}.{f}:{sent_no}",
+                                )
+                                sent_postags.append("Z")
 
-                    for w in tok_sent.words[1:]:
-                        poses.update([w.upostag])
-                        sent_lemmas.append(w.lemma)
-# ☐ 2023-03-28 10:14:41,462|WARNING|Cannot find <root> in the COMPRESS_UPOS_MAPPING, skipping for now 2023-03-28 10:14:41,940|ERROR|not enough values to unpack (expected 2, got 1)
-                        # Again, not moving that to a separate function to
-                        # reduce number of unnecessary calls
-                        try:
-                            sent_postags.append(COMPRESS_UPOS_MAPPING[w.upostag])
-                        except KeyError:
-                            task.log(
-                                logging.WARNING,
-                                f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now, sentence was '{s}'",
-                            )
-                            task.log(logging.WARNING, f"{w.lemma}, {w.upostag}, {w.feats}, {w}")
-                            task.log(logging.WARNING, f"{f}, {corpus}, {id_}, {sent_no}, {type(s)}")
-                            sent_postags.append("Z")
+                            sent_features.append(compress_features(w.feats))
 
-                        sent_features.append(compress_features(w.feats))
-
-                        for pair in w.feats.split("|"):
-                            if not pair:
-                                continue
-                            cat, val = pair.split("=")
-                            feat_categories.update([cat])
-                            feat_values[cat].update([val])
+                            for pair in w.feats.split("|"):
+                                if not pair:
+                                    continue
+                                cat, val = pair.split("=")
+                                feat_categories.update([cat])
+                                feat_values[cat].update([val])
 
                     layer_data[f]["ud_lemmas"].append(" ".join(sent_lemmas))
 
@@ -750,10 +756,12 @@ class ProcessWithNlpUKJob(BaseCorpusTask):
             # This is the list of update operations, to connect original documents,
             # identified by corpus/id pair to the respective layers in bulk
             layer_refs: Dict[str, List[pymongo.UpdateOne]] = defaultdict(list)
+            ids_: List[str] = []
 
             # Batch 2 here means, that we are grouping back the results of processing
             # of title and texts, as they'll live in the same layer document
             for (corpus, id_), (title, text) in zip(ids, batch_iterator(batch, 2)):
+                ids_.append(f"{corpus}.{id_}")
                 update_clause: Dict = {}
 
                 # Remapping the fieldnames in the API response to something more suitable
@@ -809,7 +817,7 @@ class ProcessWithNlpUKJob(BaseCorpusTask):
             try:
                 db.layers.bulk_write(layers)
             except (pymongo.errors.WriteError, pymongo.errors.OperationFailure) as e:
-                task.log(logging.WARNING, f"Cannot add layers: {e}")
+                task.log(logging.WARNING, f"Cannot add layers: {e}, batch ids looks like {ids_}")
 
             for corpus, updates in layer_refs.items():
                 try:

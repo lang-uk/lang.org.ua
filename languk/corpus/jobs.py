@@ -441,7 +441,7 @@ class TagWithUDPipeJob(BaseCorpusTask):
             # udpipe is applied to both, title and text
             for f in ["title", "text"]:
                 # sentence by sentence
-                for s in article["tokenized"].get(f, []):
+                for sent_no, s in enumerate(article["tokenized"].get(f, [])):
                     # ignoring default udpipe tokenizer as we already have our text tokenized
                     tok_sent = Sentence()
                     for w in s:
@@ -467,6 +467,7 @@ class TagWithUDPipeJob(BaseCorpusTask):
                                 f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now, sentence was '{s}'",
                             )
                             task.log(logging.WARNING, f"{w.lemma}, {w.upostag}, {w.feats}, {w}")
+                            task.log(logging.WARNING, f"{f}, {corpus}, {id_}, {sent_no}, {type(s)}")
                             sent_postags.append("Z")
 
                         sent_features.append(compress_features(w.feats))

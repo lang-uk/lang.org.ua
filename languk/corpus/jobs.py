@@ -291,7 +291,7 @@ class ExportCorpusJob(BaseCorpusTask):
                 doc: Dict = {
                     k: v
                     for k, v in article.items()
-                    if k not in ["nlp", "clean", "title", "text"]
+                    if k not in ["nlp", "clean", "title", "text", "layers", "processing_status"]
                 }
                 doc["title"] = title
                 doc["text"] = text
@@ -456,7 +456,7 @@ class TagWithUDPipeJob(BaseCorpusTask):
                     for w in tok_sent.words[1:]:
                         poses.update([w.upostag])
                         sent_lemmas.append(w.lemma)
-
+# ☐ 2023-03-28 10:14:41,462|WARNING|Cannot find <root> in the COMPRESS_UPOS_MAPPING, skipping for now 2023-03-28 10:14:41,940|ERROR|not enough values to unpack (expected 2, got 1)
                         # Again, not moving that to a separate function to
                         # reduce number of unnecessary calls
                         try:
@@ -464,8 +464,9 @@ class TagWithUDPipeJob(BaseCorpusTask):
                         except KeyError:
                             task.log(
                                 logging.WARNING,
-                                f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now",
+                                f"Cannot find {w.upostag} in the COMPRESS_UPOS_MAPPING, skipping for now, sentence was '{s}'",
                             )
+                            task.log(logging.WARNING, f"{w.lemma}, {w.upostag}, {w.feats}, {w}")
                             sent_postags.append("Z")
 
                         sent_features.append(compress_features(w.feats))

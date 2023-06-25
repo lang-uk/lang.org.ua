@@ -94,68 +94,39 @@
     </div>
   </div>
   <!-- /home-page/abous-us-section.pug-->
-{# 
+
   <!-- home-page/products-section.pug-->
   <div class="products">
     <div class="spacer spacer--size-3">
       <div class="spacer__item">
-        <p class="h1 text-center">Продукти</p>
+        <p class="h1 text-center">{{ products_page.translated_title }}</p>
       </div>
       <div class="spacer__item">
-        <p class="text-l text-center">На даний момент всі результати нашої роботи розміщені на&nbsp;<a class="link link--primary-dark underline-animation-reverse" href="https://github.com/lang-uk/new_design">github</a> в репозиторіях організації</p>
+        <div class="text-l text-center">
+        {{ products_page.translated_intro|richtext }}
+        </div>
       </div>
       <div class="spacer__item spacer__item--size-6">
-        <div class="card-container"><a class="card card__home" href="services.html"><span class="h3">Сервіси<span class="svg"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M3.92857 10V6.82081L1.07143 8.41041L0 6.5896L2.82738 5L0 3.4104L1.07143 1.5896L3.92857 3.17919V0H6.10119V3.17919L8.92857 1.5896L10 3.4104L7.17262 5L10 6.5896L8.92857 8.41041L6.10119 6.82081V10H3.92857Z" fill="#FF3F3F"/>
-</svg>
-<span class="star-text">Нові надходження</span></span></span>
-            <div class="card__icon"><svg width="25" height="21" viewBox="0 0 25 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M24.3192 19.5097L18.5313 9.99957L12.4218 19.7591L6.64232 10.249L1.00303 19.9991" stroke="black"/>
-<path d="M24.3211 10.51L18.5317 0.999939L12.4237 10.7594L6.64278 1.24939L1.005 10.9995" stroke="black"/>
-</svg>
-
+        <div class="card-container">
+        {% for product_page in products_page.get_children().live() %}
+          <a class="card card__home" href="{{ product_page.get_url() }}"><span class="h3">{{ product_page.specific.translated_title }} {#<span class="svg"><svg width="10" height="10"
+                  viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3.92857 10V6.82081L1.07143 8.41041L0 6.5896L2.82738 5L0 3.4104L1.07143 1.5896L3.92857 3.17919V0H6.10119V3.17919L8.92857 1.5896L10 3.4104L7.17262 5L10 6.5896L8.92857 8.41041L6.10119 6.82081V10H3.92857Z"
+              fill="#FF3F3F" />
+                </svg>
+                <span class="star-text">Нові надходження</span></span>#}</span>
+            <div class="card__icon"><svg width="25" height="21" viewBox="0 0 25 21" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                {{ product_page.specific.svg_image|safe }}
+              </svg>
             </div>
-            <div class="card__strip"></div></a><a class="card card__home" href="services.html"><span class="h3">Моделі</span>
-            <div class="card__icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="0.707107" y="12" width="15.9706" height="15.9706" transform="rotate(-45 0.707107 12)" stroke="black"/>
-<rect x="7.79304" y="12" width="5.98601" height="5.98601" transform="rotate(-45 7.79304 12)" stroke="black"/>
-</svg>
-
-            </div>
-            <div class="card__strip"></div></a><a class="card card__home" href="services.html"><span class="h3">Бібліотеки</span>
-            <div class="card__icon"><svg width="25" height="16" viewBox="0 0 25 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="8.92732" y="8" width="10.3137" height="10.3137" transform="rotate(-45 8.92732 8)" stroke="black"/>
-<rect x="0.707107" y="8" width="10.3137" height="10.3137" transform="rotate(-45 0.707107 8)" stroke="black"/>
-</svg>
-
-            </div>
-            <div class="card__strip"></div></a><a class="card card__home" href="services.html"><span class="h3">Словники</span>
-            <div class="card__icon"><svg width="27" height="16" viewBox="0 0 27 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M13.844 11.5L19.5 1.0504L25.156 11.5H13.844Z" stroke="black"/>
-<path d="M1.84398 11.5L7.5 1.0504L13.156 11.5L1.84398 11.5Z" stroke="black"/>
-</svg>
-
-            </div>
-            <div class="card__strip"></div></a><a class="card card__home" href="services.html"><span class="h3">Корпуси<span class="svg"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M3.92857 10V6.82081L1.07143 8.41041L0 6.5896L2.82738 5L0 3.4104L1.07143 1.5896L3.92857 3.17919V0H6.10119V3.17919L8.92857 1.5896L10 3.4104L7.17262 5L10 6.5896L8.92857 8.41041L6.10119 6.82081V10H3.92857Z" fill="#FF3F3F"/>
-</svg>
-<span class="star-text">Нові надходження</span></span></span>
-            <div class="card__icon"><svg width="20" height="24" viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="0.707107" y="9.8335" width="12.9066" height="12.9066" transform="rotate(-45 0.707107 9.8335)" stroke="black"/>
-<rect x="3.31453" y="16.625" width="9.42993" height="9.42993" transform="rotate(-45 3.31453 16.625)" fill="white" stroke="black"/>
-</svg>
-
-            </div>
-            <div class="card__strip"></div></a><a class="card card__home" href="services.html"><span class="h3">Ґазетіри</span>
-            <div class="card__icon"><svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M0.353623 4.80793L0 5.16963L0.349392 5.53582L5.13712 10.5537L0.353781 15.5782L0.00902288 15.9403L0.353781 16.3024L4.78976 20.962L5.47927 20.2378L1.38805 15.9403L5.82741 11.2772L11.2437 16.9538L11.5889 17.3156L11.9341 16.9538L17.3417 11.2863L21.7723 15.9403L17.6811 20.2378L18.3706 20.962L22.8065 16.3024L23.1513 15.9403L22.8065 15.5782L18.0319 10.5629L22.8284 5.53582L23.1736 5.17406L22.8284 4.81231L18.3873 0.157663L17.6969 0.881166L21.7929 5.17406L17.3424 9.83855L11.9249 4.14799L11.5802 3.78586L11.2354 4.14799L5.82667 9.82938L1.3891 5.1785L5.73607 0.732265L5.05422 0L0.353623 4.80793ZM6.51696 10.5528L11.5889 15.8686L16.6521 10.562L11.5802 5.2344L6.51696 10.5528Z" fill="black"/>
-</svg>
-
-            </div>
-            <div class="card__strip"></div></a></div>
+            <div class="card__strip"></div>
+          </a>
+        {% endfor %}
+        </div>
       </div>
       <div class="spacer__item">
-        <div class="spacer spacer--h-sm spacer--center-v spacer--size-4"><a class="button button-wave button-wave--transparent spacer__item" href="#">Залишити видгук</a><a class="button button-wave spacer__item" href="add-product.html">Доповнити продукт</a></div>
+        <div class="spacer spacer--h-sm spacer--center-v spacer--size-4"><a class="button button-wave button-wave--transparent spacer__item" href="#">{{ _("Залишити видгук") }}</a><a class="button button-wave spacer__item" href="add-product.html">{{ _("Доповнити продукт") }}</a></div>
       </div>
     </div>
   </div>
@@ -163,14 +134,17 @@
   <!-- home-page/consumers-section.pug-->
   <div class="consumers spacer">
     <div class="spacer__item">
-      <p class="h2 text-center">Вже використовують наші продукти</p>
+      <p class="h2 text-center">{{ page.translated_partners_title }}</p>
     </div>
     <div class="spacer__item">
       <div class="consumers__container">
-        <div class="consumers__card"><img class="consumers__logo" src="./img/user_logo_1.svg"/></div>
-        <div class="consumers__card"><img class="consumers__logo" src="./img/user_logo_2.svg"/></div>
-        <div class="consumers__card"><img class="consumers__logo" src="./img/user_logo_3.svg"/></div>
-        <div class="consumers__card"><img class="consumers__logo" src="./img/user_logo_2.svg"/></div>
+        {% for partner in page.partners.all() %}
+          <div class="consumers__card">
+            {% if partner.link_external %}<a href="{{ partner.link_external }}" class="consumers__card">{% endif %}
+            <img class="consumers__logo" src="{{ partner.partner_logo.file.url }}" alt="{{ partner.translated_partner_name }}" style="padding: 1px"/>
+            {% if partner.link_external %}</a>{% endif %}
+          </div>
+        {% endfor %}
       </div>
     </div>
     <div class="separator separator--icon-center spacer__item">
@@ -198,100 +172,67 @@
   <!-- /home-page/consumers-section.pug-->
   <!-- TODO: needs to be redone block enter-->
   <!-- enter.pug-->
-  <div class="enter"><img src="./img/enter_picture.png"/></div>
+  <div class="enter"><img src="{{ static('img/enter_picture.png') }}"/></div>
   <!-- /enter.pug-->
   <!-- home-page/healthy-section.pug-->
   <div class="healthy spacer">
-    <p class="h1 text-center">Кому це може бути корисно</p>
+    <p class="h1 text-center">{{ page.translated_useful_title }}</p>
     <div class="healthy__content">
-      <div class="healthy__item spacer">
-        <p class="spacer__item h3 text-center">Науковцям</p>
-        <p class="spacer__item text-m text-m--regular text-center">Такі галузі як: філологія, журналістика використовують наші дані як основу для статей, наукових робіт та диссертацій</p>
-      </div>
-      <div class="healthy__item spacer">
-        <p class="spacer__item h3 text-center">Підприємцям</p>
-        <p class="spacer__item text-m text-m--regular text-center">Такі галузі як: філологія, журналістика використовують наші дані як основу для статей, наукових робіт та диссертацій</p>
-      </div>
-      <div class="healthy__item spacer">
-        <p class="spacer__item h3 text-center">Журналістам</p>
-        <p class="spacer__item text-m text-m--regular text-center">Як джерело для написання статей</p>
-      </div>
+      {% for end_user in page.end_users.all() %}
+        <div class="healthy__item spacer">
+          <p class="spacer__item h3 text-center">{{ end_user.translated_role_name }}</p>
+          <p class="spacer__item text-m text-m--regular text-center">{{ end_user.translated_role_use }}</p>
+        </div>
+      {% endfor %}
     </div>
   </div>
   <!-- /home-page/healthy-section.pug-->
   <!-- become-part.pug-->
   <div class="become-part">
     <div class="become-part__container">
-      <p class="become-part__title">Стань частиною проєкту, який змінить майбутнє країни</p>
+      <p class="become-part__title">{{ page.translated_become_a_part_cta }}</p>
       <div class="become-part__actions">
         <div class="spacer spacer--h-sm">
-          <div class="spacer__item"><a class="button button-wave button-wave--transparent spacer__item" href="#">Залишити видгук</a></div>
-          <div class="spacer__item"><a class="button button-wave spacer__item" href="add-product.html">Доповнити продукт</a></div>
+          <div class="spacer__item"><a class="button button-wave button-wave--transparent spacer__item" href="#">{{ _("Залишити видгук") }}</a></div>
+          <div class="spacer__item"><a class="button button-wave spacer__item" href="add-product.html">{{ _("Доповнити продукт") }}</a></div>
         </div>
       </div>
     </div>
-    <div class="svg-hover"><img src="./img/Hover.svg"/></div>
+    <div class="svg-hover"><img src="{{ static('img/hover.svg') }}"/></div>
   </div>
   <!-- /become-part.pug-->
+
   <!-- media-articles.pug-->
   <div class="media-articles">
     <div class="media-articles__title">
-      <p class="h1 text-center">Медіа про нас</p>
+      <p class="h1 text-center">{{ page.translated_media_title }}</p>
     </div>
     <div class="media-articles__content">
       <div class="slider-wrap">
         <div class="slider-wrap__slider">
           <div class="slider">
+            {% for press_article in page.press_articles.all() %}
             <div class="media-card">
               <div class="media-card__head">
                 <div class="media-card__head-item">
-                  <div class="media-card__head-logo"><img src="./img/dou_logo.jpg"/></div>
-                  <p class="media-card__head-text">07.09.2017</p>
+                  <div class="media-card__head-logo"><img src="{{ press_article.media_logo.file.url }}" /></div>
+                  <p class="media-card__head-text">{{ press_article.date_of_publish|date("SHORT_DATE_FORMAT") }}</p>
                 </div>
                 <div class="media-card__head-item">
-                  <p class="media-card__head-text media-card__head-text--label text-right">Promo</p>
-                  <p class="media-card__head-text media-card__head-text--bold text-right">№1</p>
+                  <p class="media-card__head-text media-card__head-text--label text-right">
+                    {% if press_article.link_external %}<a href="{{ press_article.link_external }}">{% endif %}{{ press_article.translated_source }}{% if press_article.link_external %}</a>{% endif %}</p>
+                  <p class="media-card__head-text media-card__head-text--bold text-right">{{ _("№") }}{{ loop.index }}</p>
                 </div>
               </div>
               <div class="media-card__body">
-                <p class="text-l">Комп’ютерна лінгвістика по-українськи: про підсумки роботи lang-uk за рік існування</p>
+                <p class="text-l">{{ press_article.translated_title }}</p>
               </div>
             </div>
-            <div class="media-card">
-              <div class="media-card__head">
-                <div class="media-card__head-item">
-                  <div class="media-card__head-logo"><img src="./img/dou_logo.jpg"/></div>
-                  <p class="media-card__head-text">07.09.2017</p>
-                </div>
-                <div class="media-card__head-item">
-                  <p class="media-card__head-text media-card__head-text--label text-right">Business</p>
-                  <p class="media-card__head-text media-card__head-text--bold text-right">№2</p>
-                </div>
-              </div>
-              <div class="media-card__body">
-                <p class="text-l">Анонс lang-uk: створюємо умови для повноцінної обробки україномовних текстів</p>
-              </div>
-            </div>
-            <div class="media-card">
-              <div class="media-card__head">
-                <div class="media-card__head-item">
-                  <div class="media-card__head-logo"><img src="./img/dou_logo.jpg"/></div>
-                  <p class="media-card__head-text">07.09.2017</p>
-                </div>
-                <div class="media-card__head-item">
-                  <p class="media-card__head-text media-card__head-text--label text-right">Lang-uk</p>
-                  <p class="media-card__head-text media-card__head-text--bold text-right">№3</p>
-                </div>
-              </div>
-              <div class="media-card__body">
-                <p class="text-l">Комп’ютерна лінгвістика по-українськи: про підсумки роботи lang-uk за рік існування</p>
-              </div>
-            </div>
+            {% endfor %}
           </div>
         </div>
       </div>
     </div>
   </div>
   <!-- /media-articles.pug-->
-#}
 {% endblock %}

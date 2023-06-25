@@ -27,7 +27,9 @@ class LanguageExtension(Extension):
         # Parse everything between the start and end tag:
         body = parser.parse_statements(["name:endlanguage"], drop_needle=True)
         # Call the _switch_language method with the given language code and body
-        return nodes.CallBlock(self.call_method("_switch_language", args), [], [], body).set_lineno(lineno)
+        return nodes.CallBlock(
+            self.call_method("_switch_language", args), [], [], body
+        ).set_lineno(lineno)
 
     def _switch_language(self, language_code, caller):
         with override(language_code):
@@ -46,7 +48,11 @@ def ensure_aware(dt):
 def datetime_filter(dt, dayfirst=False):
     return (
         formats.date_format(
-            timezone.localtime(ensure_aware(parse_dt(dt, dayfirst=dayfirst) if isinstance(dt, str) else dt)),
+            timezone.localtime(
+                ensure_aware(
+                    parse_dt(dt, dayfirst=dayfirst) if isinstance(dt, str) else dt
+                )
+            ),
             "SHORT_DATETIME_FORMAT",
         )
         if dt
@@ -57,7 +63,9 @@ def datetime_filter(dt, dayfirst=False):
 def date_filter(dt, dayfirst=False):
     return (
         formats.date_format(
-            timezone.localtime(ensure_aware(parse_dt(dt, dayfirst=dayfirst) if isinstance(dt, str) else dt)),
+            timezone.localtime(ensure_aware(parse_dt(dt, dayfirst=dayfirst)))
+            if isinstance(dt, str)
+            else dt,
             "SHORT_DATE_FORMAT",
         )
         if dt

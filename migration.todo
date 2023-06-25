@@ -1,19 +1,27 @@
 Re-design:
-  ☐ Add CMS controls for the home page
+  ✔ Add CMS controls for the home page/products section @done (25/06/2023, 16:11:06)
+  ✔ Fix links styling in the products section: "link link--primary-dark underline-animation-reverse" @done (25/06/2023, 16:57:14)
+  ☐ Wire up "add product" forms
+  ✔ Add our partners/already using our products section on the home page. @done (25/06/2023, 18:26:00)
+  ✔ CMSize Who may find it useful section of the home page @done (25/06/2023, 18:53:38)
+  ✔ CMSize become a part section of the homepage @done (25/06/2023, 19:03:30)
+  ✔ Add media about us section on the home page @done (25/06/2023, 20:16:00)
+  ☐ Wire up icon "has updates"?
 
 UberText support:
- ✔ Deploy https://github.com/arysin/nlp_uk_api locally and test @done (23-03-06 19:41)
- ✔ Amend batch api in the nlp_uk_api @done (23-03-06 19:41)
- ✔ Add a simple client for nlp_uk_api @done (23-03-16 19:22)
- ✔ Prepare a data model for the layers @done (23-03-21 18:18)
- ☐ UserWarning: use an explicit session with no_cursor_timeout=True otherwise the cursor may still timeout after 30 minutes, for more info see https://mongodb.com/docs/v4.4/reference/method/cursor.noCursorTimeout/#session-idle-timeout-overrides-nocursortimeout
- ✔ Add jobs to populate layers with data after nlp_uk_api @done (23-03-21 18:18)
- ✔ Remove spaces from the nlp-uk output @done (23-03-22 13:54)
- ✔ Rewrite udpipe task to use layers @done (23-03-23 20:55)
- ✔ Add a helper to extract required layers alongside with the texts in bulk @done (23-03-23 18:10)
- ✔ Rewrite export
- ☐ Investigate "too big layer" issue: pymongo.errors.OperationFailure: BSONObj size: 18697887 (0x11D4E9F) is invalid. Size must be between 0 and 16793600(16MB) First element: q: { _id: "7c0dc64d463d839c258b9cc3a749829ec921e968" }, full error: {'ok': 0.0, 'errmsg': 'BSONObj size: 18697887 (0x11D4E9F) is invalid. Size must be between 0 and 16793600(16MB) First element: q: { _id: "7c0dc64d463d839c258b9cc3a749829ec921e968" }', 'code': 10334, 'codeName': 'BSONObjectTooLarge'}
- ☐ 2023-03-28 10:14:41,462|WARNING|Cannot find <root> in the COMPRESS_UPOS_MAPPING, skipping for now 2023-03-28 10:14:41,940|ERROR|not enough values to unpack (expected 2, got 1)
- ☐ Rewrite frequency dict calculation and export
- ☐ Add some kind of DSL to the export to support filtering
-
+  ✔ Deploy https://github.com/arysin/nlp_uk_api locally and test @done (23-03-06 19:41)
+  ✔ Amend batch api in the nlp_uk_api @done (23-03-06 19:41)
+  ✔ Add a simple client for nlp_uk_api @done (23-03-16 19:22)
+  ✔ Prepare a data model for the layers @done (23-03-21 18:18)
+  ✔ Deploy https://github.com/arysin/nlp_uk_api locally and test @done (19/04/2023, 16:21:12)
+  ✔ Add jobs to populate layers with data after nlp_uk_api @done (23-03-21 18:18)
+  ✔ Remove spaces from the nlp-uk output @done (23-03-22 13:54)
+  ✔ Rewrite udpipe task to use layers @done (23-03-23 20:55)
+  ✔ Add a helper to extract required layers alongside with the texts in bulk @done (23-03-23 18:10)
+  ✔ Rewrite export @done (19/04/2023, 16:22:29)
+  ✔ 2023-03-28 10:14:41,462|WARNING|Cannot find <root> in the COMPRESS_UPOS_MAPPING, skipping for now 2023-03-28 10:14:41,940|ERROR|not enough values to unpack (expected 2, got 1) @done (19/04/2023, 16:22:42)
+  ☐ Rewrite frequency dict calculation and export
+  ☐ Add some kind of DSL to the export to support filtering
+  ☐ UserWarning: use an explicit session with no_cursor_timeout=True otherwise the cursor may still timeout after 30 minutes, for more info see https://mongodb.com/docs/v4.4/reference/method/cursor.noCursorTimeout/#session-idle-timeout-overrides-nocursortimeout
+  ☐ Switch to better flags for the articles to quickly find ones that aren't processed yet
+  ☐ Fix for the storing of the long articles

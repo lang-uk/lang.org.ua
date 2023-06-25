@@ -2,12 +2,12 @@ from django.db import models
 from django.utils import translation
 from django.conf import settings
 
-from wagtail.core import hooks
-from wagtail.core.models import Page, Orderable
+from wagtail import hooks
+from wagtail.models import Page, Orderable
 from modelcluster.fields import ParentalKey
-from wagtail.core.fields import RichTextField
-from wagtail.core.whitelist import attribute_rule, allow_without_attributes
-from wagtail.admin.edit_handlers import InlinePanel, FieldPanel, PageChooserPanel
+from wagtail.fields import RichTextField
+from wagtail.whitelist import attribute_rule, allow_without_attributes
+from wagtail.admin.panels import InlinePanel, FieldPanel, PageChooserPanel
 
 from wagtailmenus.models import AbstractMainMenuItem
 
@@ -31,7 +31,9 @@ class GenericSiteSettings(BaseGenericSetting):
 def whitelister_element_rules():
     return {
         "u": allow_without_attributes,
-        "table": attribute_rule({"cellspacing": True, "cellpadding": True, "border": True}),
+        "table": attribute_rule(
+            {"cellspacing": True, "cellpadding": True, "border": True}
+        ),
         "td": attribute_rule({"valign": True, "style": True}),
         "tr": allow_without_attributes,
         "th": allow_without_attributes,
@@ -56,7 +58,9 @@ class TranslatedField(object):
 
 class LinkFields(models.Model):
     caption = models.CharField(max_length=255, blank=True, verbose_name="Заголовок")
-    caption_en = models.CharField(max_length=255, blank=True, verbose_name="[EN] Заголовок")
+    caption_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Заголовок"
+    )
 
     translated_caption = TranslatedField(
         "caption",
@@ -92,9 +96,13 @@ class LinkFields(models.Model):
 
 
 class AbstractPage(Page):
-    title_en = models.CharField(default="", max_length=255, verbose_name="[EN] Назва сторінки")
+    title_en = models.CharField(
+        default="", max_length=255, verbose_name="[EN] Назва сторінки"
+    )
 
-    global_class = models.CharField(default="", max_length=255, blank=True, verbose_name="CSS-Клас сторінки")
+    global_class = models.CharField(
+        default="", max_length=255, blank=True, verbose_name="CSS-Клас сторінки"
+    )
 
     body = RichTextField(default="", verbose_name="[UA] Загальний текст сторінки")
 
@@ -130,7 +138,10 @@ class AbstractPage(Page):
         for code, _ in settings.LANGUAGES:
             translation.activate(code)
 
-            yield {"location": self.get_full_url(request), "lastmod": self.latest_revision_created_at}
+            yield {
+                "location": self.get_full_url(request),
+                "lastmod": self.latest_revision_created_at,
+            }
 
             translation.deactivate()
 
@@ -142,11 +153,122 @@ class StaticPage(AbstractPage):
     template = "home/static_page.html"
 
 
+class PartnerLink(Orderable):
+    page = ParentalKey("HomePage", on_delete=models.CASCADE, related_name="partners")
+
+    partner_name = models.CharField(
+        max_length=255, blank=True, verbose_name="Назва партнера"
+    )
+    partner_name_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Назва партнера"
+    )
+
+    translated_partner_name = TranslatedField(
+        "partner_name",
+        "partner_name_en",
+    )
+
+    partner_logo = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Логотип партнеру",
+    )
+
+    link_external = models.URLField("Посилання на партнера", blank=True)
+
+    panels = [
+        FieldPanel("partner_name"),
+        FieldPanel("partner_name_en"),
+        FieldPanel("link_external"),
+        FieldPanel("partner_logo"),
+    ]
+
+
+class EndUser(Orderable):
+    page = ParentalKey("HomePage", on_delete=models.CASCADE, related_name="end_users")
+
+    role_name = models.CharField(max_length=255, blank=True, verbose_name="Назва ролі")
+    role_name_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Назва ролі"
+    )
+
+    translated_role_name = TranslatedField(
+        "role_name",
+        "role_name_en",
+    )
+
+    role_use = models.CharField(max_length=1024, blank=True, verbose_name="Опис ролі")
+    role_use_en = models.CharField(
+        max_length=1024, blank=True, verbose_name="[EN] Опис ролі"
+    )
+
+    translated_role_use = TranslatedField(
+        "role_use",
+        "role_use_en",
+    )
+
+    panels = [
+        FieldPanel("role_name"),
+        FieldPanel("role_name_en"),
+        FieldPanel("role_use"),
+        FieldPanel("role_use_en"),
+    ]
+
+
+class PressArticles(Orderable):
+    page = ParentalKey("HomePage", on_delete=models.CASCADE, related_name="press_articles")
+
+    source = models.CharField(max_length=255, blank=True, verbose_name="Назва джерела")
+    source_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Назва джерела"
+    )
+
+    translated_source = TranslatedField(
+        "source",
+        "source_en",
+    )
+
+    title = models.CharField(max_length=255, blank=True, verbose_name="Назва публікації")
+    title_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Назва публікації"
+    )
+
+    translated_title = TranslatedField(
+        "title",
+        "title_en",
+    )
+
+    date_of_publish = models.DateField("Дата публікації", blank=True)
+    link_external = models.URLField("Посилання на текст або матеріал", blank=True)
+
+    media_logo = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Логотип автору матеріалу",
+    )
+
+    panels = [
+        FieldPanel("source"),
+        FieldPanel("source_en"),
+        FieldPanel("title"),
+        FieldPanel("title_en"),
+        FieldPanel("date_of_publish"),
+        FieldPanel("link_external"),
+        FieldPanel("media_logo"),
+    ]
+
+
 class HomePage(AbstractPage):
     template = "home/home_page.html"
 
     slogan_title = models.TextField(default="", verbose_name="[UA] Слоган (заголовок)")
-    slogan_title_en = models.TextField(default="", verbose_name="[EN] Слоган (заголовок)")
+    slogan_title_en = models.TextField(
+        default="", verbose_name="[EN] Слоган (заголовок)"
+    )
     translated_slogan_title = TranslatedField(
         "slogan_title",
         "slogan_title_en",
@@ -159,46 +281,119 @@ class HomePage(AbstractPage):
         "slogan_text_en",
     )
 
-    aboutus_title = models.TextField(default="", verbose_name="[UA] Про нас (заголовок)")
-    aboutus_title_en = models.TextField(default="", verbose_name="[EN] Про нас (заголовок)")
+    aboutus_title = models.TextField(
+        default="", verbose_name="[UA] Розділ 'Про нас' (заголовок)"
+    )
+    aboutus_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ 'Про нас' (заголовок)"
+    )
     translated_aboutus_title = TranslatedField(
         "aboutus_title",
         "aboutus_title_en",
     )
 
-    aboutus_text = RichTextField(default="", verbose_name="[UA] Про нас (текст)")
-    aboutus_text_en = RichTextField(default="", verbose_name="[EN] Про нас (текст)")
+    aboutus_text = RichTextField(default="", verbose_name="[UA] Розділ 'Про нас' (текст)")
+    aboutus_text_en = RichTextField(default="", verbose_name="[EN] Розділ 'Про нас' (текст)")
     translated_aboutus_text = TranslatedField(
         "aboutus_text",
         "aboutus_text_en",
     )
 
-    content_panels = [
-        FieldPanel("title", classname="full title"),
-        FieldPanel("title_en", classname="full title"),
+    partners_title = models.TextField(
+        default="", verbose_name="[UA] Розділ партнерів (заголовок)"
+    )
+    partners_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ партнерів (заголовок)"
+    )
+    translated_partners_title = TranslatedField(
+        "partners_title",
+        "partners_title_en",
+    )
 
+    useful_title = models.TextField(
+        default="", verbose_name="[UA] Розділ користувачів (заголовок)"
+    )
+    useful_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ користувачів (заголовок)"
+    )
+    translated_useful_title = TranslatedField(
+        "useful_title",
+        "useful_title_en",
+    )
+
+    become_a_part_cta = models.TextField(
+        default="", verbose_name="[UA] Стань частиною (заклик)"
+    )
+    become_a_part_cta_en = models.TextField(
+        default="", verbose_name="[EN] Стань частиною (заклик)"
+    )
+    translated_become_a_part_cta = TranslatedField(
+        "become_a_part_cta",
+        "become_a_part_cta_en",
+    )
+
+    media_title = models.TextField(
+        default="", verbose_name="[UA] Розділ медіа (заголовок)"
+    )
+    media_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ медіа (заголовок)"
+    )
+    translated_media_title = TranslatedField(
+        "media_title",
+        "media_title_en",
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("title_en", classname="full title"),
         FieldPanel("slogan_title"),
         FieldPanel("slogan_title_en"),
         FieldPanel("slogan_text", classname="full"),
         FieldPanel("slogan_text_en", classname="full"),
-
         FieldPanel("aboutus_title"),
         FieldPanel("aboutus_title_en"),
         FieldPanel("aboutus_text", classname="full"),
         FieldPanel("aboutus_text_en", classname="full"),
-
+        FieldPanel("partners_title"),
+        FieldPanel("partners_title_en"),
+        InlinePanel("partners", heading="Партнери", label="Партнери"),
+        FieldPanel("useful_title"),
+        FieldPanel("useful_title_en"),
+        InlinePanel("end_users", heading="Користувачи", label="Користувачи"),
+        FieldPanel("become_a_part_cta"),
+        FieldPanel("become_a_part_cta_en"),
+        FieldPanel("media_title"),
+        FieldPanel("media_title_en"),
+        InlinePanel("press_articles", heading="Публікації в медіа", label="Публікації в медіа"),
         FieldPanel("body", classname="full"),
         FieldPanel("body_en", classname="full"),
         FieldPanel("global_class", classname="full"),
     ]
 
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context["products_page"] = ProductsPage.objects.child_of(self).live().first()
+        return context
+
+    subpage_types = ["ProductsPage", "StaticPage"]
+
 
 class ProductsPage(AbstractPage):
     template = "home/products_page.html"
+    parent_page_types = [HomePage]
+    subpage_types = ["ProductPage"]
+
+    intro = RichTextField(default="", verbose_name="[UA] Вводний текст")
+    intro_en = RichTextField(default="", verbose_name="[EN] Вводний текст")
+    translated_intro = TranslatedField(
+        "intro",
+        "intro_en",
+    )
 
     content_panels = [
         FieldPanel("title", classname="full title"),
         FieldPanel("title_en", classname="full title"),
+        FieldPanel("intro", classname="full"),
+        FieldPanel("intro_en", classname="full"),
         FieldPanel("body", classname="full"),
         FieldPanel("body_en", classname="full"),
         FieldPanel("svg_image", classname="full"),
@@ -207,6 +402,7 @@ class ProductsPage(AbstractPage):
 
 
 class ProductPage(AbstractPage):
+    parent_page_types = [ProductsPage]
     template = "home/product_page.html"
 
 

@@ -69,7 +69,7 @@ INSTALLED_APPS = [
     "wagtail.images",
     "wagtail.search",
     "wagtail.admin",
-    "wagtail.core",
+    "wagtail",
     "wagtail.contrib.modeladmin",
     "wagtailmenus",
     "modelcluster",
@@ -205,7 +205,7 @@ CORPORA_EXPORT_PATH = os.path.join(STATIC_ROOT, "data")
 
 WAGTAIL_SITE_NAME = "languk"
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
-    "hallo": {"WIDGET": "wagtail.wagtailadmin.rich_text.HalloRichTextArea"},
+    "hallo": {"WIDGET": "wagtail.admin.rich_text.HalloRichTextArea"},
 }
 
 # WAGTAILSIMPLETRANSLATION_SYNC_PAGE_TREE = True

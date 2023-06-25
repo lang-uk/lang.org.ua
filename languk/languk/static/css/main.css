@@ -327,6 +327,31 @@ h4 {
     line-height: 36px;
   }
 }
+.text-l a {
+  color: #63ba84;
+  position: relative;
+  text-decoration: none;
+}
+.text-l a:before {
+  content: "";
+  position: absolute;
+  bottom: -0.125rem;
+  height: 2px;
+  background-color: #63ba84;
+  -webkit-transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  -o-transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  left: 0;
+  right: auto;
+  width: 100%;
+}
+@media (hover: hover) and (pointer: fine) {
+  .text-l a:hover::before {
+    right: 0;
+    left: auto;
+    width: 0;
+  }
+}
 
 .text-m {
   font-size: 16px;
@@ -769,6 +794,7 @@ h4 {
 .consumers__logo {
   -o-object-fit: contain;
      object-fit: contain;
+  padding: 1px;
 }
 @media (min-width: 992px) {
   .consumers__card {

@@ -179,14 +179,6 @@ class Corpus:
             pipeline.append({"$project": project_clause})
 
         cursor: MongoCursor = coll.aggregate(pipeline)
-        # cursor.no_cursor_timeout = True
-        # command = {
-        #     'aggregate': collection,
-        #     'pipeline': pipeline,
-        #     'cursor': {'batchSize': 1000, 'noCursorTimeout': True}
-        # }
-
-        # return coll.database.command(command)['cursor']
         return cursor
 
 

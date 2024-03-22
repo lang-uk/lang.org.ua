@@ -115,10 +115,8 @@
               fill="#FF3F3F" />
                 </svg>
                 <span class="star-text">Нові надходження</span></span>#}</span>
-            <div class="card__icon"><svg width="25" height="21" viewBox="0 0 25 21" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
+            <div class="card__icon">
                 {{ product_page.specific.svg_image|safe }}
-              </svg>
             </div>
             <div class="card__strip"></div>
           </a>
@@ -187,52 +185,6 @@
     </div>
   </div>
   <!-- /home-page/healthy-section.pug-->
-  <!-- become-part.pug-->
-  <div class="become-part">
-    <div class="become-part__container">
-      <p class="become-part__title">{{ page.translated_become_a_part_cta }}</p>
-      <div class="become-part__actions">
-        <div class="spacer spacer--h-sm">
-          <div class="spacer__item"><a class="button button-wave button-wave--transparent spacer__item" href="#">{{ _("Залишити видгук") }}</a></div>
-          <div class="spacer__item"><a class="button button-wave spacer__item" href="add-product.html">{{ _("Доповнити продукт") }}</a></div>
-        </div>
-      </div>
-    </div>
-    <div class="svg-hover"><img src="{{ static('img/hover.svg') }}"/></div>
-  </div>
-  <!-- /become-part.pug-->
-
-  <!-- media-articles.pug-->
-  <div class="media-articles">
-    <div class="media-articles__title">
-      <p class="h1 text-center">{{ page.translated_media_title }}</p>
-    </div>
-    <div class="media-articles__content">
-      <div class="slider-wrap">
-        <div class="slider-wrap__slider">
-          <div class="slider">
-            {% for press_article in page.press_articles.all() %}
-            <div class="media-card">
-              <div class="media-card__head">
-                <div class="media-card__head-item">
-                  <div class="media-card__head-logo"><img src="{{ press_article.media_logo.file.url }}" /></div>
-                  <p class="media-card__head-text">{{ press_article.date_of_publish|date("SHORT_DATE_FORMAT") }}</p>
-                </div>
-                <div class="media-card__head-item">
-                  <p class="media-card__head-text media-card__head-text--label text-right">
-                    {% if press_article.link_external %}<a href="{{ press_article.link_external }}">{% endif %}{{ press_article.translated_source }}{% if press_article.link_external %}</a>{% endif %}</p>
-                  <p class="media-card__head-text media-card__head-text--bold text-right">{{ _("№") }}{{ loop.index }}</p>
-                </div>
-              </div>
-              <div class="media-card__body">
-                <p class="text-l">{{ press_article.translated_title }}</p>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- /media-articles.pug-->
+  {% include "common/become_a_part.html" %}
+  {% include "common/media_about.html" %}
 {% endblock %}

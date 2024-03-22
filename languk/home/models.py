@@ -6,6 +6,7 @@ from wagtail import hooks
 from wagtail.models import Page, Orderable
 from modelcluster.fields import ParentalKey
 from wagtail.fields import RichTextField
+from wagtail.snippets.models import register_snippet
 from wagtail.whitelist import attribute_rule, allow_without_attributes
 from wagtail.admin.panels import InlinePanel, FieldPanel, PageChooserPanel
 
@@ -217,9 +218,8 @@ class EndUser(Orderable):
     ]
 
 
-class PressArticles(Orderable):
-    page = ParentalKey("HomePage", on_delete=models.CASCADE, related_name="press_articles")
-
+@register_snippet
+class PressArticle(models.Model):
     source = models.CharField(max_length=255, blank=True, verbose_name="Назва джерела")
     source_en = models.CharField(
         max_length=255, blank=True, verbose_name="[EN] Назва джерела"
@@ -251,6 +251,10 @@ class PressArticles(Orderable):
         verbose_name="Логотип автору матеріалу",
     )
 
+
+    def __str__(self):
+        return f"{self.translated_source}: {self.translated_title}"
+
     panels = [
         FieldPanel("source"),
         FieldPanel("source_en"),
@@ -260,6 +264,9 @@ class PressArticles(Orderable):
         FieldPanel("link_external"),
         FieldPanel("media_logo"),
     ]
+
+    class Meta:
+        ordering = ('-date_of_publish', )
 
 
 class HomePage(AbstractPage):
@@ -321,28 +328,6 @@ class HomePage(AbstractPage):
         "useful_title_en",
     )
 
-    become_a_part_cta = models.TextField(
-        default="", verbose_name="[UA] Стань частиною (заклик)"
-    )
-    become_a_part_cta_en = models.TextField(
-        default="", verbose_name="[EN] Стань частиною (заклик)"
-    )
-    translated_become_a_part_cta = TranslatedField(
-        "become_a_part_cta",
-        "become_a_part_cta_en",
-    )
-
-    media_title = models.TextField(
-        default="", verbose_name="[UA] Розділ медіа (заголовок)"
-    )
-    media_title_en = models.TextField(
-        default="", verbose_name="[EN] Розділ медіа (заголовок)"
-    )
-    translated_media_title = TranslatedField(
-        "media_title",
-        "media_title_en",
-    )
-
     content_panels = Page.content_panels + [
         FieldPanel("title_en", classname="full title"),
         FieldPanel("slogan_title"),
@@ -359,11 +344,7 @@ class HomePage(AbstractPage):
         FieldPanel("useful_title"),
         FieldPanel("useful_title_en"),
         InlinePanel("end_users", heading="Користувачи", label="Користувачи"),
-        FieldPanel("become_a_part_cta"),
-        FieldPanel("become_a_part_cta_en"),
-        FieldPanel("media_title"),
-        FieldPanel("media_title_en"),
-        InlinePanel("press_articles", heading="Публікації в медіа", label="Публікації в медіа"),
+
         FieldPanel("body", classname="full"),
         FieldPanel("body_en", classname="full"),
         FieldPanel("global_class", classname="full"),
@@ -374,7 +355,12 @@ class HomePage(AbstractPage):
         context["products_page"] = ProductsPage.objects.child_of(self).live().first()
         return context
 
-    subpage_types = ["ProductsPage", "StaticPage"]
+    subpage_types = ["ProductsPage", "StaticPage", "AboutUsPage"]
+
+
+class AboutUsPage(AbstractPage):
+    template = "home/about_us_page.html"
+    parent_page_types = [HomePage]
 
 
 class ProductsPage(AbstractPage):

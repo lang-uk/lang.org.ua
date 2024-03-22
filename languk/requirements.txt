@@ -1,5 +1,5 @@
 psycopg2-binary==2.9.5
-wagtail==4.2.2
+wagtail==5.2.2
 Django==4.1.8
 git+https://github.com/TwilioDevEd/wagtailtinymce.git
 gunicorn==20.1.0
@@ -12,5 +12,5 @@ django-task==2.0.5
 django-rq==2.6.0
 django-redis-cache==3.0.1
 dependencies/ufal.udpipe-1.2.0.1.tar.gz
-gcld3==3.0.13
+gcld3
 wagtailmenus==3.1.3

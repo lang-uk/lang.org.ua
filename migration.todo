@@ -6,7 +6,12 @@ Re-design:
   ✔ CMSize Who may find it useful section of the home page @done (25/06/2023, 18:53:38)
   ✔ CMSize become a part section of the homepage @done (25/06/2023, 19:03:30)
   ✔ Add media about us section on the home page @done (25/06/2023, 20:16:00)
+  ✔ Refactor common blocks in new design into snippets @done (25/06/2023, 21:13:46)
+  ✔ Fix icons on main page @done (22/03/2024, 01:20:07)
+  ✔ Fix burger menu @done (22/03/2024, 01:49:55)
   ☐ Wire up icon "has updates"?
+  ☐ Convert About US page
+  ☐ Thumbnail macro
 
 UberText support:
   ✔ Deploy https://github.com/arysin/nlp_uk_api locally and test @done (23-03-06 19:41)

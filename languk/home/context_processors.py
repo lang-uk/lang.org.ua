@@ -1,4 +1,5 @@
 from wagtail.models import Site
+from home.models import PressArticle
 
 
 def get_site_root(request):
@@ -10,4 +11,5 @@ def pages_processor(request):
 
     return {
         "root_page": root_page,
+        "press_articles": PressArticle.objects.all(),
     }

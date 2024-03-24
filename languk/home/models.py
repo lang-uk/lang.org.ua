@@ -230,7 +230,9 @@ class PressArticle(models.Model):
         "source_en",
     )
 
-    title = models.CharField(max_length=255, blank=True, verbose_name="Назва публікації")
+    title = models.CharField(
+        max_length=255, blank=True, verbose_name="Назва публікації"
+    )
     title_en = models.CharField(
         max_length=255, blank=True, verbose_name="[EN] Назва публікації"
     )
@@ -251,7 +253,6 @@ class PressArticle(models.Model):
         verbose_name="Логотип автору матеріалу",
     )
 
-
     def __str__(self):
         return f"{self.translated_source}: {self.translated_title}"
 
@@ -266,7 +267,78 @@ class PressArticle(models.Model):
     ]
 
     class Meta:
-        ordering = ('-date_of_publish', )
+        ordering = ("-date_of_publish",)
+
+
+class TeamMember(Orderable):
+    name = models.CharField(max_length=255, blank=True, verbose_name="Повне ім'я")
+    name_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Повне ім'я"
+    )
+
+    translated_name = TranslatedField(
+        "name",
+        "name_en",
+    )
+
+    role = models.CharField(max_length=255, blank=True, verbose_name="Роль або внесок")
+    role_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Роль або внесок"
+    )
+
+    translated_role = TranslatedField(
+        "role",
+        "role_en",
+    )
+
+    github = models.URLField("Профіль у github", blank=True)
+    telegram = models.URLField("Профіль у telegram", blank=True)
+    facebook = models.URLField("Профіль у facebook", blank=True)
+    instagram = models.URLField("Профіль у instagram", blank=True)
+    google_scholar = models.URLField("Профіль у google scholar", blank=True)
+    huggingface = models.URLField("Профіль у huggingface", blank=True)
+    linkedin = models.URLField("Профіль у linkedin", blank=True)
+    twitter = models.URLField("Профіль у twitter/x", blank=True)
+
+    photo = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Фото користувача",
+    )
+
+    def __str__(self):
+        return f"{self.translated_name}: {self.translated_role}"
+
+    panels = [
+        FieldPanel("name"),
+        FieldPanel("name_en"),
+        FieldPanel("role"),
+        FieldPanel("role_en"),
+        FieldPanel("github"),
+        FieldPanel("telegram"),
+        FieldPanel("facebook"),
+        FieldPanel("instagram"),
+        FieldPanel("google_scholar"),
+        FieldPanel("huggingface"),
+        FieldPanel("linkedin"),
+        FieldPanel("twitter"),
+        FieldPanel("photo"),
+    ]
+
+    class Meta:
+        abstract = True
+
+
+class Founder(TeamMember):
+    page = ParentalKey("AboutUsPage", on_delete=models.CASCADE, related_name="founders")
+
+
+class Volunteer(TeamMember):
+    page = ParentalKey(
+        "AboutUsPage", on_delete=models.CASCADE, related_name="volunteers"
+    )
 
 
 class HomePage(AbstractPage):
@@ -299,8 +371,12 @@ class HomePage(AbstractPage):
         "aboutus_title_en",
     )
 
-    aboutus_text = RichTextField(default="", verbose_name="[UA] Розділ 'Про нас' (текст)")
-    aboutus_text_en = RichTextField(default="", verbose_name="[EN] Розділ 'Про нас' (текст)")
+    aboutus_text = RichTextField(
+        default="", verbose_name="[UA] Розділ 'Про нас' (текст)"
+    )
+    aboutus_text_en = RichTextField(
+        default="", verbose_name="[EN] Розділ 'Про нас' (текст)"
+    )
     translated_aboutus_text = TranslatedField(
         "aboutus_text",
         "aboutus_text_en",
@@ -344,7 +420,6 @@ class HomePage(AbstractPage):
         FieldPanel("useful_title"),
         FieldPanel("useful_title_en"),
         InlinePanel("end_users", heading="Користувачи", label="Користувачи"),
-
         FieldPanel("body", classname="full"),
         FieldPanel("body_en", classname="full"),
         FieldPanel("global_class", classname="full"),
@@ -361,6 +436,78 @@ class HomePage(AbstractPage):
 class AboutUsPage(AbstractPage):
     template = "home/about_us_page.html"
     parent_page_types = [HomePage]
+
+    directions_title = models.TextField(
+        default="", verbose_name="[UA] Розділ Напрямки Роботи (заголовок)"
+    )
+    directions_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ Напрямки Роботи (заголовок)"
+    )
+    translated_directions_title = TranslatedField(
+        "directions_title",
+        "directions_title_en",
+    )
+
+    direction1 = models.TextField(default="", verbose_name="[UA] Перший напрямок")
+    direction1_en = models.TextField(default="", verbose_name="[EN] Перший напрямок")
+    translated_direction1 = TranslatedField(
+        "direction1",
+        "direction1_en",
+    )
+
+    direction2 = models.TextField(default="", verbose_name="[UA] Другий напрямок")
+    direction2_en = models.TextField(default="", verbose_name="[EN] Другий напрямок")
+    translated_direction2 = TranslatedField(
+        "direction2",
+        "direction2_en",
+    )
+    direction3 = models.TextField(default="", verbose_name="[UA] Третій напрямок")
+    direction3_en = models.TextField(default="", verbose_name="[EN] Третій напрямок")
+    translated_direction3 = TranslatedField(
+        "direction3",
+        "direction3_en",
+    )
+
+    team = models.TextField(
+        default="", verbose_name="[UA] Розділ Наша Команда (заголовок)"
+    )
+    team_en = models.TextField(
+        default="", verbose_name="[EN] Розділ Наша Команда (заголовок)"
+    )
+    translated_team_title = TranslatedField(
+        "team",
+        "team_en",
+    )
+
+    volunteers_title = models.TextField(
+        default="", verbose_name="[UA] Розділ Наша Команда (заголовок)"
+    )
+    volunteers_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ Наша Команда (заголовок)"
+    )
+    translated_volunteers_title = TranslatedField(
+        "volunteers_title",
+        "volunteers_title_en",
+    )
+
+    content_panels = [
+        FieldPanel("title", classname="full title"),
+        FieldPanel("title_en", classname="full title"),
+        FieldPanel("directions_title"),
+        FieldPanel("directions_title_en"),
+        FieldPanel("direction1", classname="full"),
+        FieldPanel("direction1_en", classname="full"),
+        FieldPanel("direction2", classname="full"),
+        FieldPanel("direction2_en", classname="full"),
+        FieldPanel("direction3", classname="full"),
+        FieldPanel("direction3_en", classname="full"),
+        FieldPanel("team"),
+        FieldPanel("team_en"),
+        InlinePanel("founders", heading="Засновники", label="Засновники"),
+        FieldPanel("volunteers_title"),
+        FieldPanel("volunteers_title_en"),
+        InlinePanel("volunteers", heading="Помічники", label="Помічники"),
+    ]
 
 
 class ProductsPage(AbstractPage):

@@ -10,8 +10,10 @@ Re-design:
   ✔ Fix icons on main page @done (22/03/2024, 01:20:07)
   ✔ Fix burger menu @done (22/03/2024, 01:49:55)
   ☐ Wire up icon "has updates"?
-  ☐ Convert About US page
+  ✔ Convert About US page @done (24/03/2024, 02:17:01)
   ☐ Thumbnail macro
+  ☐ Titles for the pages
+  ☐ Convert Manifest page
 
 UberText support:
   ✔ Deploy https://github.com/arysin/nlp_uk_api locally and test @done (23-03-06 19:41)

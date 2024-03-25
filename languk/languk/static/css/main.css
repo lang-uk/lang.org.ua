@@ -3196,14 +3196,14 @@ h4 {
     max-width: 34rem;
   }
 }
-.manifest__item .list__item .item__text .list__text-content {
+.manifest__item .list__item .item__text ul {
   margin: 1.5rem 0 0.5rem;
 }
-.manifest__item .list__item .item__text .list__text-content .text-l {
+.manifest__item .list__item .item__text ul li {
   position: relative;
   padding: 0 0 1rem 1.625rem;
 }
-.manifest__item .list__item .item__text .list__text-content .text-l::before {
+.manifest__item .list__item .item__text ul li::before {
   position: absolute;
   display: block;
   content: "";

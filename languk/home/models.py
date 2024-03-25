@@ -105,9 +105,9 @@ class AbstractPage(Page):
         default="", max_length=255, blank=True, verbose_name="CSS-Клас сторінки"
     )
 
-    body = RichTextField(default="", verbose_name="[UA] Загальний текст сторінки")
+    body = RichTextField(default="", verbose_name="[UA] Загальний текст сторінки", blank=True)
 
-    body_en = RichTextField(default="", verbose_name="[EN] Загальний текст сторінки")
+    body_en = RichTextField(default="", verbose_name="[EN] Загальний текст сторінки", blank=True)
 
     svg_image = models.TextField(
         verbose_name="SVG image icon (raw text) to display next to menu item",
@@ -430,7 +430,7 @@ class HomePage(AbstractPage):
         context["products_page"] = ProductsPage.objects.child_of(self).live().first()
         return context
 
-    subpage_types = ["ProductsPage", "StaticPage", "AboutUsPage"]
+    subpage_types = ["ProductsPage", "StaticPage", "AboutUsPage", "ManifestoPage", "ContactUsPage"]
 
 
 class AboutUsPage(AbstractPage):
@@ -534,9 +534,99 @@ class ProductsPage(AbstractPage):
     ]
 
 
+class ManifestoPage(AbstractPage):
+    template = "home/manifesto.html"
+    explainer = RichTextField(default="", verbose_name="[UA] Текст маніфесту")
+    explainer_en = RichTextField(default="", verbose_name="[EN] Текст маніфесту")
+    translated_explainer = TranslatedField(
+        "explainer",
+        "explainer_en",
+    )
+
+    thesis1_title = models.TextField(default="", verbose_name="[UA] Теза 1 (заголовок)")
+    thesis1_title_en = models.TextField(default="", verbose_name="[EN] Теза 1 (заголовок)")
+    translated_thesis1_title = TranslatedField(
+        "thesis1_title",
+        "thesis1_title_en",
+    )
+
+    thesis1_description = RichTextField(
+        default="", verbose_name="[UA] Теза 1 (опис)"
+    )
+    thesis1_description_en = RichTextField(
+        default="", verbose_name="[EN] Теза 1 (опис)"
+    )
+    translated_thesis1_description = TranslatedField(
+        "thesis1_description",
+        "thesis1_description_en",
+    )
+
+    thesis2_title = models.TextField(default="", verbose_name="[UA] Теза 2 (заголовок)")
+    thesis2_title_en = models.TextField(
+        default="", verbose_name="[EN] Теза 2 (заголовок)"
+    )
+    translated_thesis2_title = TranslatedField(
+        "thesis2_title",
+        "thesis2_title_en",
+    )
+
+    thesis2_description = RichTextField(
+        default="", verbose_name="[UA] Теза 2 (опис)"
+    )
+    thesis2_description_en = RichTextField(
+        default="", verbose_name="[EN] Теза 2 (опис)"
+    )
+    translated_thesis2_description = TranslatedField(
+        "thesis2_description",
+        "thesis2_description_en",
+    )
+
+    thesis3_title = models.TextField(default="", verbose_name="[UA] Теза 3 (заголовок)")
+    thesis3_title_en = models.TextField(
+        default="", verbose_name="[EN] Теза 3 (заголовок)"
+    )
+    translated_thesis3_title = TranslatedField(
+        "thesis3_title",
+        "thesis3_title_en",
+    )
+
+    thesis3_description = RichTextField(
+        default="", verbose_name="[UA] Теза 3 (опис)"
+    )
+    thesis3_description_en = RichTextField(
+        default="", verbose_name="[EN] Теза 3 (опис)"
+    )
+    translated_thesis3_description = TranslatedField(
+        "thesis3_description",
+        "thesis3_description_en",
+    )
+
+    content_panels = [
+        FieldPanel("title", classname="full title"),
+        FieldPanel("title_en", classname="full title"),
+        FieldPanel("explainer", classname="full"),
+        FieldPanel("explainer_en", classname="full"),
+        FieldPanel("thesis1_title"),
+        FieldPanel("thesis1_title_en"),
+        FieldPanel("thesis1_description"),
+        FieldPanel("thesis1_description_en"),
+        FieldPanel("thesis2_title"),
+        FieldPanel("thesis2_title_en"),
+        FieldPanel("thesis2_description"),
+        FieldPanel("thesis2_description_en"),
+        FieldPanel("thesis3_title"),
+        FieldPanel("thesis3_title_en"),
+        FieldPanel("thesis3_description"),
+        FieldPanel("thesis3_description_en"),
+    ]
+
 class ProductPage(AbstractPage):
     parent_page_types = [ProductsPage]
     template = "home/product_page.html"
+
+
+class ContactUsPage(AbstractPage):
+    template = "home/contact_us.html"
 
 
 class LangUkMainMenuItem(AbstractMainMenuItem):

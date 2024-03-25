@@ -3,7 +3,7 @@ from home.models import PressArticle
 
 
 def get_site_root(request):
-    return Site.find_for_request(request).root_page
+    return Site.find_for_request(request).root_page.get_specific()
 
 
 def pages_processor(request):

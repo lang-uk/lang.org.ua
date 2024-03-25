@@ -1,0 +1,137 @@
+{% extends "bachoo_base.html" %}
+
+{% block page_content %}
+{% include "common/breadcrumbs.html" %}
+    <div class="intro">
+        <div class="cols">
+            <div class="cols__item cols__item--md">
+                <p class="h0 intro__title">{{ page.translated_title }}</p>
+            </div>
+            <div class="cols__item cols__item--md">
+                <div class="intro__image"><img src="{{ static('/img/Manifest.svg') }}" /></div>
+            </div>
+        </div><span class="intro__actions">
+            <div class="intro__button"><svg width="24" height="25" viewBox="0 0 24 25" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 12L5.46154 12L5.46154 0.688528L19.3077 0.688528L19.3077 12L22 12L12.3846 23.3115L2 12Z"
+                        stroke="black" />
+                </svg>
+    
+            </div>
+        </span>
+    </div>
+    <!-- manifest/about-manifest.pug-->
+    <div class="about-manifest">
+        <div class="about-manifest__info">
+            <div class="about-manifest__content">
+                {{ page.translated_explainer|richtext }}
+                <div class="manifest__content-line">
+                    <div class="line1"></div>
+                    <div class="line2"></div>
+                    <div class="line3"></div>
+                    <div class="line4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /manifest/about-manifest.pug-->
+    <!-- manifest/manifests-list.pug-->
+    <div class="manifest-list__item">
+        <div class="manifest__item">
+            <div class="list__item">
+                <div class="list__item-title">
+                    <div class="item__icon icon1"><svg width="80" height="80" viewBox="0 0 61 59" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <rect x="12.1648" y="24.8496" width="37.3155" height="33.6505" fill="#F4F1EF" stroke="black" />
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                d="M30.9489 37.0105L30.9486 37.0101L30.9483 37.0103L27.7307 33.8222L21.2295 40.2638L27.7307 46.7053L27.7309 46.7051L30.9486 49.8932L34.0136 46.8563L34.0139 46.8567L40.5151 40.4151L34.0139 33.9736L30.9489 37.0105Z"
+                                fill="black" />
+                            <line y1="-0.5" x2="15.8359" y2="-0.5"
+                                transform="matrix(0.707107 -0.707107 0.988783 0.149362 49.9805 24.5522)" stroke="black" />
+                            <line y1="-0.5" x2="15.8359" y2="-0.5"
+                                transform="matrix(-0.707107 -0.707107 -0.988783 0.149362 11.5337 24.5522)" stroke="black" />
+                            <rect x="22.9653" y="10.2515" width="3.21419" height="3.21419"
+                                transform="rotate(45 22.9653 10.2515)" fill="#AAE2BF" />
+                            <rect x="37.1338" y="12.3943" width="4.31206" height="4.31206"
+                                transform="rotate(45 37.1338 12.3943)" fill="#AAE2BF" />
+                            <rect x="30.9548" y="0.0732422" width="2.39082" height="2.39082"
+                                transform="rotate(45 30.9548 0.0732422)" fill="#AAE2BF" />
+                        </svg>
+    
+                    </div>
+                    <div class="item__title">
+                        <p class="h2">{{ page.translated_thesis1_title }}</p>
+                    </div>
+                </div>
+                <div class="item__text">
+                    {{ page.translated_thesis1_description|richtext }}
+                </div>
+            </div>
+            <div class="list__item">
+                <div class="list__item-title">
+                    <div class="item__icon icon2"><svg width="80" height="80" viewBox="0 0 80 80" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15.0601 65V34.0759L40.3301 15.0369L65.254 34.1813V65H15.0601Z" fill="#F4F1EF" />
+                            <path
+                                d="M15.0601 34.0759V65M15.0601 34.0759L35.83 47.3456L15.0601 65M15.0601 34.0759L40.3301 15.0369L65.254 34.1813M15.0601 34.0759L40.3301 50.2303L65.254 34.1813M15.0601 65H65.254V34.1813"
+                                stroke="black" />
+                            <path d="M65.2539 64.7482V34.1814L44.4841 47.5765L65.2539 64.7482Z" fill="#F4F1EF" />
+                            <path
+                                d="M65.2539 34.1814L64.9829 33.7612C65.1367 33.662 65.3325 33.6548 65.4932 33.7424C65.6539 33.83 65.7539 33.9984 65.7539 34.1814H65.2539ZM65.2539 64.7482H65.7539V65.8103L64.9353 65.1336L65.2539 64.7482ZM44.4841 47.5765L44.1655 47.9618L43.639 47.5265L44.2131 47.1563L44.4841 47.5765ZM65.7539 34.1814V64.7482H64.7539V34.1814H65.7539ZM64.9353 65.1336L44.1655 47.9618L44.8027 47.1911L65.5725 64.3628L64.9353 65.1336ZM44.2131 47.1563L64.9829 33.7612L65.5249 34.6016L44.7551 47.9967L44.2131 47.1563Z"
+                                fill="black" />
+                            <path d="M40.4421 15.0369L15.4758 33.7615L40.4421 49.5735L64.5761 34.1776L40.4421 15.0369Z"
+                                fill="black" stroke="black" />
+                            <path d="M20.9573 22.3615H59.8965V37.205L40.4261 49.8706L20.9573 37.2815V22.3615Z" fill="white"
+                                stroke="black" />
+                            <rect x="30.0398" y="29.1844" width="19.973" height="0.832208" fill="#AAE2BF" />
+                            <rect x="30.0398" y="33.3455" width="19.973" height="0.832208" fill="#AAE2BF" />
+                            <rect x="30.0398" y="37.5065" width="12.4831" height="0.832208" fill="#AAE2BF" />
+                        </svg>
+    
+                    </div>
+                    <div class="item__title">
+                        <p class="h2">{{ page.translated_thesis2_title }}</p>
+                    </div>
+                </div>
+                <div class="item__text">
+                    {{ page.translated_thesis2_description|richtext }}
+                    <!-- <p class="h4">Результати роботи групи</p>
+                    <ul class="list__text-content">
+                        <li class="text-l">Відкриті дані</li>
+                        <li class="text-l">Програмний код інструментів роботи з ними</li>
+                        <li class="text-l">Машинно-навчені моделі</li>
+                        <li class="text-l">Публікації та інше</li>
+                    </ul>
+                    <p class="text-l">Всі ці артефакти мають публікуватись в центральному репозиторії групи, мати дозволяючу
+                        ліцензію на роботу з ними (наприклад, MIT, BSD, Creative Commons, Apache). Ми намагатимемость
+                        забезпечити максимальну інтероперабельність рішень, побудованих на цих артефактах, на основі
+                        використовувати відкритих специфікацій, стандартних або загальноприйнятих форматів кодування даних і
+                        моделей.</p> -->
+                </div>
+            </div>
+            <div class="list__item">
+                <div class="list__item-title">
+                    <div class="item__icon icon3"><svg width="80" height="80" viewBox="0 0 80 80" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <rect x="14.5" y="38.1479" width="51" height="34" stroke="black" />
+                            <rect x="35.7166" y="7.67404" width="21.3478" height="27.033"
+                                transform="rotate(27.4082 35.7166 7.67404)" fill="white" stroke="black" />
+                            <path d="M15 47.6479H66" stroke="black" />
+                            <path d="M29 42.6479L53 42.648" stroke="black" stroke-width="2" />
+                            <path d="M14 70.6479L65 70.648" stroke="black" stroke-width="2" />
+                            <path d="M41.8135 19.7241L42.9321 23.8785L49.4621 20.3553" stroke="#AAE2BF" stroke-width="2" />
+                        </svg>
+    
+                    </div>
+                    <div class="item__title">
+                        <p class="h2">{{ page.translated_thesis3_title }}</p>
+                    </div>
+                </div>
+                <div class="item__text">
+                    {{ page.translated_thesis3_description|richtext }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /manifest/manifests-list.pug-->
+{% endblock %}

@@ -13,7 +13,8 @@ Re-design:
   ✔ Convert About US page @done (24/03/2024, 02:17:01)
   ☐ Thumbnail macro
   ☐ Titles for the pages
-  ☐ Convert Manifest page
+  ✔ Convert Manifest page @done (25/03/2024, 02:13:45)
+  ☐ Convert Contact us page
 
 UberText support:
   ✔ Deploy https://github.com/arysin/nlp_uk_api locally and test @done (23-03-06 19:41)

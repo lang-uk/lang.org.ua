@@ -1,0 +1,59 @@
+{% extends "bachoo_base.html" %}
+
+{% block page_content %}
+{% include "common/breadcrumbs.html" %}
+<!-- contact-us/info-contact.pug-->
+<div class="contact-us">
+    <div class="contact__content">
+        <div class="h0">{{ page.translated_title }}</div>
+        <div class="contact">
+            <div class="contact__item"><span class="h4">e:</span><a class="h3"
+                    href="mailto:{{ settings.home.GenericSiteSettings.email }}">{{ settings.home.GenericSiteSettings.email }}</a></div>
+            <div class="contact__item"><span class="h4">t:</span><a class="h3" href="tel:{{ settings.home.GenericSiteSettings.phone }}">{{ settings.home.GenericSiteSettings.phone }}</a></div>
+            <div class="contact__item"><svg width="18" height="15" viewBox="0 0 18 15" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M5.99694 9.44478L5.96556 9.16239L5.7069 9.04482L1.28725 7.03588L17.2977 0.80961L14.177 14.1838L10.2774 11.584L10.0359 11.423L9.77639 11.5528L6.41776 13.2321L5.99694 9.44478Z"
+                        fill="black" stroke="black" />
+                </svg>
+                <a class="h3" href="{{ settings.home.GenericSiteSettings.telegram }}">@nlp_uk</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /contact-us/info-contact.pug-->
+<!-- contact-us/form-contact.pug-->
+<div class="contact__form">
+    <div class="form__content">
+        <p class="h2">Зв’язатися з нами</p>
+        <form class="form" action="" method="POST">
+            <input type="hidden" name="redirect" value="contact-us-success.html" />
+            <div class="contact-input">
+                <input class="input__item required" type="text" name="name" placeholder="Ім’я*" value="" />
+                <div class="caption-2 error__msg">Ведіть ваше Ім'я</div>
+            </div>
+            <div class="contact-input">
+                <div class="input__contact">
+                    <div class="input__contact-item">
+                        <input class="input__item" type="tel" name="tel" placeholder="Телефон" value="" />
+                    </div>
+                    <div class="input__contact-item">
+                        <input class="input__item required" type="email" name="email" placeholder="Email*" value="" />
+                        <div class="caption-2 error__msg">Введіть ваш Email</div>
+                    </div>
+                </div>
+            </div>
+            <div class="contact-input">
+                <p class="text-m">Повідомлення*</p>
+                <textarea class="input__item-area required" rows="6" name="message"
+                    placeholder="Ваше повідомлення"></textarea>
+                <div class="caption-2 error__msg">Додайте повідомлення</div>
+            </div>
+            <button class="button button-wave spacer__item" href="contact-us-success.html"
+                type="submit">Надіслати</button>
+        </form>
+    </div>
+</div>
+<!-- /contact-us/form-contact.pug-->
+
+{% endblock %}

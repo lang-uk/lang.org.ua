@@ -53,6 +53,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 INSTALLED_APPS = [
     "django_rq",
     "django_task",
+    "django_recaptcha",
     "home",
     "newborn",
     "corpus",
@@ -60,7 +61,6 @@ INSTALLED_APPS = [
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.settings",
-    # "wagtail.contrib.simple_translation",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
@@ -118,7 +118,6 @@ TEMPLATES = [
             ],
             "extensions": [
                 "jinja2.ext.i18n",
-                "jinja2.ext.with_",
                 "wagtail.jinja2tags.core",
                 "wagtail.admin.jinja2tags.userbar",
                 "wagtail.images.jinja2tags.images",

@@ -1,21 +1,23 @@
 from django.db import models
 from django.utils import translation
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+from django.shortcuts import render
+
+from modelcluster.fields import ParentalKey
 
 from wagtail import hooks
 from wagtail.models import Page, Orderable
-from modelcluster.fields import ParentalKey
 from wagtail.fields import RichTextField
 from wagtail.snippets.models import register_snippet
 from wagtail.whitelist import attribute_rule, allow_without_attributes
 from wagtail.admin.panels import InlinePanel, FieldPanel, PageChooserPanel
-
-from wagtailmenus.models import AbstractMainMenuItem
-
 from wagtail.contrib.settings.models import (
     BaseGenericSetting,
     register_setting,
 )
+
+from wagtailmenus.models import AbstractMainMenuItem
 
 
 @register_setting
@@ -105,9 +107,13 @@ class AbstractPage(Page):
         default="", max_length=255, blank=True, verbose_name="CSS-Клас сторінки"
     )
 
-    body = RichTextField(default="", verbose_name="[UA] Загальний текст сторінки", blank=True)
+    body = RichTextField(
+        default="", verbose_name="[UA] Загальний текст сторінки", blank=True
+    )
 
-    body_en = RichTextField(default="", verbose_name="[EN] Загальний текст сторінки", blank=True)
+    body_en = RichTextField(
+        default="", verbose_name="[EN] Загальний текст сторінки", blank=True
+    )
 
     svg_image = models.TextField(
         verbose_name="SVG image icon (raw text) to display next to menu item",
@@ -430,7 +436,13 @@ class HomePage(AbstractPage):
         context["products_page"] = ProductsPage.objects.child_of(self).live().first()
         return context
 
-    subpage_types = ["ProductsPage", "StaticPage", "AboutUsPage", "ManifestoPage", "ContactUsPage"]
+    subpage_types = [
+        "ProductsPage",
+        "StaticPage",
+        "AboutUsPage",
+        "ManifestoPage",
+        "ContactUsPage",
+    ]
 
 
 class AboutUsPage(AbstractPage):
@@ -544,15 +556,15 @@ class ManifestoPage(AbstractPage):
     )
 
     thesis1_title = models.TextField(default="", verbose_name="[UA] Теза 1 (заголовок)")
-    thesis1_title_en = models.TextField(default="", verbose_name="[EN] Теза 1 (заголовок)")
+    thesis1_title_en = models.TextField(
+        default="", verbose_name="[EN] Теза 1 (заголовок)"
+    )
     translated_thesis1_title = TranslatedField(
         "thesis1_title",
         "thesis1_title_en",
     )
 
-    thesis1_description = RichTextField(
-        default="", verbose_name="[UA] Теза 1 (опис)"
-    )
+    thesis1_description = RichTextField(default="", verbose_name="[UA] Теза 1 (опис)")
     thesis1_description_en = RichTextField(
         default="", verbose_name="[EN] Теза 1 (опис)"
     )
@@ -570,9 +582,7 @@ class ManifestoPage(AbstractPage):
         "thesis2_title_en",
     )
 
-    thesis2_description = RichTextField(
-        default="", verbose_name="[UA] Теза 2 (опис)"
-    )
+    thesis2_description = RichTextField(default="", verbose_name="[UA] Теза 2 (опис)")
     thesis2_description_en = RichTextField(
         default="", verbose_name="[EN] Теза 2 (опис)"
     )
@@ -590,9 +600,7 @@ class ManifestoPage(AbstractPage):
         "thesis3_title_en",
     )
 
-    thesis3_description = RichTextField(
-        default="", verbose_name="[UA] Теза 3 (опис)"
-    )
+    thesis3_description = RichTextField(default="", verbose_name="[UA] Теза 3 (опис)")
     thesis3_description_en = RichTextField(
         default="", verbose_name="[EN] Теза 3 (опис)"
     )
@@ -620,13 +628,69 @@ class ManifestoPage(AbstractPage):
         FieldPanel("thesis3_description_en"),
     ]
 
+
 class ProductPage(AbstractPage):
     parent_page_types = [ProductsPage]
     template = "home/product_page.html"
 
 
 class ContactUsPage(AbstractPage):
-    template = "home/contact_us.html"
+    thank_you_caption = RichTextField(default="", verbose_name="Подяка за повідомлення")
+    thank_you_caption_en = RichTextField(
+        default="", verbose_name="[EN] Подяка за повідомлення"
+    )
+    thank_you_text = RichTextField(
+        default="", verbose_name="Текст подяки за повідомлення"
+    )
+    thank_you_text_en = RichTextField(
+        default="", verbose_name="[EN] Текст подяки за повідомлення"
+    )
+
+    translated_thank_you_caption = TranslatedField(
+        "thank_you_caption",
+        "thank_you_caption_en",
+    )
+    translated_thank_you_text = TranslatedField(
+        "thank_you_text",
+        "thank_you_text_en",
+    )
+
+    content_panels = [
+        FieldPanel("title", classname="full title"),
+        FieldPanel("title_en", classname="full title"),
+        FieldPanel("body", classname="full"),
+        FieldPanel("body_en", classname="full"),
+        FieldPanel("thank_you_caption"),
+        FieldPanel("thank_you_caption_en"),
+        FieldPanel("thank_you_text", classname="full"),
+        FieldPanel("thank_you_text_en", classname="full"),
+    ]
+
+    def serve(self, request):
+        from home.forms import ContactUsForm
+
+        if request.method == "POST":
+            form = ContactUsForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return render(
+                    request,
+                    "home/contact_thankyou.html",
+                    {
+                        "page": self,
+                    },
+                )
+        else:
+            form = ContactUsForm()
+
+        return render(
+            request,
+            "home/contact_us.html",
+            {
+                "page": self,
+                "form": form,
+            },
+        )
 
 
 class LangUkMainMenuItem(AbstractMainMenuItem):
@@ -654,3 +718,18 @@ class LangUkMainMenuItem(AbstractMainMenuItem):
         FieldPanel("show_in_footer"),
         FieldPanel("allow_subnav"),
     )
+
+
+class ContactUsMessage(models.Model):
+    text = models.TextField(_("Повідомлення*"), blank=False)
+    author = models.TextField(_("Ім'я"), max_length=512, blank=False)
+    email = models.EmailField(_("e-mail"), max_length=512, blank=False)
+    phone = models.TextField(_("Телефон"), max_length=512, blank=True)
+    added = models.DateTimeField(_("Був надісланий"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("Зворотній зв'язок")
+        verbose_name_plural = _("Зворотній зв'язок")
+
+    def __str__(self):
+        return f"{self.author} <{self.email}>: {self.text[:50]}"

@@ -13,7 +13,7 @@ from wagtailmenus.templatetags.menu_tags import main_menu, sub_menu
 from dateutil.parser import parse as parse_dt
 import markdown
 from markupsafe import Markup
-from jinja2 import Environment, contextfunction
+from jinja2 import Environment, pass_context
 from jinja2.ext import Extension, nodes
 
 
@@ -63,9 +63,11 @@ def datetime_filter(dt, dayfirst=False):
 def date_filter(dt, dayfirst=False):
     return (
         formats.date_format(
-            timezone.localtime(ensure_aware(parse_dt(dt, dayfirst=dayfirst)))
-            if isinstance(dt, str)
-            else dt,
+            (
+                timezone.localtime(ensure_aware(parse_dt(dt, dayfirst=dayfirst)))
+                if isinstance(dt, str)
+                else dt
+            ),
             "SHORT_DATE_FORMAT",
         )
         if dt
@@ -103,8 +105,8 @@ def environment(**options):
             "static": staticfiles_storage.url,
             "url": reverse,
             "curr_year": datetime.today().year,
-            "lang_uk_menu": contextfunction(main_menu),
-            "sub_menu": contextfunction(sub_menu),
+            "lang_uk_menu": pass_context(main_menu),
+            "sub_menu": pass_context(sub_menu),
             "LANGUAGES_DICT": dict(settings.LANGUAGES),
         }
     )

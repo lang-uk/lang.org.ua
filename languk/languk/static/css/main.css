@@ -3400,7 +3400,8 @@ h4 {
   width: 100%;
   padding-bottom: 32px;
 }
-.contact__form .form__content form .error__msg {
+.contact__form .form__content form .error__msg,
+.contact__form .form__content form .errorlist {
   display: none;
 }
 .contact__form .form__content form .error .input__item {
@@ -3427,7 +3428,9 @@ h4 {
 .contact__form .form__content form .error .input__item-area {
   border: 1px solid #ff3f3f;
 }
-.contact__form .form__content form .error .error__msg {
+.contact__form .form__content form .error .error__msg,
+.contact__form .form__content form .error .errorlist,
+.contact__form .form__content form .errorlist {
   display: block;
   color: #ff3f3f;
 }

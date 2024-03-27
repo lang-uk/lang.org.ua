@@ -25,32 +25,49 @@
 <!-- contact-us/form-contact.pug-->
 <div class="contact__form">
     <div class="form__content">
-        <p class="h2">Зв’язатися з нами</p>
+        {{ page.translated_body|safe }}
+
         <form class="form" action="" method="POST">
-            <input type="hidden" name="redirect" value="contact-us-success.html" />
+            {{ csrf_input }}
+
             <div class="contact-input">
-                <input class="input__item required" type="text" name="name" placeholder="Ім’я*" value="" />
-                <div class="caption-2 error__msg">Ведіть ваше Ім'я</div>
+                {{ form.author }}
+                {% if form.author.errors %}
+                    <span class="caption-2">{{ form.author.errors }}</span>
+                {% endif %}
             </div>
+
             <div class="contact-input">
                 <div class="input__contact">
                     <div class="input__contact-item">
-                        <input class="input__item" type="tel" name="tel" placeholder="Телефон" value="" />
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <span class="caption-2">{{ form.phone.errors }}</span>
+                        {% endif %}
                     </div>
                     <div class="input__contact-item">
-                        <input class="input__item required" type="email" name="email" placeholder="Email*" value="" />
-                        <div class="caption-2 error__msg">Введіть ваш Email</div>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <span class="caption-2">{{ form.email.errors }}</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+
             <div class="contact-input">
-                <p class="text-m">Повідомлення*</p>
-                <textarea class="input__item-area required" rows="6" name="message"
-                    placeholder="Ваше повідомлення"></textarea>
-                <div class="caption-2 error__msg">Додайте повідомлення</div>
+                <p class="text-m">{{ form.text.label_tag(label_suffix="") }}</p>
+                {{ form.text }}
+                {% if form.text.errors %}
+                    <span class="caption-2">{{ form.text.errors }}</span>
+                {% endif %}
             </div>
-            <button class="button button-wave spacer__item" href="contact-us-success.html"
-                type="submit">Надіслати</button>
+            {% if form.captcha.errors %}
+                <div class="contact-input">
+                    <span class="caption-2">{{ form.captcha.errors }}</span>
+                </div>
+            {% endif %}
+            <button class="button button-wave spacer__item" type="submit">{{ _("Надіслати") }}</button>
+            {{ form.captcha }}
         </form>
     </div>
 </div>

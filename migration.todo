@@ -1,7 +1,7 @@
 Re-design:
   ✔ Add CMS controls for the home page/products section @done (25/06/2023, 16:11:06)
   ✔ Fix links styling in the products section: "link link--primary-dark underline-animation-reverse" @done (25/06/2023, 16:57:14)
-  ☐ Wire up "add product" forms
+  ✔ Wire up "add product" forms @done (05/07/2026)
   ✔ Add our partners/already using our products section on the home page. @done (25/06/2023, 18:26:00)
   ✔ CMSize Who may find it useful section of the home page @done (25/06/2023, 18:53:38)
   ✔ CMSize become a part section of the homepage @done (25/06/2023, 19:03:30)
@@ -9,13 +9,32 @@ Re-design:
   ✔ Refactor common blocks in new design into snippets @done (25/06/2023, 21:13:46)
   ✔ Fix icons on main page @done (22/03/2024, 01:20:07)
   ✔ Fix burger menu @done (22/03/2024, 01:49:55)
-  ☐ Wire up icon "has updates"?
+  ✔ Wire up icon "has updates" (last_significant_update on ArtifactPage drives the badge) @done (05/07/2026)
   ✔ Convert About US page @done (24/03/2024, 02:17:01)
-  ☐ Thumbnail macro
+  ✔ Thumbnail macro (catalog/_macros.html) @done (05/07/2026)
   ✔ Titles for the pages @done (25/03/2024, 15:12:33)
   ✔ Convert Manifest page @done (25/03/2024, 02:13:45)
   ✔ Convert Contact us page @done (27/03/2024, 16:36:50)
-  ☐ Add sendgrid to the contact form
+  ✔ Add sendgrid to the contact form (django-anymail; set SENDGRID_API_KEY + notification_emails) @done (05/07/2026)
+  ✔ Catalog data model: ArtifactType/ArtifactPage/SectionPage in the new catalog app @done (05/07/2026)
+  ✔ Public forms: submit-artifact + usage-feedback with moderation inboxes @done (05/07/2026)
+  ✔ Convert corpus browser (4 pages) to the new design @done (05/07/2026)
+  ✔ Rewire search on the new design @done (05/07/2026)
+  ✔ New 404/500 pages @done (05/07/2026)
+  ✔ Retire old base templates, css/js, newborn app @done (05/07/2026)
+
+Production rollout (after deploying this branch):
+  ☐ manage.py migrate
+  ☐ manage.py convert_product_pages --type-map korpusi=corpora slovniki=dictionaries gazetiri=gazetteers servisi=services biblioteki=libraries modeli=models
+  ☐ manage.py import_artifacts (drafts; --publish once curated)
+  ☐ manage.py import_community_artifacts (30 curated GitHub/HF projects; the 0005
+    migration tries this too but skips types whose sections don't exist yet —
+    re-run the command after convert_product_pages + the Датасети section exist)
+  ☐ Create SubmitArtifactPage + FeedbackPage + "Датасети" section in CMS
+  ☐ Set SENDGRID_API_KEY env + notification_emails in site settings
+  ☐ Curate imported artifacts (EN texts for the models section, licenses, update dates)
+  ☐ Clear legacy one-word section bodies after convert_product_pages (they duplicate the title)
+  ☐ Drop legacy home.ProductPage model once production pages are converted
 
 
 UberText support:

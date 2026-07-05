@@ -26,11 +26,11 @@ Re-design:
 Production rollout (after deploying this branch):
   ☐ manage.py migrate
   ☐ manage.py convert_product_pages --type-map korpusi=corpora slovniki=dictionaries gazetiri=gazetteers servisi=services biblioteki=libraries modeli=models
+  ☐ manage.py bootstrap_catalog_pages (Датасети section + submit/feedback pages)
   ☐ manage.py import_artifacts (drafts; --publish once curated)
   ☐ manage.py import_community_artifacts (30 curated GitHub/HF projects; the 0005
-    migration tries this too but skips types whose sections don't exist yet —
-    re-run the command after convert_product_pages + the Датасети section exist)
-  ☐ Create SubmitArtifactPage + FeedbackPage + "Датасети" section in CMS
+    migration tries this too but skips types whose sections don't exist yet)
+  See DEPLOYMENT.md for the full guide (env vars, verification, rollback)
   ☐ Set SENDGRID_API_KEY env + notification_emails in site settings
   ☐ Curate imported artifacts (EN texts for the models section, licenses, update dates)
   ☐ Clear legacy one-word section bodies after convert_product_pages (they duplicate the title)

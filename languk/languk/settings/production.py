@@ -1,8 +1,21 @@
 from __future__ import absolute_import, unicode_literals
 
+import os
+
 from .base import *
 
 DEBUG = False
+
+# Form notifications (contact, artifact submissions, usage feedback) go out
+# through SendGrid; without SENDGRID_API_KEY mail silently stays on the
+# console backend from base.py
+if os.environ.get("SENDGRID_API_KEY"):
+    EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+    ANYMAIL = {
+        "SENDGRID_API_KEY": os.environ["SENDGRID_API_KEY"],
+    }
+
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@lang.org.ua")
 
 try:
     from .local import *

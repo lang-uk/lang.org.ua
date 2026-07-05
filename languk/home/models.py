@@ -28,6 +28,13 @@ class GenericSiteSettings(BaseGenericSetting):
     phone = models.CharField(max_length=30)
     copyright = models.CharField(max_length=120)
     ga_account = models.CharField(max_length=30, default="")
+    notification_emails = models.TextField(
+        default="",
+        blank=True,
+        verbose_name="Сповіщення редакторам",
+        help_text="Email-адреси через кому: сюди надходять повідомлення з форм "
+        "(зворотній зв'язок, заявки на продукти, відгуки)",
+    )
 
 
 @hooks.register("construct_whitelister_element_rules")
@@ -100,7 +107,7 @@ class LinkFields(models.Model):
 
 class AbstractPage(Page):
     title_en = models.CharField(
-        default="", max_length=255, verbose_name="[EN] Назва сторінки"
+        default="", max_length=255, blank=True, verbose_name="[EN] Назва сторінки"
     )
 
     global_class = models.CharField(
@@ -433,7 +440,11 @@ class HomePage(AbstractPage):
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
-        context["products_page"] = ProductsPage.objects.child_of(self).live().first()
+        products_page = ProductsPage.objects.child_of(self).live().first()
+        context["products_page"] = products_page
+        context["section_pages"] = (
+            products_page.get_sections_with_badges() if products_page else []
+        )
         return context
 
     subpage_types = [
@@ -442,6 +453,8 @@ class HomePage(AbstractPage):
         "AboutUsPage",
         "ManifestoPage",
         "ContactUsPage",
+        "catalog.SubmitArtifactPage",
+        "catalog.FeedbackPage",
     ]
 
 
@@ -525,7 +538,8 @@ class AboutUsPage(AbstractPage):
 class ProductsPage(AbstractPage):
     template = "home/products_page.html"
     parent_page_types = [HomePage]
-    subpage_types = ["ProductPage"]
+    # ProductPage is legacy; sections are being converted to catalog.SectionPage
+    subpage_types = ["ProductPage", "catalog.SectionPage"]
 
     intro = RichTextField(default="", verbose_name="[UA] Вводний текст")
     intro_en = RichTextField(default="", verbose_name="[EN] Вводний текст")
@@ -544,6 +558,31 @@ class ProductsPage(AbstractPage):
         FieldPanel("svg_image", classname="full"),
         FieldPanel("global_class", classname="full"),
     ]
+
+    def get_sections_with_badges(self):
+        """Live child sections with a precomputed new-arrivals flag
+        (one query for the badge instead of an EXISTS per card)."""
+        from datetime import date, timedelta
+
+        from catalog.models import NEW_BADGE_DAYS, ArtifactPage
+
+        sections = list(self.get_children().live().specific())
+        cutoff = date.today() - timedelta(days=NEW_BADGE_DAYS)
+        recent_paths = list(
+            ArtifactPage.objects.live()
+            .filter(last_significant_update__gte=cutoff)
+            .values_list("path", flat=True)
+        )
+        for section in sections:
+            section.has_new_arrivals = any(
+                path.startswith(section.path) for path in recent_paths
+            )
+        return sections
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context["section_pages"] = self.get_sections_with_badges()
+        return context
 
 
 class ManifestoPage(AbstractPage):
@@ -634,16 +673,22 @@ class ProductPage(AbstractPage):
     template = "home/product_page.html"
 
 
-class ContactUsPage(AbstractPage):
-    thank_you_caption = RichTextField(default="", verbose_name="Подяка за повідомлення")
+class FormPageMixin(models.Model):
+    """Thank-you texts plus the shared POST -> validate -> save -> notify ->
+    thank-you serve() flow used by the public forms (contact us, submit an
+    artifact, usage feedback)."""
+
+    thank_you_caption = RichTextField(
+        default="", blank=True, verbose_name="Подяка за повідомлення"
+    )
     thank_you_caption_en = RichTextField(
-        default="", verbose_name="[EN] Подяка за повідомлення"
+        default="", blank=True, verbose_name="[EN] Подяка за повідомлення"
     )
     thank_you_text = RichTextField(
-        default="", verbose_name="Текст подяки за повідомлення"
+        default="", blank=True, verbose_name="Текст подяки за повідомлення"
     )
     thank_you_text_en = RichTextField(
-        default="", verbose_name="[EN] Текст подяки за повідомлення"
+        default="", blank=True, verbose_name="[EN] Текст подяки за повідомлення"
     )
 
     translated_thank_you_caption = TranslatedField(
@@ -655,42 +700,62 @@ class ContactUsPage(AbstractPage):
         "thank_you_text_en",
     )
 
-    content_panels = [
-        FieldPanel("title", classname="full title"),
-        FieldPanel("title_en", classname="full title"),
-        FieldPanel("body", classname="full"),
-        FieldPanel("body_en", classname="full"),
+    thank_you_panels = [
         FieldPanel("thank_you_caption"),
         FieldPanel("thank_you_caption_en"),
         FieldPanel("thank_you_text", classname="full"),
         FieldPanel("thank_you_text_en", classname="full"),
     ]
 
+    class Meta:
+        abstract = True
+
+    def get_form_class(self):
+        raise NotImplementedError
+
+    def get_notification_subject(self, obj):
+        raise NotImplementedError
+
+    def get_notification_body(self, obj):
+        return str(obj)
+
     def serve(self, request):
+        from catalog.emails import notify_editors
+
+        form_class = self.get_form_class()
+        if request.method == "POST":
+            form = form_class(request.POST)
+            if form.is_valid():
+                obj = form.save()
+                notify_editors(
+                    subject=self.get_notification_subject(obj),
+                    body=self.get_notification_body(obj),
+                    request=request,
+                )
+                return render(request, "home/contact_thankyou.html", {"page": self})
+        else:
+            form = form_class()
+
+        return render(request, self.template, {"page": self, "form": form})
+
+
+class ContactUsPage(FormPageMixin, AbstractPage):
+    template = "home/contact_us.html"
+
+    content_panels = [
+        FieldPanel("title", classname="full title"),
+        FieldPanel("title_en", classname="full title"),
+        FieldPanel("body", classname="full"),
+        FieldPanel("body_en", classname="full"),
+    ] + FormPageMixin.thank_you_panels
+
+    def get_form_class(self):
         from home.forms import ContactUsForm
 
-        if request.method == "POST":
-            form = ContactUsForm(request.POST)
-            if form.is_valid():
-                form.save()
-                return render(
-                    request,
-                    "home/contact_thankyou.html",
-                    {
-                        "page": self,
-                    },
-                )
-        else:
-            form = ContactUsForm()
+        return ContactUsForm
 
-        return render(
-            request,
-            "home/contact_us.html",
-            {
-                "page": self,
-                "form": form,
-            },
-        )
+    def get_notification_subject(self, obj):
+        return "lang.org.ua: нове повідомлення з форми зворотнього зв'язку"
 
 
 class LangUkMainMenuItem(AbstractMainMenuItem):

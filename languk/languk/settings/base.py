@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     "django_task",
     "django_recaptcha",
     "home",
-    "newborn",
+    "catalog",
     "corpus",
     "search",
     "wagtail.contrib.forms",

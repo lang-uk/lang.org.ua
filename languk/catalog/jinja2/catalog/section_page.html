@@ -1,0 +1,57 @@
+{% extends "bachoo_base.html" %}
+{% from "catalog/_macros.html" import artifact_info, new_badge %}
+{% from "_macros/ui.html" import pagination %}
+
+{% block page_content %}
+{% include "common/breadcrumbs.html" %}
+    <div class="services">
+      <div class="spacer spacer--size-3">
+        <div class="spacer__item">
+          <p class="h1">{{ page.translated_title }}</p>
+        </div>
+        {% if page.translated_body %}
+        <div class="spacer__item">
+          <div class="text-l">{{ page.translated_body|richtext|design_richtext }}</div>
+        </div>
+        {% endif %}
+        <div class="spacer__item">
+          <div class="services-types">
+            <div class="button-fill-container">
+              <button class="button-fill button-fill-container__item active" data-type="list" type="button"><span class="button-fill__content">{{ _("Список") }}</span></button>
+              <button class="button-fill button-fill-container__item" data-type="cards" type="button"><span class="button-fill__content">{{ _("Картки") }}</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="spacer__item spacer__item--size-6">
+          <div class="services-list">
+          {% for artifact in artifacts %}
+            <div class="service accordion"{% if loop.first %} data-open{% endif %}>
+              <div class="service-head accordion-toggle">
+                <span class="service-head__title h3">{{ artifact.translated_title }}
+                  {%- if artifact.has_recent_updates %} {{ new_badge() }}{% endif %}</span>
+                <span class="service-head__toggle"></span>
+              </div>
+              <div class="service-body accordion-body">
+                <div class="service-wrapper">
+                  <div class="service-content">
+                    {# short_description is for cards/search snippets — the body opens with the same text #}
+                    {{ artifact.translated_body|richtext|design_richtext }}
+                    <p><a class="link link--primary-dark underline-animation-reverse" href="{{ artifact.get_url() }}">{{ _("Постійне посилання") }}</a></p>
+                  </div>
+                  {{ artifact_info(artifact) }}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+          </div>
+        </div>
+        {% if artifacts.has_other_pages() %}
+        <div class="spacer__item">
+          <div class="search-result__block">
+            {{ pagination(artifacts) }}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+{% endblock %}

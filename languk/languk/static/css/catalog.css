@@ -1,0 +1,44 @@
+/* Catalog add-ons for the Bachoo design system: the design ships table
+   styles only under .article, but catalog bodies render inside
+   .service-content (section accordions and artifact pages) */
+
+/* accordion heads are clickable: pointer + the design's green hover accent */
+.services-list .service-head.accordion-toggle {
+  cursor: pointer;
+}
+
+.services-list .service-head__title {
+  -webkit-transition: color 0.2s ease-in-out;
+  -o-transition: color 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
+}
+
+.services-list .service-head.accordion-toggle:hover .service-head__title {
+  color: #63ba84;
+}
+
+.services-list .service-content .table {
+  width: 100%;
+  overflow: auto;
+  margin-bottom: 2rem;
+}
+
+.services-list .service-content .table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.services-list .service-content .table thead {
+  background-color: #ffffff;
+}
+
+.services-list .service-content .table td,
+.services-list .service-content .table th {
+  border: 1px solid #dddddd;
+  text-align: center;
+  padding: 0.75rem 1rem;
+}
+
+.services-list .service-content .table tr:nth-child(even) {
+  background-color: #ebe8e6;
+}

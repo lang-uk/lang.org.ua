@@ -1,0 +1,28 @@
+{% macro search_form(css_class="", value="") %}
+<form class="search-form{% if css_class %} {{ css_class }}{% endif %}" action="{{ url('search') }}" method="get">
+  <div class="search-form__wrapper">
+    <input class="search-form__input" name="query" type="text" {% if value %}value="{{ value }}" {% endif %}placeholder="{{ _('Пошук') }}" autocomplete="off"/>
+  </div>
+  <button class="search-form__button" type="submit"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.25 18C14.9779 18 18 14.9779 18 11.25C18 7.52208 14.9779 4.5 11.25 4.5C7.52208 4.5 4.5 7.52208 4.5 11.25C4.5 14.9779 7.52208 18 11.25 18Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M23.2484 22.5L16.6484 16.65" stroke="black" stroke-width="2" stroke-linejoin="round"/>
+</svg>
+  </button>
+</form>
+{% endmacro %}
+
+{% macro pagination(page_obj, extra_query="") %}
+<div class="search-result__pages">
+  <ul class="pagination">
+    {% for num in page_obj.paginator.page_range %}
+    <li>
+      {% if num == page_obj.number %}
+      <span class="text-m current">{{ num }}</span>
+      {% else %}
+      <a class="text-m" href="?{{ extra_query }}page={{ num }}">{{ num }}</a>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endmacro %}

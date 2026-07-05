@@ -5,6 +5,13 @@ from wagtail.admin.rich_text.converters.html_to_contentstate import (
 from wagtail import hooks
 
 
+@hooks.register("register_rich_text_features")
+def enable_code_feature(features):
+    """Expose Wagtail's built-in inline-code feature; rendered monospace via
+    the design's .code-text styles."""
+    features.default_features.append("code")
+
+
 # 1. Use the register_rich_text_features hook.
 @hooks.register("register_rich_text_features")
 def register_h4_feature(features):

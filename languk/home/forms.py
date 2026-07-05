@@ -7,11 +7,15 @@ from django.utils.translation import gettext_lazy as _
 from home.models import ContactUsMessage
 
 
-class ContactUsForm(ModelForm):
+class RecaptchaModelForm(ModelForm):
+    """Base for the public forms: required-field styling + invisible captcha."""
+
     required_css_class = "required"
 
     captcha = ReCaptchaField(widget=ReCaptchaV3)
 
+
+class ContactUsForm(RecaptchaModelForm):
     class Meta:
         model = ContactUsMessage
         fields = ["author", "text", "email", "phone"]

@@ -1,0 +1,43 @@
+{% extends "bachoo_base.html" %}
+
+{% macro form_row(field) %}
+        <div class="form-row{% if field.errors %} error{% endif %}">
+          <div class="form-row__content">
+            {{ field }}
+            {% if field.errors %}<span class="error-message caption-2">{{ field.errors[0] }}</span>{% endif %}
+          </div>
+        </div>
+{% endmacro %}
+
+{% block page_content %}
+{% include "common/breadcrumbs.html" %}
+    <div class="add-product-form">
+      <div class="spacer spacer--size-3">
+        <div class="spacer__item">
+          <p class="h1">{{ page.translated_title }}</p>
+        </div>
+        {% if page.translated_body %}
+        <div class="spacer__item">
+          <div class="text-l">{{ page.translated_body|richtext }}</div>
+        </div>
+        {% endif %}
+        <div class="spacer__item">
+          <form class="form" action="" method="POST">
+            {{ csrf_input }}
+            {% for field in form.visible_fields() %}
+              {{ form_row(field) }}
+            {% endfor %}
+            {% for field in form.hidden_fields() %}{{ field }}{% endfor %}
+            {% if form.captcha.errors %}
+            <div class="form-row error">
+              <span class="error-message caption-2">{{ form.captcha.errors[0] }}</span>
+            </div>
+            {% endif %}
+            <div class="form-row__button">
+              <button class="button button-wave" type="submit">{{ page.submit_label }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+{% endblock %}

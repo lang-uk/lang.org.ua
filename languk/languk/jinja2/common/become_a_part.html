@@ -5,8 +5,8 @@
         <div class="become-part__actions">
             <div class="spacer spacer--h-sm">
                 <div class="spacer__item"><a class="button button-wave button-wave--transparent spacer__item"
-                        href="#">{{ _("Залишити видгук") }}</a></div>
-                <div class="spacer__item"><a class="button button-wave spacer__item" href="add-product.html">{{
+                        href="{{ feedback_url() }}">{{ _("Залишити відгук") }}</a></div>
+                <div class="spacer__item"><a class="button button-wave spacer__item" href="{{ submit_product_url() }}">{{
                         _("Доповнити продукт") }}</a></div>
             </div>
         </div>

@@ -5,20 +5,16 @@ from django.shortcuts import render
 from django.utils.translation import gettext as _
 
 from wagtail.models import Page
-from wagtail.search.models import Query
 
 
 def search(request):
     search_query = request.GET.get('query', None)
     page = request.GET.get('page', 1)
 
-    # Search
+    # Search (specific() batches the page-type upcast per content type
+    # instead of one query per result in the template)
     if search_query:
-        search_results = Page.objects.live().search(search_query)
-        query = Query.get(search_query)
-
-        # Record hit
-        query.add_hit()
+        search_results = Page.objects.live().specific().search(search_query)
     else:
         search_results = Page.objects.none()
 

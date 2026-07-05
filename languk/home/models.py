@@ -6,11 +6,9 @@ from django.shortcuts import render
 
 from modelcluster.fields import ParentalKey
 
-from wagtail import hooks
 from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField
 from wagtail.snippets.models import register_snippet
-from wagtail.whitelist import attribute_rule, allow_without_attributes
 from wagtail.admin.panels import InlinePanel, FieldPanel, PageChooserPanel
 from wagtail.contrib.settings.models import (
     BaseGenericSetting,
@@ -35,23 +33,6 @@ class GenericSiteSettings(BaseGenericSetting):
         help_text="Email-адреси через кому: сюди надходять повідомлення з форм "
         "(зворотній зв'язок, заявки на продукти, відгуки)",
     )
-
-
-@hooks.register("construct_whitelister_element_rules")
-def whitelister_element_rules():
-    return {
-        "u": allow_without_attributes,
-        "table": attribute_rule(
-            {"cellspacing": True, "cellpadding": True, "border": True}
-        ),
-        "td": attribute_rule({"valign": True, "style": True}),
-        "tr": allow_without_attributes,
-        "th": allow_without_attributes,
-        "tbody": allow_without_attributes,
-        "tfoot": allow_without_attributes,
-        "thead": allow_without_attributes,
-        "p": attribute_rule({"align": True}),
-    }
 
 
 class TranslatedField(object):

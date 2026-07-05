@@ -1,4 +1,4 @@
-FROM python:3.7.2-alpine3.8
+FROM python:3.13-alpine
 
 ARG root=/app
 ARG version

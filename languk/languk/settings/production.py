@@ -6,6 +6,15 @@ from .base import *
 
 DEBUG = False
 
+# Error reporting (replaces the long-dead raven client)
+if os.environ.get("SENTRY_DSN"):
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=os.environ["SENTRY_DSN"],
+        release=os.environ.get("VERSION", "undef"),
+    )
+
 # Form notifications (contact, artifact submissions, usage feedback) go out
 # through SendGrid; without SENDGRID_API_KEY mail silently stays on the
 # console backend from base.py

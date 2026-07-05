@@ -1,17 +1,64 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <title>Internal server error</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
-    <body>
-        <h1>Internal server error</h1>
-
-        <h2>Sorry, there seems to be an error. Please try again soon.</h2>
-    </body>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Внутрішня помилка сервера: lang-uk</title>
+  <!-- Deliberately self-contained: a 500 can mean the database or the
+       static pipeline is down, so no CMS queries and no external assets -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f4f1ef;
+      color: #000000;
+      font-family: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+    .error-box {
+      max-width: 42rem;
+      padding: 2rem;
+      text-align: center;
+    }
+    .error-box .code {
+      font-size: 6rem;
+      font-weight: 800;
+      line-height: 1;
+      margin: 0 0 1rem;
+    }
+    .error-box h1 {
+      font-size: 1.5rem;
+      margin: 0 0 1rem;
+    }
+    .error-box p {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 0 0 2rem;
+      color: #444444;
+    }
+    .error-box a {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      border: 1px solid #000000;
+      border-radius: 2rem;
+      color: #000000;
+      text-decoration: none;
+    }
+    .error-box a:hover {
+      background: #aae2bf;
+    }
+  </style>
+</head>
+<body>
+  <div class="error-box">
+    <p class="code">500</p>
+    <h1>Внутрішня помилка сервера / Internal server error</h1>
+    <p>Щось пішло не так із нашого боку. Ми вже про це знаємо і працюємо над виправленням.<br/>
+       Something went wrong on our side. We are already on it.</p>
+    <a href="/">lang.org.ua</a>
+  </div>
+</body>
 </html>

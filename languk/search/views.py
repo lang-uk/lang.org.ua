@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import render
+from django.utils.translation import gettext as _
 
 from wagtail.models import Page
 from wagtail.search.models import Query
@@ -33,4 +34,5 @@ def search(request):
     return render(request, 'search/search.html', {
         'search_query': search_query,
         'search_results': search_results,
+        'page_title': search_query or _('Пошук'),
     })

@@ -1,0 +1,55 @@
+/* UberText corpus browser add-ons for the Bachoo design system */
+
+/* stats tables: left-align and wrap the source column */
+.article .table table td:first-child,
+.article .table table th:first-child {
+  text-align: left;
+  white-space: normal;
+}
+
+/* timeline chart */
+#source_timeline {
+  height: 300px;
+  width: 100%;
+}
+
+.ct-series-a .ct-line,
+.ct-series-a .ct-point {
+  stroke: #63ba84;
+}
+
+/* article excerpts on sample pages */
+.excerpt {
+  margin-bottom: 3rem;
+}
+
+/* monospace font comes from main.css's .code-text on the pre tags */
+.excerpt pre,
+.corpus-text pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.excerpt time,
+.excerpt address,
+.corpus-meta time,
+.corpus-meta address {
+  display: block;
+  margin: 0.5rem 0;
+  font-style: normal;
+  color: #898989;
+}
+
+/* external-link marker (from the legacy reading view) */
+.corpus-text a[target="_blank"]::after,
+.excerpt a[target="_blank"]::after {
+  content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+  margin: 0 3px 0 5px;
+}
+
+.uk-rate--high { color: darkgreen; }
+.uk-rate--mid { color: darkorange; }
+.uk-rate--low { color: red; }

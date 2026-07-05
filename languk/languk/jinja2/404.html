@@ -1,16 +1,15 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <title>Internal server error</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
-    <body>
-        <h1>Page not found</h1>
-        <h2>Sorry, this page could not be found.</h2>
-    </body>
-</html>
+{% extends "bachoo_base.html" %}
+
+{% block page_content %}
+    <div class="article">
+      <div class="article__content">
+        <p class="h0">404</p>
+        <p class="h2">{{ _("Сторінку не знайдено") }}</p>
+        <p class="text-l">{{ _("Схоже, такої сторінки не існує. Спробуйте почати з головної або скористайтеся пошуком.") }}</p>
+        <p><img src="{{ static('img/error_404.svg') }}" alt="404" style="max-width: 100%;"/></p>
+        <p>
+          <a class="button button-wave" href="/">{{ _("На головну") }}</a>
+        </p>
+      </div>
+    </div>
+{% endblock %}

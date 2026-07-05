@@ -1,197 +1,136 @@
-{% extends "base.html" %}
-
-{% block page_header %}
-{% endblock %}
-
-{% block title %}
-	{{ _("Джерело") }} «{{ source.title }}» | {{ _("UberText") }}
-{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.4/chartist.min.css" integrity="sha512-V0+DPzYyLzIiMiWCg3nNdY+NyIiK9bED/T1xNBj08CaIUyK3sXRpB26OUCIzujMevxY9TRJFHQIxTwgzb0jVLg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-{% endblock %}
+{% extends "bachoo_base.html" %}
 
 {% block page_content %}
-<div class="wrapper-in rte full_page">
-	<section>
-		<h3>
-			{{ _("Джерело") }} «{{ source.title }}»
-		</h3>
+    <div class="article">
+      <div class="article__content">
+        <p class="h1">{{ _("Джерело") }} «{{ source.title }}»</p>
 
-		<table class="source-details">
-			<tbody>
-				<tr>
-					<th>
-						{{ _("Ідентифікатор") }}
-					</th>
-					<td>
-						{{ source._id }}
-					</td>
-				</tr>
-				<tr>
-					<th>
-						{{ _("Сайт") }}
-					</th>
-					<td>
-						<a href="{{ source.website }}">{{ source.website }}</a>
-					</td>
-				</tr>
-				<tr>
-					<th>
-						{{ _("Авторські права") }}
-					</th>
-					<td>
-						{{ source.copyright }}
-					</td>
-				</tr>
-				{% if source.stats %}
-					<tr>
-						<th>
-							{{ _("Статей") }}
-						</th>
-						<td>
-							{{ source.stats.docs|number_format }}
-						</td>
-					</tr>
-					<tr>
-						<th>
-							{{ _("Слів") }}
-						</th>
-						<td>
-							{{ source.stats.total_words|number_format }}
-						</td>
-					</tr>
-					<tr>
-						<th>
-							{{ _("Байтів") }}
-						</th>
-						<td>
-							{{ source.stats.total_len|number_format }}
-						</td>
-					</tr>
+        <div class="table">
+          <table>
+            <tbody>
+              <tr>
+                <th>{{ _("Ідентифікатор") }}</th>
+                <td>{{ source._id }}</td>
+              </tr>
+              <tr>
+                <th>{{ _("Сайт") }}</th>
+                <td><a class="link link--primary-dark" href="{{ source.website }}">{{ source.website }}</a></td>
+              </tr>
+              <tr>
+                <th>{{ _("Авторські права") }}</th>
+                <td>{{ source.copyright }}</td>
+              </tr>
+              {% if source.stats %}
+                <tr>
+                  <th>{{ _("Статей") }}</th>
+                  <td>{{ source.stats.docs|number_format }}</td>
+                </tr>
+                <tr>
+                  <th>{{ _("Слів") }}</th>
+                  <td>{{ source.stats.total_words|number_format }}</td>
+                </tr>
+                <tr>
+                  <th>{{ _("Байтів") }}</th>
+                  <td>{{ source.stats.total_len|number_format }}</td>
+                </tr>
+                {% if source.stats.docs %}
+                  <tr>
+                    <th>{{ _("Слів на статтю") }}</th>
+                    <td>{{ (source.stats.total_words / source.stats.docs)|number_format }}</td>
+                  </tr>
+                  <tr>
+                    <th>{{ _("Довжина статті") }}</th>
+                    <td>{{ (source.stats.total_len / source.stats.docs)|number_format }}</td>
+                  </tr>
+                {% endif %}
+                {% if source.stats.min_date %}
+                  <tr>
+                    <th>{{ _("Найстаріша стаття") }}</th>
+                    <td>{{ source.stats.min_date|datetime }}</td>
+                  </tr>
+                {% endif %}
+                {% if source.stats.max_date %}
+                  <tr>
+                    <th>{{ _("Найновіша стаття") }}</th>
+                    <td>{{ source.stats.max_date|datetime }}</td>
+                  </tr>
+                {% endif %}
+                {% if source.sampling_results %}
+                  <tr>
+                    <th>{{ _("Тестові вибірки") }}</th>
+                    <td>
+                      <ul>
+                      {% for sample_slug, sample in source.sampling_results.items() %}
+                      <li><a class="link link--primary-dark" href="{{ url('corpus>corpus_sample', args=[source.collection, source._id, sample_slug]) }}">{{ sample.title }}</a></li>
+                      {% endfor %}
+                      </ul>
+                    </td>
+                  </tr>
+                {% endif %}
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
 
-					{% if source.stats.docs %}
-						<tr>
-							<th>
-								{{ _("Слів на статтю") }}
-							</th>
-							<td>
-								{{ (source.stats.total_words / source.stats.docs)|number_format }}
-							</td>
-						</tr>
-						<tr>
-							<th>
-								{{ _("Довжина статті") }}
-							</th>
-							<td>
-								{{ (source.stats.total_len / source.stats.docs)|number_format }}
-							</td>
-						</tr>
-					{% endif %}
-					{% if source.stats.min_date %}
-						<tr>
-							<th>
-								{{ _("Найстаріша стаття") }}
-							</th>
-							<td>
-								{{ source.stats.min_date|datetime }}
-							</td>
-						</tr>
-					{% endif %}
-					{% if source.stats.max_date %}
-						<tr>
-							<th>
-								{{ _("Найновіша стаття") }}
-							</th>
-							<td>
-								{{ source.stats.max_date|datetime }}
-							</td>
-						</tr>
-					{% endif %}
-					{% if source.timeline %}
-						<tr>
-							<th colspan="2">
-								{{ _("Таймлайн") }}
-								<div id="source_timeline" data-timeline="{{ source.timeline|tojson|forceescape }}">
-								</div>
-							</th>
-						</tr>
-					{% endif %}
-					{% if source.sampling_results %}
-						<tr>
-							<th>
-								{{ _("Тестові вибірки") }}
-							</th>
-							<td>
-								<ul>
-								{% for sample_slug, sample in source.sampling_results.items() %}
-								<li><a href="{{ url('corpus>corpus_sample', args=[source.collection, source._id, sample_slug]) }}">{{ sample.title }}</a></li>
-								{% endfor %}
-								</ul>
-							</td>
-						</tr>   
-					{% endif %}
-				{% endif %}
-			</tbody>
-		</table>
-	</section>
-</div>
+        {% if source.stats and source.timeline %}
+        <p class="h3">{{ _("Таймлайн") }}</p>
+        <div id="source_timeline" data-timeline="{{ source.timeline|tojson|forceescape }}"></div>
+        {% endif %}
+      </div>
+    </div>
 {% endblock %}
 
 {% block extra_js %}
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/chartist/0.11.4/chartist.min.js" integrity="sha512-9rxMbTkN9JcgG5euudGbdIbhFZ7KGyAuVomdQDI9qXfPply9BJh0iqA7E/moLCatH2JD4xBGHwV6ezBkCpnjRQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script type="text/javascript" src="{{ static('js/chartist-plugin-tooltip.min.js') }}"></script>
+  {% if source.stats and source.timeline %}
+  <script src="{{ static('js/chartist.min.js') }}"></script>
+  <script src="{{ static('js/chartist-plugin-tooltip.min.js') }}"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var el = document.getElementById("source_timeline");
+      if (!el || typeof Chartist === "undefined") return;
 
+      var timeline = JSON.parse(el.dataset.timeline);
+      var series = [];
+      for (var i = 0; i < timeline.length; i++) {
+        if (!timeline[i]["date"]) continue;
+        series.push({
+          x: new Date(timeline[i]["date"]),
+          y: timeline[i]["count"]
+        });
+      }
 
-	<script type="text/javascript">
-		$(function() {
-			var timeline = $("#source_timeline").data("timeline"),
-				timeline_series = [];
+      var monthFormatter = new Intl.DateTimeFormat("{{ LANGUAGE_CODE }}", { month: "short", year: "numeric" });
+      var dayFormatter = new Intl.DateTimeFormat("{{ LANGUAGE_CODE }}", { dateStyle: "medium" });
 
-			for (var i = 0; i < timeline.length; i++) {
-				if (!timeline[i]["date"]) {
-					continue;
-				}
-				timeline_series.push({
-					"x": moment.utc(timeline[i]["date"])._d,
-					"y": timeline[i]["count"]
-				});
-			}
-			var chart = new Chartist.Line('#source_timeline', {
-				series: [{
-					name: 'Publications',
-					data: timeline_series
-				}]
-			}, {
-				showPoint: true,
-				showLine: true,
-				lineSmooth: Chartist.Interpolation.simple({
-					divisor: 1
-				}),
-				plugins: [
-					Chartist.plugins.tooltip({
-						appendToBody: true,
-						anchorToPoint: false, //accepts true or false
-						transformTooltipTextFnc: function(value) {
-							if (value) {
-								var dt = new Date(parseInt(value.split(",")[0]));
-								var cnt = value.split(",")[1];
-
-								return dt.toDateString() + "<br/>\n" + cnt;
-							}
-							return value;
-						}
-    				})
-				],
-				axisX: {
-					type: Chartist.FixedScaleAxis,
-					divisor: 12,
-					labelInterpolationFnc: function(value) {
-						return moment(value).format('MMM Y');
-					}
-				}
-			});
-		});
-	</script>
+      new Chartist.Line("#source_timeline", {
+        series: [{ name: "Publications", data: series }]
+      }, {
+        showPoint: true,
+        showLine: true,
+        lineSmooth: Chartist.Interpolation.simple({ divisor: 1 }),
+        plugins: [
+          Chartist.plugins.tooltip({
+            appendToBody: true,
+            anchorToPoint: false,
+            transformTooltipTextFnc: function (value) {
+              if (value) {
+                var dt = new Date(parseInt(value.split(",")[0]));
+                var cnt = value.split(",")[1];
+                return dayFormatter.format(dt) + "<br/>\n" + cnt;
+              }
+              return value;
+            }
+          })
+        ],
+        axisX: {
+          type: Chartist.FixedScaleAxis,
+          divisor: 12,
+          labelInterpolationFnc: function (value) {
+            return monthFormatter.format(new Date(value));
+          }
+        }
+      });
+    });
+  </script>
+  {% endif %}
 {% endblock %}

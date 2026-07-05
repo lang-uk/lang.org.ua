@@ -1,27 +1,15 @@
-{% extends "base.html" %}
+{% extends "bachoo_base.html" %}
 {% from 'corpus/_macro.html' import article_excerpt with context %}
 
-{% block page_header %}
-{% endblock %}
-
-{% block title %}
-	{{ _("Джерело") }} «{{ source.title }}» | {{ _("UberText") }}
-{% endblock %}
-
-
 {% block page_content %}
-<div class="wrapper-in rte full_page">
-	<section>
-		<h3>
-			{{ _("Джерело") }} «{{ source.title }}»
-		</h3>
-		<h4>
-			{{ _("Вибірка") }} «<strong>{{ sample.title }}</strong>»
-		</h4>
+    <div class="article">
+      <div class="article__content">
+        <p class="h1">{{ _("Джерело") }} «{{ source.title }}»</p>
+        <p class="h3">{{ _("Вибірка") }} «{{ sample.title }}»</p>
 
-		{% for doc in sample.documents %}
-			{{ article_excerpt(doc) }}
-		{% endfor %}
-	</section>
-</div>
+        {% for doc in sample.documents %}
+          {{ article_excerpt(doc) }}
+        {% endfor %}
+      </div>
+    </div>
 {% endblock %}

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+  {% include "_includes/head.html" %}
+  <body>
+    <div class="layout">
+      <main class="main">
+        <div class="main__container">
+        {% block page_content %}
+        {% endblock %}
+        </div>
+      </main>
+    </div>
+    {% block extra_js %}
+    {% endblock %}
+  </body>
+</html>

@@ -98,3 +98,5 @@ local.py
 
 .env
 *.so
+# collected static files (STATIC_ROOT)
+languk/static/

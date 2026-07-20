@@ -30,6 +30,32 @@ def absolutize_static(html, base_url):
     return RELATIVE_STATIC_RE.sub(rf"{base_url}/\1", html)
 
 
+CF_EMAIL_ANCHOR_RE = re.compile(
+    r'<a[^>]+href="[^"]*email-protection/?#([0-9a-fA-F]+)"[^>]*>.*?</a>', re.S
+)
+CF_EMAIL_SPAN_RE = re.compile(
+    r'<span[^>]+data-cfemail="([0-9a-fA-F]+)"[^>]*>.*?</span>', re.S
+)
+
+
+def decode_cfemail(hexstr):
+    data = bytes.fromhex(hexstr)
+    return "".join(chr(b ^ data[0]) for b in data[1:])
+
+
+def decloudflare_emails(html):
+    """The live site sits behind Cloudflare, which obfuscates emails into
+    /cdn-cgi/l/email-protection links plus a JS decoder; scraped copies are
+    dead links showing "[email protected]". Decode them back to mailto:."""
+
+    def anchor(m):
+        email = decode_cfemail(m.group(1))
+        return f'<a href="mailto:{email}">{email}</a>'
+
+    html = CF_EMAIL_ANCHOR_RE.sub(anchor, html)
+    return CF_EMAIL_SPAN_RE.sub(lambda m: decode_cfemail(m.group(1)), html)
+
+
 def fetch_chunks(url, base_url):
     """Return [(title, chunk_html, chunk_soup), ...] parsed from a legacy
     section page. Sections with several h2 headings (corpora, dictionaries,
@@ -60,7 +86,8 @@ def fetch_chunks(url, base_url):
     return [
         (title, html, BeautifulSoup(html, "html.parser"))
         for title, html in (
-            (title, absolutize_static(html, base_url)) for title, html in chunks
+            (title, decloudflare_emails(absolutize_static(html, base_url)))
+            for title, html in chunks
         )
     ]
 

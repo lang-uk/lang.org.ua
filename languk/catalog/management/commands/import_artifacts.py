@@ -83,13 +83,11 @@ def fetch_chunks(url, base_url):
     if current_title is not None:
         chunks.append((current_title, "".join(current)))
 
-    return [
-        (title, html, BeautifulSoup(html, "html.parser"))
-        for title, html in (
-            (title, decloudflare_emails(absolutize_static(html, base_url)))
-            for title, html in chunks
-        )
-    ]
+    result = []
+    for title, html in chunks:
+        html = decloudflare_emails(absolutize_static(html, base_url))
+        result.append((title, html, BeautifulSoup(html, "html.parser")))
+    return result
 
 
 def extract_license(chunk_soup):
@@ -110,7 +108,6 @@ def extract_short_description(chunk_soup):
 
 
 SIZE_CAPTION_RE = re.compile(r"^[\d.,]+\s*[kmgt]?b$", re.I)
-ARCHIVE_EXT_RE = re.compile(r"\.(txt|csv|tsv|jsonl?)(\.(bz2|gz|xz|zip))?$", re.I)
 
 
 def extract_links(chunk_soup):
@@ -122,11 +119,11 @@ def extract_links(chunk_soup):
         seen.add(href)
         caption = a.get_text(" ", strip=True)[:255]
         # download tables use the file size as the anchor text — prefix the
-        # archive name so the sidebar caption says what the file is
+        # file name so the sidebar caption says what the file is
         if SIZE_CAPTION_RE.match(caption):
-            stem = ARCHIVE_EXT_RE.sub("", href.rstrip("/").rsplit("/", 1)[-1])
-            if stem:
-                caption = f"{stem} ({caption})"[:255]
+            name = href.rstrip("/").rsplit("/", 1)[-1]
+            if name:
+                caption = f"{name} ({caption})"[:255]
         links.append((guess_kind(href), href, caption))
     return links
 

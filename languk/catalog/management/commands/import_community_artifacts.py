@@ -10,7 +10,7 @@ class Command(BaseCommand):
         "Idempotent: existing slugs are skipped. Use this to re-run the 0005 "
         "data migration after the section pages exist. --enrich additionally "
         "backfills authors/licenses/paper links onto pages that already exist "
-        "(blank fields only; re-runs the 0006 data migration)."
+        "(blank fields only; same as the enrich data migration)."
     )
 
     def add_arguments(self, parser):

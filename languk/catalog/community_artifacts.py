@@ -11,8 +11,8 @@ the Hugging Face API (model cards, commit history) and the ACL Anthology
 a link to the paper. Author names are given in Ukrainian for members of the
 Ukrainian NLP community and as-published for foreign contributors.
 
-Used by the 0005/0006 data migrations and the import_community_artifacts
-command.
+Used by the populate/enrich data migrations and the
+import_community_artifacts command.
 """
 
 GH = "https://github.com/lang-uk"
@@ -484,49 +484,51 @@ def populate(publish=False, log=None):
     return created, skipped
 
 
+# fields enrich() backfills onto existing pages when they are still blank;
+# everything else (titles, descriptions) stays editor-owned after creation
+ENRICHABLE_FIELDS = ("authors", "license")
+
+
 def enrich(log=None):
     """Backfill refreshed details onto artifact pages that already exist.
 
-    Fills `authors` and `license` only where they are still blank (editor
-    curation is never overwritten) and appends links whose URL the page does
-    not have yet (e.g. the paper links). Draft pages get a fresh revision so
-    the additions show up in the editor; live pages are republished.
+    Fills ENRICHABLE_FIELDS only where they are still blank (editor curation
+    is never overwritten) and appends links whose URL the page does not have
+    yet (e.g. the paper links). Draft pages get a fresh revision so the
+    additions show up in the editor; live pages are republished.
     Returns the list of updated slugs."""
-    from catalog.models import ArtifactLink, ArtifactPage
+    from catalog.models import ArtifactPage
 
     updated = []
     for entry in COMMUNITY_ARTIFACTS:
         page = ArtifactPage.objects.filter(slug=entry["slug"]).first()
         if page is None:
             continue
+        changed = False
 
-        existing = list(page.links.all())
-        links_changed = False
-        # older imports created links with NULL sort_order, which Postgres
-        # sorts after any explicit value — normalize by pk (insertion order)
-        # so appended links actually land at the end
-        if any(link.sort_order is None for link in existing):
-            existing.sort(key=lambda link: link.pk)
-            for order, link in enumerate(existing):
-                if link.sort_order != order:
-                    link.sort_order = order
-                    link.save(update_fields=["sort_order"])
-                    links_changed = True
-        known = {link.url for link in existing}
-        next_order = max((link.sort_order for link in existing), default=-1) + 1
+        # keep links numbered 0..n-1 in display order: older imports left
+        # sort_order NULL, which Postgres sorts after any explicit value,
+        # so appended links would jump ahead of the existing ones
+        links = sorted(
+            page.links.all(),
+            key=lambda l: (l.sort_order is None, l.sort_order or 0, l.pk),
+        )
+        for order, link in enumerate(links):
+            if link.sort_order != order:
+                link.sort_order = order
+                link.save(update_fields=["sort_order"])
+                changed = True
+        known = {link.url for link in links}
         for kind, url, caption in entry["links"]:
             if url in known:
                 continue
-            ArtifactLink.objects.create(
-                page=page, kind=kind, url=url, caption=caption, sort_order=next_order
+            page.links.create(
+                kind=kind, url=url, caption=caption, sort_order=len(known)
             )
-            next_order += 1
-            links_changed = True
+            known.add(url)
+            changed = True
 
-        # re-fetch so the revision serializes the fresh link set
-        page = ArtifactPage.objects.get(pk=page.pk)
-        changed = links_changed
-        for field in ("authors", "license"):
+        for field in ENRICHABLE_FIELDS:
             if entry.get(field) and not getattr(page, field):
                 setattr(page, field, entry[field])
                 changed = True

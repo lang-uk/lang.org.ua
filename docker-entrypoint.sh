@@ -23,7 +23,7 @@ if [ "$#" -eq 1 ] && [ "$1" = 'gunicorn' ]; then
 
   set -- gunicorn -w "${APP_WORKERS}" --keep-alive 120 \
     --access-logfile - --error-logfile - -t 120 \
-    --chdir "${PREFIX}" --bind 0.0.0.0:8000 "${APP_NAME}"
+    --chdir "${PREFIX}" --bind "${APP_BIND:-0.0.0.0:8000}" "${APP_NAME}"
 fi
 
 # quote "$@" all the way down so arguments with spaces survive

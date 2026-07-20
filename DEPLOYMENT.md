@@ -45,6 +45,7 @@ volume on version change. `APP_WORKERS` (default 2) controls gunicorn.
 | `BREVO_API_KEY` | form notifications (Brevo transactional API); without it mail stays on the console backend. Authenticate the lang.org.ua domain (SPF/DKIM) in the Brevo dashboard so no-reply@lang.org.ua is a valid sender |
 | `DEFAULT_FROM_EMAIL` | sender for notifications (default no-reply@lang.org.ua) |
 | `STATIC_ROOT` / `MEDIA_ROOT` | preset in the image (`/static`, `/media`) |
+| `APP_BIND` | gunicorn bind (default `0.0.0.0:8000`); with `--network host` set e.g. `127.0.0.1:11234` to slot in behind the existing nginx proxy |
 | `DJANGO_SETTINGS_MODULE` | `languk.settings.production` (wsgi.py default) |
 
 reCAPTCHA keys are not env-driven: provide

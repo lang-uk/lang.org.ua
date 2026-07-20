@@ -28,13 +28,13 @@ Production rollout (after deploying this branch):
   ☐ manage.py convert_product_pages --type-map korpusi=corpora slovniki=dictionaries gazetiri=gazetteers servisi=services biblioteki=libraries modeli=models
   ☐ manage.py bootstrap_catalog_pages (Датасети section + submit/feedback pages)
   ☐ manage.py import_artifacts (drafts; --publish once curated)
-  ☐ manage.py import_community_artifacts (30 curated GitHub/HF projects with
+  ☐ manage.py import_community_artifacts (31 curated GitHub/HF projects with
     authors/licenses/paper links; the 0005+0007 migrations try this too but skip
     types whose sections don't exist yet; --enrich backfills existing pages)
   See DEPLOYMENT.md for the full guide (env vars, verification, rollback)
   ☐ Set SENDGRID_API_KEY env + notification_emails in site settings
   ☐ Curate imported artifacts (EN texts for the models section, update dates;
-    authors/licenses/papers are prefilled for the 30 community ones)
+    authors/licenses/papers are prefilled for the 31 community ones)
   ☐ Clear legacy one-word section bodies after convert_product_pages (they duplicate the title)
   ☐ Drop legacy home.ProductPage model once production pages are converted
 

@@ -209,6 +209,20 @@ COMMUNITY_ARTIFACTS = [
     # ------------------------------------------------------------ corpora
     {
         "type": "corpora",
+        "slug": "ubertext-2-0",
+        "title": "UberText 2.0 — корпус сучасної української мови",
+        "title_en": "UberText 2.0 — a corpus of modern Ukrainian at scale",
+        "description": "Корпус сучасної української мови на 3,27 млрд токенів: новини, Вікіпедія, художня література, судові рішення та соцмережі, у кількох шарах обробки (речення, токени, леми).",
+        "description_en": "A 3.27-billion-token corpus of modern Ukrainian: news, Wikipedia, fiction, court decisions and social media, in several processing layers (sentences, tokens, lemmas).",
+        "authors": "Дмитро Чаплинський",
+        "links": [
+            ("download", "https://lang.org.ua/en/ubertext/", "Сторінка корпусу та завантаження"),
+            ("demo", "https://lang.org.ua/corpus/", "Браузер корпусу"),
+            ("paper", f"{ACL}/2023.unlp-1.1/", "Стаття (UNLP 2023)"),
+        ],
+    },
+    {
+        "type": "corpora",
         "slug": "malyuk",
         "title": "Малюк — корпус для тренування мовних моделей",
         "title_en": "Malyuk — Ukrainian LM pre-training corpus",

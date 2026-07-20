@@ -82,6 +82,10 @@ def extract_short_description(chunk_soup):
     return text[:297] + "..." if len(text) > 300 else text
 
 
+SIZE_CAPTION_RE = re.compile(r"^[\d.,]+\s*[kmgt]?b$", re.I)
+ARCHIVE_EXT_RE = re.compile(r"\.(txt|csv|tsv|jsonl?)(\.(bz2|gz|xz|zip))?$", re.I)
+
+
 def extract_links(chunk_soup):
     links, seen = [], set()
     for a in chunk_soup.find_all("a", href=True):
@@ -89,7 +93,14 @@ def extract_links(chunk_soup):
         if href.startswith(("#", "/", "mailto:")) or href in seen:
             continue
         seen.add(href)
-        links.append((guess_kind(href), href, a.get_text(" ", strip=True)[:255]))
+        caption = a.get_text(" ", strip=True)[:255]
+        # download tables use the file size as the anchor text — prefix the
+        # archive name so the sidebar caption says what the file is
+        if SIZE_CAPTION_RE.match(caption):
+            stem = ARCHIVE_EXT_RE.sub("", href.rstrip("/").rsplit("/", 1)[-1])
+            if stem:
+                caption = f"{stem} ({caption})"[:255]
+        links.append((guess_kind(href), href, caption))
     return links
 
 

@@ -89,9 +89,10 @@ Then in the CMS/admin:
 2. Curate the imported drafts (Сторінки → Продукти → sections): EN texts
    for the models section, `last_significant_update` dates (drives the
    "Нові надходження" badge), licenses/authors on the legacy-scraped
-   artifacts (the 30 community ones already carry authors, licenses and
-   paper links), trim duplicate download links on link-heavy artifacts —
-   then publish.
+   artifacts (the 31 community ones already carry authors, licenses and
+   paper links), trim duplicate download links on link-heavy artifacts,
+   and drop inline-reference links the importer hoisted into the sidebar
+   (publisher homepages on the UberText corpus page etc.) — then publish.
 3. Clear the legacy one-word section bodies (they repeat the title) and
    give the Датасети section an SVG icon for its homepage card.
 4. Old rich-text section content stays reachable until you publish the new

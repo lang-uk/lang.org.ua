@@ -16,12 +16,12 @@ if os.environ.get("SENTRY_DSN"):
     )
 
 # Form notifications (contact, artifact submissions, usage feedback) go out
-# through SendGrid; without SENDGRID_API_KEY mail silently stays on the
+# through Brevo; without BREVO_API_KEY mail silently stays on the
 # console backend from base.py
-if os.environ.get("SENDGRID_API_KEY"):
-    EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+if os.environ.get("BREVO_API_KEY"):
+    EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
     ANYMAIL = {
-        "SENDGRID_API_KEY": os.environ["SENDGRID_API_KEY"],
+        "BREVO_API_KEY": os.environ["BREVO_API_KEY"],
     }
 
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@lang.org.ua")

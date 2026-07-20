@@ -32,7 +32,8 @@ Production rollout (after deploying this branch):
     authors/licenses/paper links; the 0005+0007 migrations try this too but skip
     types whose sections don't exist yet; --enrich backfills existing pages)
   See DEPLOYMENT.md for the full guide (env vars, verification, rollback)
-  ☐ Set SENDGRID_API_KEY env + notification_emails in site settings
+  ☐ Set BREVO_API_KEY env + notification_emails in site settings; authenticate
+    lang.org.ua (SPF/DKIM) in Brevo so no-reply@ is a valid sender
   ☐ Curate imported artifacts (EN texts for the models section, update dates;
     authors/licenses/papers are prefilled for the 31 community ones)
   ☐ Clear legacy one-word section bodies after convert_product_pages (they duplicate the title)

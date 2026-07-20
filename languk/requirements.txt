@@ -13,5 +13,5 @@ dependencies/ufal.udpipe-1.2.0.1.tar.gz
 gcld3
 wagtailmenus==4.0.7
 django-recaptcha==4.1.0
-django-anymail[sendgrid]==15.0
+django-anymail[brevo]==15.0
 beautifulsoup4==4.15.0

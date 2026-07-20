@@ -11,7 +11,7 @@ forms, and the Django 6.0 / Wagtail 7.4 / Python 3.13 stack.
 - Products live in a data model (`ArtifactType` / `SectionPage` /
   `ArtifactPage`) instead of rich-text pages; community submissions and
   usage feedback flow into moderation inboxes in the Django admin with
-  SendGrid notifications.
+  email notifications (Brevo).
 - Django 6.0.6, Wagtail 7.4.2, Python 3.13; `raven` replaced by
   `sentry-sdk`, `django-redis-cache` by Django's built-in Redis backend.
 
@@ -42,7 +42,7 @@ volume on version change. `APP_WORKERS` (default 2) controls gunicorn.
 | `SECRET_KEY` | **set it** — base.py has an insecure default |
 | `ALLOWED_HOSTS` | space-separated (see note below) |
 | `SENTRY_DSN`, `VERSION` | error reporting (sentry-sdk, production settings only) |
-| `SENDGRID_API_KEY` | form notifications; without it mail stays on the console backend |
+| `BREVO_API_KEY` | form notifications (Brevo transactional API); without it mail stays on the console backend. Authenticate the lang.org.ua domain (SPF/DKIM) in the Brevo dashboard so no-reply@lang.org.ua is a valid sender |
 | `DEFAULT_FROM_EMAIL` | sender for notifications (default no-reply@lang.org.ua) |
 | `STATIC_ROOT` / `MEDIA_ROOT` | preset in the image (`/static`, `/media`) |
 | `DJANGO_SETTINGS_MODULE` | `languk.settings.production` (wsgi.py default) |

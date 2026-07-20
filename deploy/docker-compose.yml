@@ -1,0 +1,69 @@
+# Production compose file for lang.org.ua.
+#
+# Lives in the repo as a reference; deploy it by copying next to the
+# server's .env (so compose picks it up for interpolation and env_file):
+#
+#     cp deploy/docker-compose.yml /srv/sites/lang.org.ua/
+#     cd /srv/sites/lang.org.ua && docker-compose up -d
+#
+# The app joins the host network (gunicorn on APP_BIND behind the existing
+# nginx; Mongo/Redis on localhost), while Postgres 16 runs as a container
+# published on 127.0.0.1:5433 — the host's ancient 9.6 stays untouched.
+# One-off admin commands:
+#
+#     docker-compose run --rm app python manage.py <command>
+#
+# The RQ worker for corpus jobs is behind a profile; start it with
+#     docker-compose --profile worker up -d
+
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - /srv/data/sites/lang.org.ua/pg16:/var/lib/postgresql/data
+      - /srv/backups:/backups:ro
+
+  app:
+    image: lang.org.ua:latest
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    environment:
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5433"
+      STATIC_ROOT: /static
+      MEDIA_ROOT: /media
+      APP_BIND: 127.0.0.1:11234
+    volumes:
+      - ./local.py:/app/languk/settings/local.py:ro
+      - /srv/data/sites/lang.org.ua/static:/static
+      - /srv/data/sites/lang.org.ua/media:/media
+    depends_on:
+      - db
+
+  rqworker:
+    image: lang.org.ua:latest
+    restart: unless-stopped
+    network_mode: host
+    profiles: ["worker"]
+    env_file: .env
+    environment:
+      DB_HOST: 127.0.0.1
+      DB_PORT: "5433"
+      STATIC_ROOT: /static
+      MEDIA_ROOT: /media
+    volumes:
+      - ./local.py:/app/languk/settings/local.py:ro
+      - /srv/data/sites/lang.org.ua/media:/media
+    command: python manage.py rqworker languk_default
+    depends_on:
+      - db

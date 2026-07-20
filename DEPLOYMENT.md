@@ -1,133 +1,90 @@
-# Deploying the redesigned lang.org.ua
+# Deploying lang.org.ua
 
-This guide covers deploying the `new_version` branch: the Bachoo redesign,
-the structured artifact catalog (`catalog` app), the public submit/feedback
-forms, and the Django 6.0 / Wagtail 7.4 / Python 3.13 stack.
+Deployed 2026-07-21 from the `new_version` branch: the Bachoo redesign, the
+structured artifact catalog, public submit/feedback forms, Django 6.0 /
+Wagtail 7.4 / Python 3.13, running in Docker behind the host nginx.
 
-## What ships in this release
+## Production layout (open-base)
 
-- Every public page on the new design; the old `base.html` design, its
-  assets and the `newborn` app are deleted.
-- Products live in a data model (`ArtifactType` / `SectionPage` /
-  `ArtifactPage`) instead of rich-text pages; community submissions and
-  usage feedback flow into moderation inboxes in the Django admin with
-  email notifications (Brevo).
-- Django 6.0.6, Wagtail 7.4.2, Python 3.13; `raven` replaced by
-  `sentry-sdk`, `django-redis-cache` by Django's built-in Redis backend.
-
-## Prerequisites
-
-- PostgreSQL (the relational DB), Redis (cache + RQ queues), MongoDB
-  (the UberText corpus browser).
-- Docker for the image build; the image bundles gunicorn, the compiled
-  corpus-pipeline deps (`gcld3`, `ufal.udpipe`) and pre-collected statics.
-
-## 1. Build the image
-
-```bash
-./build.sh          # tags with git describe, passes VERSION=git sha
-```
-
-The image serves HTTP on port 8000, exposes `/static` and `/media` volumes,
-and `docker-entrypoint.sh` copies collected statics into the `/static`
-volume on version change. `APP_WORKERS` (default 2) controls gunicorn.
-
-## 2. Environment
-
-| Variable | Purpose |
+| Piece | Where |
 |---|---|
-| `DB_NAME` / `DB_USER` / `DB_PASS` / `DB_HOST` / `DB_PORT` | PostgreSQL |
-| `MONGODB_HOST` (host:port), `MONGODB_DB`, `MONGODB_USERNAME`, `MONGODB_PASSWORD`, `MONGODB_AUTH_DB` | UberText MongoDB |
-| `REDIS_HOST` | cache + RQ queues (db 0, port 6379) |
-| `SECRET_KEY` | **set it** — base.py has an insecure default |
-| `ALLOWED_HOSTS` | space-separated (see note below) |
-| `SENTRY_DSN`, `VERSION` | error reporting (sentry-sdk, production settings only) |
-| `BREVO_API_KEY` | form notifications (Brevo transactional API); without it mail stays on the console backend. Authenticate the lang.org.ua domain (SPF/DKIM) in the Brevo dashboard so no-reply@lang.org.ua is a valid sender |
-| `DEFAULT_FROM_EMAIL` | sender for notifications (default no-reply@lang.org.ua) |
-| `STATIC_ROOT` / `MEDIA_ROOT` | preset in the image (`/static`, `/media`) |
-| `APP_BIND` | gunicorn bind (default `0.0.0.0:8000`); with `--network host` set e.g. `127.0.0.1:11234` to slot in behind the existing nginx proxy |
-| `DJANGO_SETTINGS_MODULE` | `languk.settings.production` (wsgi.py default) |
+| Compose project | `/srv/sites/lang.org.ua/docker-compose.yml` (copy of `deploy/docker-compose.yml`) + `.env` + `local.py` |
+| App container | `lang.org.ua:latest` image, host networking, gunicorn on `127.0.0.1:11234` (`APP_BIND`) behind the unchanged nginx vhost |
+| PostgreSQL | `postgres:16-alpine` container on `127.0.0.1:5433`, data in `/srv/data/sites/lang.org.ua/pg16` (the host's system Postgres is 9.6 — below Django 6's floor — and keeps serving other tenants) |
+| Redis | `redis:7-alpine` container on `127.0.0.2:6379` (the host's system Redis predates RESP3/HELLO; second loopback address keeps the standard port) |
+| MongoDB | host `mongod`, reached via host networking (corpus browser) |
+| Statics / media | `/srv/data/sites/lang.org.ua/{static,media}` mounted into the container; nginx serves them directly. The entrypoint refreshes statics on image version change |
+| Build checkout | `/srv/sites/lang.org.ua-build` (git worktree of this repo) |
+| Old deployment | `/srv/sites/lang.org.ua/{venv,languk}` + systemd `lang-org-ua-site.service` (disabled) + the 9.6 `lang-org-ua` DB — kept as rollback |
 
-reCAPTCHA keys are not env-driven: provide
-`languk/languk/settings/local.py` with `RECAPTCHA_PUBLIC_KEY` /
-`RECAPTCHA_PRIVATE_KEY` (production.py imports it), as before.
+## Environment
 
-> Note: base.py currently hard-overrides `ALLOWED_HOSTS = ["*"]` right
-> after reading the env var — a pre-existing wart. If you want real host
-> validation, delete that line.
+`.env` (shared with the old deployment for rollback compatibility):
+`DB_NAME/DB_USER/DB_PASS/DB_HOST`, `SECRET_KEY`, `SENTRY_DSN`,
+`APP_WORKERS`, `DJANGO_SETTINGS_MODULE=languk.settings.production`,
+`ALLOWED_HOSTS`, `BREVO_API_KEY` (form notifications; without it mail
+stays on the console backend), old host-path `STATIC_ROOT`/`MEDIA_ROOT`
+(overridden to `/static`/`/media` by compose).
 
-## 3. First deploy of this release (one-time data steps, in order)
+Compose overrides per service: `DB_HOST=127.0.0.1`, `DB_PORT=5433`,
+`REDIS_HOST=127.0.0.2`, `APP_BIND=127.0.0.1:11234`.
 
-**Back up PostgreSQL first** — this release applies Wagtail 5.2→7.4
-migrations plus the catalog migrations, and step 2 rewrites the page tree
-in place; there is no practical way back but a restore.
+`local.py` (mounted to `/app/languk/settings/local.py`):
+`RECAPTCHA_PUBLIC_KEY` / `RECAPTCHA_PRIVATE_KEY` — a **reCAPTCHA v3**
+pair for lang.org.ua. Until set, the forms run on test-fallback keys
+that accept everything.
+
+## Deploying an update
 
 ```bash
-manage.py migrate
+cd /srv/sites/lang.org.ua-build
+git fetch origin && git checkout origin/master -- .   # or the release branch
+./build.sh                                            # tags lang.org.ua:latest
 
-# 1. legacy ProductPage sections -> SectionPage (preserves ids/slugs/URLs)
-manage.py convert_product_pages --type-map \
-    korpusi=corpora slovniki=dictionaries gazetiri=gazetteers \
-    servisi=services biblioteki=libraries modeli=models
-
-# 2. Датасети section + submit-a-product + usage-feedback pages
-manage.py bootstrap_catalog_pages
-
-# 3. artifacts scraped from the legacy site pages (created as drafts)
-manage.py import_artifacts
-
-# 4. 30 curated GitHub/Hugging Face projects, complete with authors,
-#    licenses and paper links (drafts; the 0005/0007 migrations already
-#    tried this but skipped types whose sections didn't exist yet;
-#    --enrich backfills blank authors/licenses/links on existing pages)
-manage.py import_community_artifacts
+cd /srv/sites/lang.org.ua
+cp /srv/sites/lang.org.ua-build/deploy/docker-compose.yml .   # if it changed
+docker-compose up -d                                  # recreates on new image
+docker exec $(docker-compose ps -q app) python manage.py migrate
 ```
 
-Then in the CMS/admin:
+## One-off admin commands
 
-1. Wagtail admin → Settings → Generic site settings → fill
-   **notification_emails** (comma-separated editor addresses).
-2. Curate the imported drafts (Сторінки → Продукти → sections): EN texts
-   for the models section, `last_significant_update` dates (drives the
-   "Нові надходження" badge), licenses/authors on the legacy-scraped
-   artifacts (the 31 community ones already carry authors, licenses and
-   paper links), trim duplicate download links on link-heavy artifacts,
-   and drop inline-reference links the importer hoisted into the sidebar
-   (publisher homepages on the UberText corpus page etc.) — then publish.
-3. Clear the legacy one-word section bodies (they repeat the title) and
-   give the Датасети section an SVG icon for its homepage card.
-4. Old rich-text section content stays reachable until you publish the new
-   artifact pages; slugs never changed, so no redirects are needed.
-
-## 4. Verify
-
-Spot-check: `/uk/`, `/uk/produkty/` + each section, one artifact page,
-`/uk/submit-product/` and `/uk/usage-feedback/` (submit a test entry —
-check the admin inbox and the notification email), `/uk/search/?query=...`,
-`/corpus/` down to an article reading view, `/en/` variants, a 404.
-
-The read-only corpus e2e tests can run against production:
+Compose v1 on this host cannot `docker-compose run` a host-networked
+service (`host type networking can't be used with links`) — **use
+`docker exec` on the running app container instead**:
 
 ```bash
-cd languk && E2E_BASE_URL=https://lang.org.ua pytest e2e/test_corpus_live.py
+docker exec -it $(docker-compose ps -q app) python manage.py <command>
 ```
 
-Do **not** point the rest of the e2e suite at production — the form tests
-POST real submissions. The full suite runs locally against its own
-database: `cd languk && pytest` (see `e2e/README.md`).
+## How the content got here
 
-## 5. RQ workers
+Production's database predated the redesign (nine static pages), so it
+was **not** converted in place: the curated dev database — homepage
+blocks, menus, 6+1 sections, 85 artifacts with authors/licenses/paper
+links, form pages — was dumped (`deploy-payload/` on the dev machine),
+restored into the pg16 container, and the dev-uploaded media unpacked
+into the media dir. The wagtail Site record was then pointed at
+`lang.org.ua:443`, and 27 permanent redirects map the old URLs
+(`/{,uk/,en/}corpora` → `/uk/produkty/korpusi/` etc., about/team →
+pro-nas, manifesto). The old prod DB survives untouched in the host 9.6.
 
-Corpus background jobs (export, UDPipe tagging, NLP-UK, frequency vocab)
-need an RQ worker from the same image (`gcld3`/`ufal.udpipe` are compiled
-into it):
+The in-place conversion tooling (`convert_product_pages`,
+`bootstrap_catalog_pages`, `import_artifacts`,
+`import_community_artifacts --enrich`) remains in the repo for
+DB-from-scratch scenarios; `pytest e2e/` covers the site end-to-end
+(don't point the form tests at production — they POST real submissions).
+
+## RQ workers (corpus jobs)
 
 ```bash
-docker run ... languk:TAG python manage.py rqworker languk_default
+docker-compose --profile worker up -d    # rqworker languk_default, same image
 ```
 
 ## Rollback
 
-Redeploy the previous image **and restore the PostgreSQL backup** — the
-Wagtail 7 migrations and the page-tree conversion are not reversible in
-practice. MongoDB and Redis are untouched by this release.
+Until the old stack is retired: `docker-compose stop app` +
+`systemctl enable --now lang-org-ua-site` brings back the pre-redesign
+site from the untouched venv and 9.6 database. MongoDB is shared and
+unaffected. Backups: `/srv/backups/lang-org-ua.*.dump` (old prod),
+`languk-dev.dump` (shipped content).

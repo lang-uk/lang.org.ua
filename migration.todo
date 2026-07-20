@@ -23,21 +23,23 @@ Re-design:
   ✔ New 404/500 pages @done (05/07/2026)
   ✔ Retire old base templates, css/js, newborn app @done (05/07/2026)
 
-Production rollout (after deploying this branch):
-  ☐ manage.py migrate
-  ☐ manage.py convert_product_pages --type-map korpusi=corpora slovniki=dictionaries gazetiri=gazetteers servisi=services biblioteki=libraries modeli=models
-  ☐ manage.py bootstrap_catalog_pages (Датасети section + submit/feedback pages)
-  ☐ manage.py import_artifacts (drafts; --publish once curated)
-  ☐ manage.py import_community_artifacts (31 curated GitHub/HF projects with
-    authors/licenses/paper links; the 0005+0007 migrations try this too but skip
-    types whose sections don't exist yet; --enrich backfills existing pages)
-  See DEPLOYMENT.md for the full guide (env vars, verification, rollback)
-  ☐ Set BREVO_API_KEY env + notification_emails in site settings; authenticate
-    lang.org.ua (SPF/DKIM) in Brevo so no-reply@ is a valid sender
-  ☐ Curate imported artifacts (EN texts for the models section, update dates;
-    authors/licenses/papers are prefilled for the 31 community ones)
-  ☐ Clear legacy one-word section bodies after convert_product_pages (they duplicate the title)
-  ☐ Drop legacy home.ProductPage model once production pages are converted
+Production rollout:
+  ✔ Deployed 2026-07-21: compose stack (pg16 + redis7 + app) behind nginx,
+    curated dev DB + media shipped as content, 27 redirects for old URLs,
+    old venv/9.6 DB kept as rollback — see DEPLOYMENT.md @done (21/07/2026)
+
+Post-release:
+  ☐ Merge PR #17 (new_version -> master)
+  ☐ Switch prod build checkout to master (lang.org.ua-build worktree)
+  ☐ Add proper translations to all the items (EN texts across artifacts)
+  ☐ Add proper images and citations (artifact thumbnails, section icons,
+    citation blocks on artifact pages)
+  ☐ Add proper emails and phones (contacts page, GenericSiteSettings)
+  ☐ Verify that all forms are working (reCAPTCHA v3 keys in local.py,
+    BREVO_API_KEY in .env, notification_emails in site settings, then a
+    live submit -> admin inbox -> email round-trip on all three forms)
+  ☐ Drop legacy home.ProductPage model (no production pages use it)
+  ☐ Retire the old venv + 9.6 DB once confident (keep /srv/backups dumps)
 
 
 UberText support:

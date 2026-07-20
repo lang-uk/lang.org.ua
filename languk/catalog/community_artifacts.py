@@ -327,8 +327,13 @@ COMMUNITY_ARTIFACTS = [
         "description": "Розширена українська версія датасету Multi30k для мультимодального машинного перекладу.",
         "description_en": "Extended Ukrainian version of the Multi30k dataset for multimodal machine translation.",
         "license": "Apache-2.0",
-        "authors": "Юрій Панів",
-        "links": [("huggingface", f"{HFD}/multi30k-extended-17k", "")],
+        # the dataset is the Multi30K-UK extension by the NURE team (UNLP
+        # 2023 paper), re-hosted on lang-uk for the ZNO-Vision evaluation
+        "authors": "Nataliia Saichyshyna, Daniil Maksymenko, Oleksii Turuta, Andriy Yerokhin, Andrii Babii, Olena Turuta",
+        "links": [
+            ("huggingface", f"{HFD}/multi30k-extended-17k", ""),
+            ("paper", f"{ACL}/2023.unlp-1.7/", "Стаття (UNLP 2023)"),
+        ],
     },
     {
         "type": "datasets",

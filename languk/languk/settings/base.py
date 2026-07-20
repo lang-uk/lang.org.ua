@@ -228,7 +228,7 @@ MONGODB = {
 }
 
 REDIS_HOST = get_env_str("REDIS_HOST", "localhost")
-REDIS_PORT = 6379
+REDIS_PORT = int(get_env_str("REDIS_PORT", "6379"))
 REDIS_URL = "redis://%s:%d/0" % (REDIS_HOST, REDIS_PORT)
 
 CACHES = {

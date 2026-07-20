@@ -37,11 +37,13 @@ def create_artifact_draft(section, title, links=(), publish=False, **fields):
         # re-fetch: add_child mutates treebeard counters on the node
         parent = SectionPage.objects.get(pk=section.pk)
         parent.add_child(instance=artifact)
-        for link in links:
+        for order, link in enumerate(links):
             if isinstance(link, str):
                 link = (guess_kind(link), link, "")
             kind, url, caption = link
-            artifact.links.create(kind=kind, url=url, caption=caption)
+            artifact.links.create(
+                kind=kind, url=url, caption=caption, sort_order=order
+            )
         # modelcluster defers child rows until the parent is saved
         artifact.save()
         revision = artifact.save_revision()

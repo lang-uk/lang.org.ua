@@ -75,8 +75,10 @@ manage.py bootstrap_catalog_pages
 # 3. artifacts scraped from the legacy site pages (created as drafts)
 manage.py import_artifacts
 
-# 4. 30 curated GitHub/Hugging Face projects (drafts; the 0005 migration
-#    already tried this but skipped types whose sections didn't exist yet)
+# 4. 30 curated GitHub/Hugging Face projects, complete with authors,
+#    licenses and paper links (drafts; the 0005/0007 migrations already
+#    tried this but skipped types whose sections didn't exist yet;
+#    --enrich backfills blank authors/licenses/links on existing pages)
 manage.py import_community_artifacts
 ```
 
@@ -85,9 +87,11 @@ Then in the CMS/admin:
 1. Wagtail admin → Settings → Generic site settings → fill
    **notification_emails** (comma-separated editor addresses).
 2. Curate the imported drafts (Сторінки → Продукти → sections): EN texts
-   for the models section, licenses, `last_significant_update` dates
-   (drives the "Нові надходження" badge), trim duplicate download links on
-   link-heavy artifacts — then publish.
+   for the models section, `last_significant_update` dates (drives the
+   "Нові надходження" badge), licenses/authors on the legacy-scraped
+   artifacts (the 30 community ones already carry authors, licenses and
+   paper links), trim duplicate download links on link-heavy artifacts —
+   then publish.
 3. Clear the legacy one-word section bodies (they repeat the title) and
    give the Датасети section an SVG icon for its homepage card.
 4. Old rich-text section content stays reachable until you publish the new

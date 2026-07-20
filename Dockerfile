@@ -1,4 +1,4 @@
-FROM python:3.7.2-alpine3.8
+FROM python:3.13-alpine
 
 ARG root=/app
 ARG version
@@ -18,9 +18,11 @@ RUN [ "x${VERSION}" = "x" ] && echo -e '=== build-arg "version" is required for 
 RUN /usr/sbin/adduser -D -h ${root} app
 
 COPY ./languk/requirements.txt ${root}/requirements.txt
+# local sdist referenced by requirements.txt (ufal.udpipe)
+COPY ./languk/dependencies ${root}/dependencies
 
-RUN apk add --no-cache su-exec postgresql-libs libjpeg \
-		&& apk add --no-cache --virtual .build-deps jpeg-dev zlib-dev postgresql-dev build-base git \
+RUN apk add --no-cache su-exec postgresql-libs libjpeg libstdc++ protobuf \
+		&& apk add --no-cache --virtual .build-deps jpeg-dev zlib-dev postgresql-dev build-base git protobuf-dev boost-dev \
 		&& PREFIX=/usr/local pip install -r  ${root}/requirements.txt \
 		&& runDeps="$( \
 			scanelf --needed --nobanner --format '%n#p' --recursive /usr/local \
@@ -37,7 +39,8 @@ COPY ./languk/ ${root}/
 
 RUN python -m compileall ${root} \
 		&& mkdir -p ${STATIC_ROOT} ${STATIC_ROOT_SOURCE} ${MEDIA_ROOT} \
-		&& STATIC_ROOT=${STATIC_ROOT_SOURCE} python manage.py collectstatic --no-input
+		&& STATIC_ROOT=${STATIC_ROOT_SOURCE} DJANGO_SETTINGS_MODULE=languk.settings.production \
+			python manage.py collectstatic --no-input
 
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 

@@ -1,7 +1,7 @@
 {% macro article_excerpt(article) %}
 <article class="excerpt">
-	<h2>
-		<a href="{{ article.url }}" target="_blank">
+	<p class="h4">
+		<a class="link link--primary-dark" href="{{ article.url }}" target="_blank">
 		{% if article.title %}
 			{{ article.title }}
 		{% else %}
@@ -9,14 +9,14 @@
 		{% endif %}
 		</a>
 		<br/>
-		<a href="{{ url('corpus>corpus_details', args=[source.collection, source._id, article._id]) }}">[{{ _("Повна версія") }}]</a>
-	</h2>
+		<a class="link link--primary-dark underline-animation-reverse" href="{{ url('corpus>corpus_details', args=[source.collection, source._id, article._id]) }}">[{{ _("Повна версія") }}]</a>
+	</p>
 	{% if article.date_of_publish %}
 	<time>
 		{{ article.date_of_publish }}
 	</time>
 	{% endif %}
-	<pre>{% if article.text -%}
+	<pre class="code-text">{% if article.text -%}
 			{{ article.text|excerpt_markdown }}
 		{%- else -%}
 			<strong>[{{ _("Тексту немає взагалі") }}]</strong>

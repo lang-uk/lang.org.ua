@@ -1,0 +1,31 @@
+{% extends "bachoo_base.html" %}
+{% from "catalog/_macros.html" import artifact_info, new_badge, thumbnail %}
+
+{% block page_content %}
+{% include "common/breadcrumbs.html" %}
+    <div class="services">
+      <div class="spacer spacer--size-3">
+        <div class="spacer__item">
+          <p class="h1">{{ page.translated_title }}
+            {%- if page.has_recent_updates %} {{ new_badge() }}{% endif %}</p>
+        </div>
+        <div class="spacer__item spacer__item--size-6">
+          <div class="services-list">
+            <div class="service active">
+              <div class="service-body">
+                <div class="service-wrapper">
+                  <div class="service-content">
+                    {% if page.thumbnail %}
+                    <p>{{ thumbnail(page.thumbnail, "width-800") }}</p>
+                    {% endif %}
+                    {{ page.translated_body|richtext|design_richtext }}
+                  </div>
+                  {{ artifact_info(page) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}

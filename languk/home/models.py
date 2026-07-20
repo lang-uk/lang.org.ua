@@ -1,20 +1,21 @@
 from django.db import models
 from django.utils import translation
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+from django.shortcuts import render
 
-from wagtail.core import hooks
-from wagtail.core.models import Page, Orderable
 from modelcluster.fields import ParentalKey
-from wagtail.core.fields import RichTextField
-from wagtail.core.whitelist import attribute_rule, allow_without_attributes
-from wagtail.admin.edit_handlers import InlinePanel, FieldPanel, PageChooserPanel
 
-from wagtailmenus.models import AbstractMainMenuItem
-
+from wagtail.models import Page, Orderable
+from wagtail.fields import RichTextField
+from wagtail.snippets.models import register_snippet
+from wagtail.admin.panels import InlinePanel, FieldPanel, PageChooserPanel
 from wagtail.contrib.settings.models import (
     BaseGenericSetting,
     register_setting,
 )
+
+from wagtailmenus.models import AbstractMainMenuItem
 
 
 @register_setting
@@ -25,21 +26,13 @@ class GenericSiteSettings(BaseGenericSetting):
     phone = models.CharField(max_length=30)
     copyright = models.CharField(max_length=120)
     ga_account = models.CharField(max_length=30, default="")
-
-
-@hooks.register("construct_whitelister_element_rules")
-def whitelister_element_rules():
-    return {
-        "u": allow_without_attributes,
-        "table": attribute_rule({"cellspacing": True, "cellpadding": True, "border": True}),
-        "td": attribute_rule({"valign": True, "style": True}),
-        "tr": allow_without_attributes,
-        "th": allow_without_attributes,
-        "tbody": allow_without_attributes,
-        "tfoot": allow_without_attributes,
-        "thead": allow_without_attributes,
-        "p": attribute_rule({"align": True}),
-    }
+    notification_emails = models.TextField(
+        default="",
+        blank=True,
+        verbose_name="Сповіщення редакторам",
+        help_text="Email-адреси через кому: сюди надходять повідомлення з форм "
+        "(зворотній зв'язок, заявки на продукти, відгуки)",
+    )
 
 
 class TranslatedField(object):
@@ -56,7 +49,9 @@ class TranslatedField(object):
 
 class LinkFields(models.Model):
     caption = models.CharField(max_length=255, blank=True, verbose_name="Заголовок")
-    caption_en = models.CharField(max_length=255, blank=True, verbose_name="[EN] Заголовок")
+    caption_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Заголовок"
+    )
 
     translated_caption = TranslatedField(
         "caption",
@@ -92,13 +87,21 @@ class LinkFields(models.Model):
 
 
 class AbstractPage(Page):
-    title_en = models.CharField(default="", max_length=255, verbose_name="[EN] Назва сторінки")
+    title_en = models.CharField(
+        default="", max_length=255, blank=True, verbose_name="[EN] Назва сторінки"
+    )
 
-    global_class = models.CharField(default="", max_length=255, blank=True, verbose_name="CSS-Клас сторінки")
+    global_class = models.CharField(
+        default="", max_length=255, blank=True, verbose_name="CSS-Клас сторінки"
+    )
 
-    body = RichTextField(default="", verbose_name="[UA] Загальний текст сторінки")
+    body = RichTextField(
+        default="", verbose_name="[UA] Загальний текст сторінки", blank=True
+    )
 
-    body_en = RichTextField(default="", verbose_name="[EN] Загальний текст сторінки")
+    body_en = RichTextField(
+        default="", verbose_name="[EN] Загальний текст сторінки", blank=True
+    )
 
     svg_image = models.TextField(
         verbose_name="SVG image icon (raw text) to display next to menu item",
@@ -130,7 +133,10 @@ class AbstractPage(Page):
         for code, _ in settings.LANGUAGES:
             translation.activate(code)
 
-            yield {"location": self.get_full_url(request), "lastmod": self.latest_revision_created_at}
+            yield {
+                "location": self.get_full_url(request),
+                "lastmod": self.latest_revision_created_at,
+            }
 
             translation.deactivate()
 
@@ -142,11 +148,200 @@ class StaticPage(AbstractPage):
     template = "home/static_page.html"
 
 
+class PartnerLink(Orderable):
+    page = ParentalKey("HomePage", on_delete=models.CASCADE, related_name="partners")
+
+    partner_name = models.CharField(
+        max_length=255, blank=True, verbose_name="Назва партнера"
+    )
+    partner_name_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Назва партнера"
+    )
+
+    translated_partner_name = TranslatedField(
+        "partner_name",
+        "partner_name_en",
+    )
+
+    partner_logo = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Логотип партнеру",
+    )
+
+    link_external = models.URLField("Посилання на партнера", blank=True)
+
+    panels = [
+        FieldPanel("partner_name"),
+        FieldPanel("partner_name_en"),
+        FieldPanel("link_external"),
+        FieldPanel("partner_logo"),
+    ]
+
+
+class EndUser(Orderable):
+    page = ParentalKey("HomePage", on_delete=models.CASCADE, related_name="end_users")
+
+    role_name = models.CharField(max_length=255, blank=True, verbose_name="Назва ролі")
+    role_name_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Назва ролі"
+    )
+
+    translated_role_name = TranslatedField(
+        "role_name",
+        "role_name_en",
+    )
+
+    role_use = models.CharField(max_length=1024, blank=True, verbose_name="Опис ролі")
+    role_use_en = models.CharField(
+        max_length=1024, blank=True, verbose_name="[EN] Опис ролі"
+    )
+
+    translated_role_use = TranslatedField(
+        "role_use",
+        "role_use_en",
+    )
+
+    panels = [
+        FieldPanel("role_name"),
+        FieldPanel("role_name_en"),
+        FieldPanel("role_use"),
+        FieldPanel("role_use_en"),
+    ]
+
+
+@register_snippet
+class PressArticle(models.Model):
+    source = models.CharField(max_length=255, blank=True, verbose_name="Назва джерела")
+    source_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Назва джерела"
+    )
+
+    translated_source = TranslatedField(
+        "source",
+        "source_en",
+    )
+
+    title = models.CharField(
+        max_length=255, blank=True, verbose_name="Назва публікації"
+    )
+    title_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Назва публікації"
+    )
+
+    translated_title = TranslatedField(
+        "title",
+        "title_en",
+    )
+
+    date_of_publish = models.DateField("Дата публікації", blank=True)
+    link_external = models.URLField("Посилання на текст або матеріал", blank=True)
+
+    media_logo = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Логотип автору матеріалу",
+    )
+
+    def __str__(self):
+        return f"{self.translated_source}: {self.translated_title}"
+
+    panels = [
+        FieldPanel("source"),
+        FieldPanel("source_en"),
+        FieldPanel("title"),
+        FieldPanel("title_en"),
+        FieldPanel("date_of_publish"),
+        FieldPanel("link_external"),
+        FieldPanel("media_logo"),
+    ]
+
+    class Meta:
+        ordering = ("-date_of_publish",)
+
+
+class TeamMember(Orderable):
+    name = models.CharField(max_length=255, blank=True, verbose_name="Повне ім'я")
+    name_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Повне ім'я"
+    )
+
+    translated_name = TranslatedField(
+        "name",
+        "name_en",
+    )
+
+    role = models.CharField(max_length=255, blank=True, verbose_name="Роль або внесок")
+    role_en = models.CharField(
+        max_length=255, blank=True, verbose_name="[EN] Роль або внесок"
+    )
+
+    translated_role = TranslatedField(
+        "role",
+        "role_en",
+    )
+
+    github = models.URLField("Профіль у github", blank=True)
+    telegram = models.URLField("Профіль у telegram", blank=True)
+    facebook = models.URLField("Профіль у facebook", blank=True)
+    instagram = models.URLField("Профіль у instagram", blank=True)
+    google_scholar = models.URLField("Профіль у google scholar", blank=True)
+    huggingface = models.URLField("Профіль у huggingface", blank=True)
+    linkedin = models.URLField("Профіль у linkedin", blank=True)
+    twitter = models.URLField("Профіль у twitter/x", blank=True)
+
+    photo = models.ForeignKey(
+        "wagtailimages.Image",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="Фото користувача",
+    )
+
+    def __str__(self):
+        return f"{self.translated_name}: {self.translated_role}"
+
+    panels = [
+        FieldPanel("name"),
+        FieldPanel("name_en"),
+        FieldPanel("role"),
+        FieldPanel("role_en"),
+        FieldPanel("github"),
+        FieldPanel("telegram"),
+        FieldPanel("facebook"),
+        FieldPanel("instagram"),
+        FieldPanel("google_scholar"),
+        FieldPanel("huggingface"),
+        FieldPanel("linkedin"),
+        FieldPanel("twitter"),
+        FieldPanel("photo"),
+    ]
+
+    class Meta:
+        abstract = True
+
+
+class Founder(TeamMember):
+    page = ParentalKey("AboutUsPage", on_delete=models.CASCADE, related_name="founders")
+
+
+class Volunteer(TeamMember):
+    page = ParentalKey(
+        "AboutUsPage", on_delete=models.CASCADE, related_name="volunteers"
+    )
+
+
 class HomePage(AbstractPage):
     template = "home/home_page.html"
 
     slogan_title = models.TextField(default="", verbose_name="[UA] Слоган (заголовок)")
-    slogan_title_en = models.TextField(default="", verbose_name="[EN] Слоган (заголовок)")
+    slogan_title_en = models.TextField(
+        default="", verbose_name="[EN] Слоган (заголовок)"
+    )
     translated_slogan_title = TranslatedField(
         "slogan_title",
         "slogan_title_en",
@@ -159,55 +354,389 @@ class HomePage(AbstractPage):
         "slogan_text_en",
     )
 
-    aboutus_title = models.TextField(default="", verbose_name="[UA] Про нас (заголовок)")
-    aboutus_title_en = models.TextField(default="", verbose_name="[EN] Про нас (заголовок)")
+    aboutus_title = models.TextField(
+        default="", verbose_name="[UA] Розділ 'Про нас' (заголовок)"
+    )
+    aboutus_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ 'Про нас' (заголовок)"
+    )
     translated_aboutus_title = TranslatedField(
         "aboutus_title",
         "aboutus_title_en",
     )
 
-    aboutus_text = RichTextField(default="", verbose_name="[UA] Про нас (текст)")
-    aboutus_text_en = RichTextField(default="", verbose_name="[EN] Про нас (текст)")
+    aboutus_text = RichTextField(
+        default="", verbose_name="[UA] Розділ 'Про нас' (текст)"
+    )
+    aboutus_text_en = RichTextField(
+        default="", verbose_name="[EN] Розділ 'Про нас' (текст)"
+    )
     translated_aboutus_text = TranslatedField(
         "aboutus_text",
         "aboutus_text_en",
     )
 
-    content_panels = [
-        FieldPanel("title", classname="full title"),
-        FieldPanel("title_en", classname="full title"),
+    partners_title = models.TextField(
+        default="", verbose_name="[UA] Розділ партнерів (заголовок)"
+    )
+    partners_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ партнерів (заголовок)"
+    )
+    translated_partners_title = TranslatedField(
+        "partners_title",
+        "partners_title_en",
+    )
 
+    useful_title = models.TextField(
+        default="", verbose_name="[UA] Розділ користувачів (заголовок)"
+    )
+    useful_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ користувачів (заголовок)"
+    )
+    translated_useful_title = TranslatedField(
+        "useful_title",
+        "useful_title_en",
+    )
+
+    content_panels = Page.content_panels + [
+        FieldPanel("title_en", classname="full title"),
         FieldPanel("slogan_title"),
         FieldPanel("slogan_title_en"),
         FieldPanel("slogan_text", classname="full"),
         FieldPanel("slogan_text_en", classname="full"),
-
         FieldPanel("aboutus_title"),
         FieldPanel("aboutus_title_en"),
         FieldPanel("aboutus_text", classname="full"),
         FieldPanel("aboutus_text_en", classname="full"),
-
+        FieldPanel("partners_title"),
+        FieldPanel("partners_title_en"),
+        InlinePanel("partners", heading="Партнери", label="Партнери"),
+        FieldPanel("useful_title"),
+        FieldPanel("useful_title_en"),
+        InlinePanel("end_users", heading="Користувачи", label="Користувачи"),
         FieldPanel("body", classname="full"),
         FieldPanel("body_en", classname="full"),
         FieldPanel("global_class", classname="full"),
     ]
 
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        products_page = ProductsPage.objects.child_of(self).live().first()
+        context["products_page"] = products_page
+        context["section_pages"] = (
+            products_page.get_sections_with_badges() if products_page else []
+        )
+        return context
 
-class ProductsPage(AbstractPage):
-    template = "home/products_page.html"
+    subpage_types = [
+        "ProductsPage",
+        "StaticPage",
+        "AboutUsPage",
+        "ManifestoPage",
+        "ContactUsPage",
+        "catalog.SubmitArtifactPage",
+        "catalog.FeedbackPage",
+    ]
+
+
+class AboutUsPage(AbstractPage):
+    template = "home/about_us_page.html"
+    parent_page_types = [HomePage]
+
+    directions_title = models.TextField(
+        default="", verbose_name="[UA] Розділ Напрямки Роботи (заголовок)"
+    )
+    directions_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ Напрямки Роботи (заголовок)"
+    )
+    translated_directions_title = TranslatedField(
+        "directions_title",
+        "directions_title_en",
+    )
+
+    direction1 = models.TextField(default="", verbose_name="[UA] Перший напрямок")
+    direction1_en = models.TextField(default="", verbose_name="[EN] Перший напрямок")
+    translated_direction1 = TranslatedField(
+        "direction1",
+        "direction1_en",
+    )
+
+    direction2 = models.TextField(default="", verbose_name="[UA] Другий напрямок")
+    direction2_en = models.TextField(default="", verbose_name="[EN] Другий напрямок")
+    translated_direction2 = TranslatedField(
+        "direction2",
+        "direction2_en",
+    )
+    direction3 = models.TextField(default="", verbose_name="[UA] Третій напрямок")
+    direction3_en = models.TextField(default="", verbose_name="[EN] Третій напрямок")
+    translated_direction3 = TranslatedField(
+        "direction3",
+        "direction3_en",
+    )
+
+    team = models.TextField(
+        default="", verbose_name="[UA] Розділ Наша Команда (заголовок)"
+    )
+    team_en = models.TextField(
+        default="", verbose_name="[EN] Розділ Наша Команда (заголовок)"
+    )
+    translated_team_title = TranslatedField(
+        "team",
+        "team_en",
+    )
+
+    volunteers_title = models.TextField(
+        default="", verbose_name="[UA] Розділ Наша Команда (заголовок)"
+    )
+    volunteers_title_en = models.TextField(
+        default="", verbose_name="[EN] Розділ Наша Команда (заголовок)"
+    )
+    translated_volunteers_title = TranslatedField(
+        "volunteers_title",
+        "volunteers_title_en",
+    )
 
     content_panels = [
         FieldPanel("title", classname="full title"),
         FieldPanel("title_en", classname="full title"),
+        FieldPanel("directions_title"),
+        FieldPanel("directions_title_en"),
+        FieldPanel("direction1", classname="full"),
+        FieldPanel("direction1_en", classname="full"),
+        FieldPanel("direction2", classname="full"),
+        FieldPanel("direction2_en", classname="full"),
+        FieldPanel("direction3", classname="full"),
+        FieldPanel("direction3_en", classname="full"),
+        FieldPanel("team"),
+        FieldPanel("team_en"),
+        InlinePanel("founders", heading="Засновники", label="Засновники"),
+        FieldPanel("volunteers_title"),
+        FieldPanel("volunteers_title_en"),
+        InlinePanel("volunteers", heading="Помічники", label="Помічники"),
+    ]
+
+
+class ProductsPage(AbstractPage):
+    template = "home/products_page.html"
+    parent_page_types = [HomePage]
+    # ProductPage is legacy; sections are being converted to catalog.SectionPage
+    subpage_types = ["ProductPage", "catalog.SectionPage"]
+
+    intro = RichTextField(default="", verbose_name="[UA] Вводний текст")
+    intro_en = RichTextField(default="", verbose_name="[EN] Вводний текст")
+    translated_intro = TranslatedField(
+        "intro",
+        "intro_en",
+    )
+
+    content_panels = [
+        FieldPanel("title", classname="full title"),
+        FieldPanel("title_en", classname="full title"),
+        FieldPanel("intro", classname="full"),
+        FieldPanel("intro_en", classname="full"),
         FieldPanel("body", classname="full"),
         FieldPanel("body_en", classname="full"),
         FieldPanel("svg_image", classname="full"),
         FieldPanel("global_class", classname="full"),
     ]
 
+    def get_sections_with_badges(self):
+        """Live child sections with a precomputed new-arrivals flag
+        (one query for the badge instead of an EXISTS per card)."""
+        from datetime import date, timedelta
+
+        from catalog.models import NEW_BADGE_DAYS, ArtifactPage
+
+        sections = list(self.get_children().live().specific())
+        cutoff = date.today() - timedelta(days=NEW_BADGE_DAYS)
+        recent_paths = list(
+            ArtifactPage.objects.live()
+            .filter(last_significant_update__gte=cutoff)
+            .values_list("path", flat=True)
+        )
+        for section in sections:
+            section.has_new_arrivals = any(
+                path.startswith(section.path) for path in recent_paths
+            )
+        return sections
+
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context["section_pages"] = self.get_sections_with_badges()
+        return context
+
+
+class ManifestoPage(AbstractPage):
+    template = "home/manifesto.html"
+    explainer = RichTextField(default="", verbose_name="[UA] Текст маніфесту")
+    explainer_en = RichTextField(default="", verbose_name="[EN] Текст маніфесту")
+    translated_explainer = TranslatedField(
+        "explainer",
+        "explainer_en",
+    )
+
+    thesis1_title = models.TextField(default="", verbose_name="[UA] Теза 1 (заголовок)")
+    thesis1_title_en = models.TextField(
+        default="", verbose_name="[EN] Теза 1 (заголовок)"
+    )
+    translated_thesis1_title = TranslatedField(
+        "thesis1_title",
+        "thesis1_title_en",
+    )
+
+    thesis1_description = RichTextField(default="", verbose_name="[UA] Теза 1 (опис)")
+    thesis1_description_en = RichTextField(
+        default="", verbose_name="[EN] Теза 1 (опис)"
+    )
+    translated_thesis1_description = TranslatedField(
+        "thesis1_description",
+        "thesis1_description_en",
+    )
+
+    thesis2_title = models.TextField(default="", verbose_name="[UA] Теза 2 (заголовок)")
+    thesis2_title_en = models.TextField(
+        default="", verbose_name="[EN] Теза 2 (заголовок)"
+    )
+    translated_thesis2_title = TranslatedField(
+        "thesis2_title",
+        "thesis2_title_en",
+    )
+
+    thesis2_description = RichTextField(default="", verbose_name="[UA] Теза 2 (опис)")
+    thesis2_description_en = RichTextField(
+        default="", verbose_name="[EN] Теза 2 (опис)"
+    )
+    translated_thesis2_description = TranslatedField(
+        "thesis2_description",
+        "thesis2_description_en",
+    )
+
+    thesis3_title = models.TextField(default="", verbose_name="[UA] Теза 3 (заголовок)")
+    thesis3_title_en = models.TextField(
+        default="", verbose_name="[EN] Теза 3 (заголовок)"
+    )
+    translated_thesis3_title = TranslatedField(
+        "thesis3_title",
+        "thesis3_title_en",
+    )
+
+    thesis3_description = RichTextField(default="", verbose_name="[UA] Теза 3 (опис)")
+    thesis3_description_en = RichTextField(
+        default="", verbose_name="[EN] Теза 3 (опис)"
+    )
+    translated_thesis3_description = TranslatedField(
+        "thesis3_description",
+        "thesis3_description_en",
+    )
+
+    content_panels = [
+        FieldPanel("title", classname="full title"),
+        FieldPanel("title_en", classname="full title"),
+        FieldPanel("explainer", classname="full"),
+        FieldPanel("explainer_en", classname="full"),
+        FieldPanel("thesis1_title"),
+        FieldPanel("thesis1_title_en"),
+        FieldPanel("thesis1_description"),
+        FieldPanel("thesis1_description_en"),
+        FieldPanel("thesis2_title"),
+        FieldPanel("thesis2_title_en"),
+        FieldPanel("thesis2_description"),
+        FieldPanel("thesis2_description_en"),
+        FieldPanel("thesis3_title"),
+        FieldPanel("thesis3_title_en"),
+        FieldPanel("thesis3_description"),
+        FieldPanel("thesis3_description_en"),
+    ]
+
 
 class ProductPage(AbstractPage):
+    parent_page_types = [ProductsPage]
     template = "home/product_page.html"
+
+
+class FormPageMixin(models.Model):
+    """Thank-you texts plus the shared POST -> validate -> save -> notify ->
+    thank-you serve() flow used by the public forms (contact us, submit an
+    artifact, usage feedback)."""
+
+    thank_you_caption = RichTextField(
+        default="", blank=True, verbose_name="Подяка за повідомлення"
+    )
+    thank_you_caption_en = RichTextField(
+        default="", blank=True, verbose_name="[EN] Подяка за повідомлення"
+    )
+    thank_you_text = RichTextField(
+        default="", blank=True, verbose_name="Текст подяки за повідомлення"
+    )
+    thank_you_text_en = RichTextField(
+        default="", blank=True, verbose_name="[EN] Текст подяки за повідомлення"
+    )
+
+    translated_thank_you_caption = TranslatedField(
+        "thank_you_caption",
+        "thank_you_caption_en",
+    )
+    translated_thank_you_text = TranslatedField(
+        "thank_you_text",
+        "thank_you_text_en",
+    )
+
+    thank_you_panels = [
+        FieldPanel("thank_you_caption"),
+        FieldPanel("thank_you_caption_en"),
+        FieldPanel("thank_you_text", classname="full"),
+        FieldPanel("thank_you_text_en", classname="full"),
+    ]
+
+    class Meta:
+        abstract = True
+
+    def get_form_class(self):
+        raise NotImplementedError
+
+    def get_notification_subject(self, obj):
+        raise NotImplementedError
+
+    def get_notification_body(self, obj):
+        return str(obj)
+
+    def serve(self, request):
+        from catalog.emails import notify_editors
+
+        form_class = self.get_form_class()
+        if request.method == "POST":
+            form = form_class(request.POST)
+            if form.is_valid():
+                obj = form.save()
+                notify_editors(
+                    subject=self.get_notification_subject(obj),
+                    body=self.get_notification_body(obj),
+                    request=request,
+                )
+                return render(request, "home/contact_thankyou.html", {"page": self})
+        else:
+            form = form_class()
+
+        return render(request, self.template, {"page": self, "form": form})
+
+
+class ContactUsPage(FormPageMixin, AbstractPage):
+    template = "home/contact_us.html"
+
+    content_panels = [
+        FieldPanel("title", classname="full title"),
+        FieldPanel("title_en", classname="full title"),
+        FieldPanel("body", classname="full"),
+        FieldPanel("body_en", classname="full"),
+    ] + FormPageMixin.thank_you_panels
+
+    def get_form_class(self):
+        from home.forms import ContactUsForm
+
+        return ContactUsForm
+
+    def get_notification_subject(self, obj):
+        return "lang.org.ua: нове повідомлення з форми зворотнього зв'язку"
 
 
 class LangUkMainMenuItem(AbstractMainMenuItem):
@@ -235,3 +764,18 @@ class LangUkMainMenuItem(AbstractMainMenuItem):
         FieldPanel("show_in_footer"),
         FieldPanel("allow_subnav"),
     )
+
+
+class ContactUsMessage(models.Model):
+    text = models.TextField(_("Повідомлення*"), blank=False)
+    author = models.TextField(_("Ім'я"), max_length=512, blank=False)
+    email = models.EmailField(_("e-mail"), max_length=512, blank=False)
+    phone = models.TextField(_("Телефон"), max_length=512, blank=True)
+    added = models.DateTimeField(_("Був надісланий"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("Зворотній зв'язок")
+        verbose_name_plural = _("Зворотній зв'язок")
+
+    def __str__(self):
+        return f"{self.author} <{self.email}>: {self.text[:50]}"

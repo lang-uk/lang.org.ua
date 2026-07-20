@@ -6,10 +6,10 @@ from django.contrib import admin
 
 from django.conf.urls.i18n import i18n_patterns
 from wagtail.admin import urls as wagtailadmin_urls
-from wagtail.core import urls as wagtail_urls
+from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.contrib.sitemaps.views import sitemap
-from newborn import views as newborn_views
+from search import views as search_views
 
 
 urlpatterns = [
@@ -24,9 +24,8 @@ urlpatterns = [
 
 
 urlpatterns += i18n_patterns(
-    # path('search/', search_views.search, name='search'),
-    # path("", newborn_views.HomeView.as_view(), name="home"),
-    re_path(r"", include(wagtail_urls))
+    path("search/", search_views.search, name="search"),
+    re_path(r"", include(wagtail_urls)),
 )
 
 

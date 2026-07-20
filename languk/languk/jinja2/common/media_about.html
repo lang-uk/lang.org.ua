@@ -1,0 +1,39 @@
+<!-- media-articles.pug-->
+<div class="media-articles">
+    <div class="media-articles__title">
+        <p class="h1 text-center">{{ _("Медіа про нас") }}</p>
+    </div>
+
+    <div class="media-articles__content">
+        <div class="slider-wrap">
+            <div class="slider-wrap__slider">
+                <div class="slider">
+                    {% for press_article in press_articles.all() %}
+                    <div class="media-card">
+                        <div class="media-card__head">
+                            <div class="media-card__head-item">
+                                <div class="media-card__head-logo"><img src="{{ press_article.media_logo.file.url }}" />
+                                </div>
+                                <p class="media-card__head-text">{{ press_article.date_of_publish|date("SHORT_DATE_FORMAT")
+                                    }}</p>
+                            </div>
+                            <div class="media-card__head-item">
+                                <p class="media-card__head-text media-card__head-text--label text-right">
+                                    {% if press_article.link_external %}<a href="{{ press_article.link_external }}">{% endif
+                                        %}{{ press_article.translated_source }}{% if press_article.link_external %}</a>{%
+                                    endif %}</p>
+                                <p class="media-card__head-text media-card__head-text--bold text-right">{{ _("№") }}{{
+                                    loop.index }}</p>
+                            </div>
+                        </div>
+                        <div class="media-card__body">
+                            <p class="text-l">{{ press_article.translated_title }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /media-articles.pug-->

@@ -1,5 +1,31 @@
 {% extends "bachoo_base.html" %}
+{% from "catalog/_macros.html" import new_badge %}
 
 {% block page_content %}
-    {{ page.translated_body|safe }}
+{% include "common/breadcrumbs.html" %}
+  <div class="products">
+    <div class="spacer spacer--size-3">
+      <div class="spacer__item">
+        <p class="h1 text-center">{{ page.translated_title }}</p>
+      </div>
+      {% if page.translated_intro %}
+      <div class="spacer__item">
+        <div class="text-l text-center">{{ page.translated_intro|richtext }}</div>
+      </div>
+      {% endif %}
+      <div class="spacer__item spacer__item--size-6">
+        <div class="card-container">
+        {% for section_page in section_pages %}
+          <a class="card card__home" href="{{ section_page.get_url() }}"><span class="h3">{{ section_page.translated_title }}
+              {%- if section_page.has_new_arrivals %} {{ new_badge() }}{% endif %}</span>
+            <div class="card__icon">
+                {{ section_page.svg_image|safe }}
+            </div>
+            <div class="card__strip"></div>
+          </a>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

@@ -2,7 +2,21 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-  <title>{% block title %}{% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.translated_title }}{% endif %}{% endblock %}{% block title_suffix %}{% endblock %}: lang-uk</title>
+  {#- head.html is included, not extended, so Jinja blocks are not
+      overridable here: page metadata comes from the `page` object or the
+      `page_title`/`extra_css_files` context variables -#}
+  <title>{%- if page -%}
+      {%- if page.seo_title -%}
+        {{ page.seo_title }}
+      {%- else -%}
+        {{ page.translated_title }}
+      {%- endif -%}
+    {%- elif page_title -%}
+      {{ page_title }}
+    {%- endif -%}: lang-uk</title>
+  <meta name="description" content="{%- if page -%}
+    {{ page.search_description }}
+    {%- endif -%}"/>
 <!--   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/> -->
@@ -19,6 +33,7 @@
       {% endif %}
   {% endfor %}
 
-  {% block extra_css %}
-  {% endblock %}
+  {% for css_file in extra_css_files or [] %}
+  <link rel="stylesheet" href="{{ static(css_file) }}"/>
+  {% endfor %}
 </head>

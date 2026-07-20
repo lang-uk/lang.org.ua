@@ -1,0 +1,67 @@
+{% macro thumbnail(img, spec="fill-400x300", css_class="") %}
+  {%- if img %}{{ image(img, spec, class=css_class) }}{% endif -%}
+{% endmacro %}
+
+{% macro new_badge() %}
+<span class="svg"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3.92857 10V6.82081L1.07143 8.41041L0 6.5896L2.82738 5L0 3.4104L1.07143 1.5896L3.92857 3.17919V0H6.10119V3.17919L8.92857 1.5896L10 3.4104L7.17262 5L10 6.5896L8.92857 8.41041L6.10119 6.82081V10H3.92857Z"
+        fill="#FF3F3F" />
+    </svg>
+    <span class="star-text">{{ _("Нові надходження") }}</span></span>
+{% endmacro %}
+
+{% macro download_icon() %}
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16" stroke-width="1.5"/>
+</svg>
+{% endmacro %}
+
+{% macro artifact_info(artifact) %}
+          <div class="service-info">
+            {% if artifact.authors %}
+            <div class="info-block">
+              <div class="info-block__title caption-2">{{ _("Автори") }}</div>
+              <div class="info-block__text text-m">{{ artifact.authors }}</div>
+            </div>
+            {% endif %}
+            {% if artifact.license %}
+            <div class="info-block">
+              <div class="info-block__title caption-2">{{ _("Ліцензія") }}</div>
+              <div class="info-block__text text-m">{{ artifact.license }}</div>
+            </div>
+            {% endif %}
+            {% if artifact.stats %}
+            <div class="info-block">
+              <div class="info-block__title caption-2">{{ _("Обсяг") }}</div>
+              <div class="info-block__text text-m">{{ artifact.stats }}</div>
+            </div>
+            {% endif %}
+            {% if artifact.last_significant_update %}
+            <div class="info-block">
+              <div class="info-block__title caption-2">{{ _("Оновлено") }}
+                {% if artifact.has_recent_updates %}<span>{{ _("нове") }}</span>{% endif %}
+              </div>
+              <div class="info-block__text text-m">{{ artifact.last_significant_update|date }}</div>
+            </div>
+            {% endif %}
+            {% set links = artifact.links.all()|list %}
+            {% if links %}
+            <div class="info-block info-block--releases">
+              <div class="info-block__title caption-2">{{ _("Посилання") }}</div>
+              {% for link in links %}
+              <a class="info-block__download" href="{{ link.url }}" rel="noopener">
+                {{ download_icon() }}
+                <span class="text-m">{{ link.translated_caption or link.get_kind_display() }}</span>
+              </a>
+              {% endfor %}
+            </div>
+            {% endif %}
+            {% set tags = artifact.tags.all()|list %}
+            {% if tags %}
+            <div class="info-block">
+              <div class="info-block__title caption-2">{{ _("Теги") }}</div>
+              <div class="info-block__text text-m">{{ tags|join(", ") }}</div>
+            </div>
+            {% endif %}
+          </div>
+{% endmacro %}

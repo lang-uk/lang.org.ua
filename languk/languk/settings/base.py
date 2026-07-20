@@ -15,7 +15,6 @@ from __future__ import absolute_import, unicode_literals
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 from urllib.parse import quote_plus
-import raven
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
@@ -53,14 +52,14 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 INSTALLED_APPS = [
     "django_rq",
     "django_task",
+    "django_recaptcha",
     "home",
-    "newborn",
+    "catalog",
     "corpus",
     "search",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.settings",
-    # "wagtail.contrib.simple_translation",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
@@ -69,19 +68,18 @@ INSTALLED_APPS = [
     "wagtail.images",
     "wagtail.search",
     "wagtail.admin",
-    "wagtail.core",
-    "wagtail.contrib.modeladmin",
+    "wagtail",
     "wagtailmenus",
     "modelcluster",
     "taggit",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.postgres",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
-    "raven.contrib.django.raven_compat",
 ]
 
 MIDDLEWARE = [
@@ -118,7 +116,6 @@ TEMPLATES = [
             ],
             "extensions": [
                 "jinja2.ext.i18n",
-                "jinja2.ext.with_",
                 "wagtail.jinja2tags.core",
                 "wagtail.admin.jinja2tags.userbar",
                 "wagtail.images.jinja2tags.images",
@@ -175,7 +172,6 @@ LANGUAGES = (
 TIME_ZONE = "Europe/Kiev"
 
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 
@@ -204,9 +200,6 @@ CORPORA_EXPORT_PATH = os.path.join(STATIC_ROOT, "data")
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "languk"
-WAGTAILADMIN_RICH_TEXT_EDITORS = {
-    "hallo": {"WIDGET": "wagtail.wagtailadmin.rich_text.HalloRichTextArea"},
-}
 
 # WAGTAILSIMPLETRANSLATION_SYNC_PAGE_TREE = True
 
@@ -235,11 +228,14 @@ MONGODB = {
 }
 
 REDIS_HOST = get_env_str("REDIS_HOST", "localhost")
-REDIS_PORT = 6379
+REDIS_PORT = int(get_env_str("REDIS_PORT", "6379"))
 REDIS_URL = "redis://%s:%d/0" % (REDIS_HOST, REDIS_PORT)
 
 CACHES = {
-    "default": {"BACKEND": "redis_cache.RedisCache", "LOCATION": REDIS_URL},
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+    },
 }
 
 RQ_PREFIX = "languk_"
@@ -261,13 +257,4 @@ WAGTAILMENUS_MAIN_MENU_ITEMS_RELATED_NAME = "lang_uk_menu_items"
 NLP_UK_BASE_URL = "http://127.0.0.1:8080/"
 WAGTAILADMIN_BASE_URL = "https://lang.org.ua/admin/"
 
-try:
-    GIT_VERSION = raven.fetch_git_sha(os.path.abspath(os.path.join(BASE_DIR, "..")))
-except raven.exceptions.InvalidGitRepository:
-    GIT_VERSION = "undef"
-    pass
 
-RAVEN_CONFIG = {
-    "dsn": get_env_str("SENTRY_DSN", None),
-    "release": get_env_str("VERSION", GIT_VERSION),
-}

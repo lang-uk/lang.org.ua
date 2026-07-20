@@ -21,6 +21,15 @@ class NlpUkClient:
         data: Optional[Dict] = None,
         json: Optional[Dict] = None,
     ) -> requests.models.Response:
+        """
+        Make request to NLP-UK API
+        :param method: HTTP method
+        :param url: relative url
+        :param params: params
+        :param data: data
+        :param json: json
+        :return: response
+        """
         full_url: str = urljoin(self.base_url, url)
         headers = {"Content-Type": "application/json"}
         response = self.session.request(
@@ -33,9 +42,20 @@ class NlpUkClient:
         return response
 
     def batch(self, texts: List[str]) -> List[Dict[str, Union[List, str]]]:
-        response = self._request(method="POST", url="/batch", json={"texts": [text for text in texts if text.strip()]})
+        """
+        Batch request to NLP-UK API
+        :param texts: list of texts
+        :return: list of dicts with keys: cleanText, tokens, lemmas, sentences
+        """
+        filtered_texts: List[str] = [text for text in texts if text.strip()]
 
-        resp_iterator = iter(response.json())
+        if filtered_texts:
+            response = self._request(method="POST", url="/batch", json={"texts": filtered_texts})
+
+            resp_iterator = iter(response.json())
+        else:
+            resp_iterator = iter([])
+
         res: List[Dict[str, Union[List, str]]] = []
 
         for text in texts:

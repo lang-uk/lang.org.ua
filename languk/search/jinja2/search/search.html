@@ -1,0 +1,45 @@
+{% extends "bachoo_base.html" %}
+{% from "_macros/ui.html" import pagination, search_form %}
+
+{% block page_content %}
+    <div class="search-result__block">
+      <div class="search-result__content">
+        <h1 class="h1">
+          {% if search_query %}
+            {{ _("Результати пошуку за запитом") }} «{{ search_query }}»
+          {% else %}
+            {{ _("Пошук") }}
+          {% endif %}
+        </h1>
+
+        {{ search_form(value=search_query or "") }}
+
+        {% for result in search_results %}
+        {% set specific = result.specific %}
+        <div class="search-result__item">
+          <a class="h4" href="{{ result.get_url() }}">{{ specific.translated_title|default(result.title) }}</a>
+          <div class="item__website">
+            <span class="text-m">{{ result.get_full_url() }}</span>
+          </div>
+          <p class="text-m">
+            {%- if specific.search_description -%}
+              {{ specific.search_description }}
+            {%- elif specific.translated_short_description|default("") -%}
+              {{ specific.translated_short_description }}
+            {%- elif specific.translated_body|default("") -%}
+              {{ specific.translated_body|striptags|truncate(240) }}
+            {%- endif -%}
+          </p>
+        </div>
+        {% else %}
+          {% if search_query %}
+          <p class="text-l">{{ _("Нічого не знайдено") }}</p>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if search_results.paginator.num_pages > 1 %}
+      {{ pagination(search_results, extra_query="query=" + (search_query|urlencode) + "&") }}
+      {% endif %}
+    </div>
+{% endblock %}

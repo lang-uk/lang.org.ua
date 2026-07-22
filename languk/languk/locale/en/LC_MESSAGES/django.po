@@ -1,58 +1,170 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-05 01:32+0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Project-Id-Version: lang.org.ua\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: languk/settings/base.py:114
 msgid "Ukrainian"
 msgstr "Ukrainian"
 
-#: languk/settings/base.py:115
 msgid "English"
 msgstr "English"
 
-#: languk/templates/base.html:63
-msgid "Корпуси"
-msgstr "Corpora"
+msgid "Ідентифікатор"
+msgstr "Identifier"
 
-#: languk/templates/base.html:73
-msgid "Словники"
-msgstr "Dictionaries"
+msgid "Автор або джерело:"
+msgstr "Author or source:"
 
-#: languk/templates/base.html:83
-msgid "Ґазетіри"
-msgstr "Gazetteers"
+msgid "Автори"
+msgstr "Authors"
 
-#: languk/templates/base.html:93
-msgid "Сервіси"
-msgstr "Services"
+msgid "Авторські права"
+msgstr "Copyright"
 
-#: languk/templates/base.html:103
-msgid "Бібліотеки"
-msgstr "Libraries"
+msgid "Байтів"
+msgstr "Bytes"
 
-#: languk/templates/base.html:120
-msgid "Моделі"
-msgstr "Models"
+msgid "Вибірка"
+msgstr "Subset"
 
-#: languk/templates/base.html:179
-msgid "вгору"
-msgstr "up"
+msgid "Детальніше"
+msgstr "Learn more"
 
-#: languk/templates/base.html:180
-msgid "спільнота"
-msgstr "community"
+msgid "Джерело"
+msgstr "Source"
+
+msgid "Довжина статті"
+msgstr "Article length"
+
+msgid "Доповнити продукт"
+msgstr "Submit a product"
+
+msgid "Загалом"
+msgstr "Total"
+
+msgid "Заголовка немає взагалі"
+msgstr "No title at all"
+
+msgid "Залишити відгук"
+msgstr "Leave feedback"
+
+msgid "Картки"
+msgstr "Cards"
+
+msgid "Корпус"
+msgstr "Corpus"
+
+msgid "Корпуси UberText"
+msgstr "UberText corpora"
+
+msgid "Лематизована версія"
+msgstr "Lemmatized version"
+
+msgid "Ліцензія"
+msgstr "License"
+
+msgid "Медіа про нас"
+msgstr "Media about us"
+
+msgid "На головну"
+msgstr "Back to home"
+
+msgid "Надіслати"
+msgstr "Submit"
+
+msgid "Найновіша стаття"
+msgstr "Newest article"
+
+msgid "Найстаріша стаття"
+msgstr "Oldest article"
+
+msgid "Нові надходження"
+msgstr "New additions"
+
+msgid "Нічого не знайдено"
+msgstr "Nothing found"
+
+msgid "Обсяг"
+msgstr "Size"
+
+msgid "Обсяг українського тексту: "
+msgstr "Size of the Ukrainian text: "
+
+msgid "Оновлено"
+msgstr "Updated"
+
+msgid "Першоджерело"
+msgstr "Original source"
+
+msgid "Повна версія"
+msgstr "Full version"
+
+msgid "Погодитися"
+msgstr "Accept"
+
+msgid "Посилання"
+msgstr "Links"
+
+msgid "Постійне посилання"
+msgstr "Permanent link"
+
+msgid "Пошук"
+msgstr "Search"
+
+msgid "Продовжуючи використовувати наш сайт, ви погоджуєтесь з використанням cookies"
+msgstr "By continuing to use our site, you agree to the use of cookies"
+
+msgid "Результати пошуку за запитом"
+msgstr "Search results for"
+
+msgid "Сайт"
+msgstr "Website"
+
+msgid "Слів"
+msgstr "Words"
+
+msgid "Слів на статтю"
+msgstr "Words per article"
+
+msgid "Список"
+msgstr "List"
+
+msgid "Стань частиною проєкту, який змінить майбутнє країни"
+msgstr "Become part of a project that will change the country's future"
+
+msgid "Статей"
+msgstr "Articles"
+
+msgid "Сторінку не знайдено"
+msgstr "Page not found"
+
+msgid "Схоже, такої сторінки не існує. Спробуйте почати з головної або скористайтеся пошуком."
+msgstr "Looks like this page does not exist. Try starting from the home page, or use the search."
+
+msgid "Таймлайн"
+msgstr "Timeline"
+
+msgid "Теги"
+msgstr "Tags"
+
+msgid "Тексту немає взагалі"
+msgstr "No text at all"
+
+msgid "Тестові вибірки"
+msgstr "Test subsets"
+
+msgid "Токенів"
+msgstr "Tokens"
+
+msgid "Токенізована версія"
+msgstr "Tokenized version"
+
+msgid "нове"
+msgstr "new"
+
+msgid "№"
+msgstr "#"

@@ -5,8 +5,10 @@
   {#- head.html is included, not extended, so Jinja blocks are not
       overridable here: page metadata comes from the `page` object or the
       `page_title`/`extra_css_files` context variables -#}
+  {#- seo_title/search_description are single-language (Ukrainian); EN pages
+      fall back to the translated page title -#}
   <title>{%- if page -%}
-      {%- if page.seo_title -%}
+      {%- if page.seo_title and LANGUAGE_CODE != 'en' -%}
         {{ page.seo_title }}
       {%- else -%}
         {{ page.translated_title }}
@@ -17,7 +19,8 @@
   <meta name="description" content="{%- if page -%}
     {{ page.search_description }}
     {%- endif -%}"/>
-  {%- set og_title = (page.seo_title or page.translated_title) if page else (page_title or "lang-uk") %}
+  {%- set og_title = page_title or "lang-uk" %}
+  {%- if page %}{% set og_title = page.seo_title if (page.seo_title and LANGUAGE_CODE != 'en') else page.translated_title %}{% endif %}
   <meta property="og:type" content="website"/>
   <meta property="og:site_name" content="lang-uk"/>
   <meta property="og:locale" content="{{ 'en_US' if LANGUAGE_CODE == 'en' else 'uk_UA' }}"/>

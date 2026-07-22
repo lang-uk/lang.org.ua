@@ -37,7 +37,10 @@ COPY docker-entrypoint.sh /usr/local/bin/
 
 COPY ./languk/ ${root}/
 
-RUN python -m compileall ${root} \
+RUN apk add --no-cache --virtual .i18n-deps gettext \
+		&& DJANGO_SETTINGS_MODULE=languk.settings.production python manage.py compilemessages -l en \
+		&& apk del .i18n-deps \
+		&& python -m compileall ${root} \
 		&& mkdir -p ${STATIC_ROOT} ${STATIC_ROOT_SOURCE} ${MEDIA_ROOT} \
 		&& STATIC_ROOT=${STATIC_ROOT_SOURCE} DJANGO_SETTINGS_MODULE=languk.settings.production \
 			python manage.py collectstatic --no-input
